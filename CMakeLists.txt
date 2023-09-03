@@ -10,8 +10,11 @@ project(Engine VERSION 0.0.1 LANGUAGES C CXX)
 # add main library file for engine
 add_library(Engine Engine.cpp)
 
+add_executable(test.exe Engine.cpp test/test.cpp)
+add_test(test test.exe)
+
 # test section with other executables
 enable_testing()
 
-find_package(GTest CONFIG REQUIRED)
-target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+find_package(GTest REQUIRED)
+target_link_libraries(test.exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)

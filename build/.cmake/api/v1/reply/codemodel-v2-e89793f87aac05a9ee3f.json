@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "Engine",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -39,8 +41,15 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "Engine::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-Engine-Debug-e9c3d0a4e419ed1c42cc.json",
+					"jsonFile" : "target-Engine-Debug-b282eaabdae1fdacac90.json",
 					"name" : "Engine",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "test.exe::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-test.exe-Debug-4df868c1f2f980ae8c55.json",
+					"name" : "test.exe",
 					"projectIndex" : 0
 				}
 			]

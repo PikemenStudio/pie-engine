@@ -139,12 +139,26 @@ Engine/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Engine.dir/build.make CMakeFiles/Engine.dir/build
 .PHONY : Engine/fast
 
+#=============================================================================
+# Target rules for targets named test.exe
+
+# Build rule for target.
+test.exe: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test.exe
+.PHONY : test.exe
+
+# fast build rule for target.
+test.exe/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/build
+.PHONY : test.exe/fast
+
 Engine.o: Engine.cpp.o
 .PHONY : Engine.o
 
 # target to build an object file
 Engine.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Engine.dir/build.make CMakeFiles/Engine.dir/Engine.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/Engine.cpp.o
 .PHONY : Engine.cpp.o
 
 Engine.i: Engine.cpp.i
@@ -153,6 +167,7 @@ Engine.i: Engine.cpp.i
 # target to preprocess a source file
 Engine.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Engine.dir/build.make CMakeFiles/Engine.dir/Engine.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/Engine.cpp.i
 .PHONY : Engine.cpp.i
 
 Engine.s: Engine.cpp.s
@@ -161,7 +176,32 @@ Engine.s: Engine.cpp.s
 # target to generate assembly for a file
 Engine.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Engine.dir/build.make CMakeFiles/Engine.dir/Engine.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/Engine.cpp.s
 .PHONY : Engine.cpp.s
+
+test/test.o: test/test.cpp.o
+.PHONY : test/test.o
+
+# target to build an object file
+test/test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/test/test.cpp.o
+.PHONY : test/test.cpp.o
+
+test/test.i: test/test.cpp.i
+.PHONY : test/test.i
+
+# target to preprocess a source file
+test/test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/test/test.cpp.i
+.PHONY : test/test.cpp.i
+
+test/test.s: test/test.cpp.s
+.PHONY : test/test.s
+
+# target to generate assembly for a file
+test/test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test.exe.dir/build.make CMakeFiles/test.exe.dir/test/test.cpp.s
+.PHONY : test/test.cpp.s
 
 # Help Target
 help:
@@ -173,9 +213,13 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... Engine"
+	@echo "... test.exe"
 	@echo "... Engine.o"
 	@echo "... Engine.i"
 	@echo "... Engine.s"
+	@echo "... test/test.o"
+	@echo "... test/test.i"
+	@echo "... test/test.s"
 .PHONY : help
 
 

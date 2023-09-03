@@ -236,9 +236,6 @@ Engine_BINARY_DIR:STATIC=/Users/full-hat/Documents/MyProjects/Engine/build
 //Value Computed by CMake
 Engine_IS_TOP_LEVEL:STATIC=ON
 
-//Dependencies for the target
-Engine_LIB_DEPENDS:STATIC=general;GTest::gtest;general;GTest::gtest_main;general;GTest::gmock;general;GTest::gmock_main;
-
 //Value Computed by CMake
 Engine_SOURCE_DIR:STATIC=/Users/full-hat/Documents/MyProjects/Engine
 
@@ -456,8 +453,8 @@ CMAKE_TOOLCHAIN_FILE-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
-//Details about finding Threads
-FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//Details about finding GTest
+FIND_PACKAGE_MESSAGE_DETAILS_GTest:INTERNAL=[/Users/full-hat/Documents/MyProjects/Engine/build/vcpkg_installed/arm64-osx/share/gtest/GTestConfig.cmake][c ][v1.13.0()]
 //ADVANCED property for variable: VCPKG_VERBOSE
 VCPKG_VERBOSE-ADVANCED:INTERNAL=1
 //Making sure VCPKG_MANIFEST_MODE doesn't change

@@ -1246,18 +1246,6 @@
 			"value" : "ON"
 		},
 		{
-			"name" : "Engine_LIB_DEPENDS",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Dependencies for the target"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "general;GTest::gtest;general;GTest::gtest_main;general;GTest::gmock;general;GTest::gmock_main;"
-		},
-		{
 			"name" : "Engine_SOURCE_DIR",
 			"properties" : 
 			[
@@ -1270,16 +1258,16 @@
 			"value" : "/Users/full-hat/Documents/MyProjects/Engine"
 		},
 		{
-			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_Threads",
+			"name" : "FIND_PACKAGE_MESSAGE_DETAILS_GTest",
 			"properties" : 
 			[
 				{
 					"name" : "HELPSTRING",
-					"value" : "Details about finding Threads"
+					"value" : "Details about finding GTest"
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "[TRUE][v()]"
+			"value" : "[/Users/full-hat/Documents/MyProjects/Engine/build/vcpkg_installed/arm64-osx/share/gtest/GTestConfig.cmake][c ][v1.13.0()]"
 		},
 		{
 			"name" : "GTest_DIR",

@@ -155,6 +155,26 @@
 			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
 		},
 		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/FindGTest.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/GoogleTest.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/FindPackageMessage.cmake"
+		},
+		{
 			"isGenerated" : true,
 			"path" : "build/vcpkg_installed/arm64-osx/share/gtest/GTestConfigVersion.cmake"
 		},
