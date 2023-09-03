@@ -1,6 +1,6 @@
 Detecting compiler hash for triplet arm64-osx...
 All requested packages are currently installed.
-Total install time: 333 ns
+Total install time: 292 ns
 The package gtest is compatible with built-in CMake targets:
 
     enable_testing()

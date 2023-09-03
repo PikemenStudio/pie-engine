@@ -1,6 +1,4 @@
 /Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/Engine.dir
-/Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/package.dir
-/Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/package_source.dir
 /Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/test.dir
 /Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/edit_cache.dir
 /Users/full-hat/Documents/MyProjects/Engine/build/CMakeFiles/rebuild_cache.dir

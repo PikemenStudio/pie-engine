@@ -1,7 +1,7 @@
 [
 {
   "directory": "/Users/full-hat/Documents/MyProjects/Engine/build",
-  "command": "/usr/bin/clang++   -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk -o CMakeFiles/Engine.dir/Engine.cpp.o -c /Users/full-hat/Documents/MyProjects/Engine/Engine.cpp",
+  "command": "/usr/bin/clang++  -isystem /Users/full-hat/Documents/MyProjects/Engine/build/vcpkg_installed/arm64-osx/include -g -std=gnu++20 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk -o CMakeFiles/Engine.dir/Engine.cpp.o -c /Users/full-hat/Documents/MyProjects/Engine/Engine.cpp",
   "file": "/Users/full-hat/Documents/MyProjects/Engine/Engine.cpp",
   "output": "CMakeFiles/Engine.dir/Engine.cpp.o"
 }

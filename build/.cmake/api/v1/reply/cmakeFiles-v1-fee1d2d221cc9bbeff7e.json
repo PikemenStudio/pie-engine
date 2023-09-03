@@ -215,24 +215,6 @@
 			"path" : "build/vcpkg_installed/arm64-osx/share/gtest/GTestTargets-release.cmake"
 		},
 		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/CPack.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Modules/CPackComponent.cmake"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Templates/CPackConfig.cmake.in"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/opt/homebrew/Cellar/cmake/3.27.4/share/cmake/Templates/CPackConfig.cmake.in"
-		},
-		{
 			"path" : "vcpkg.json"
 		}
 	],
