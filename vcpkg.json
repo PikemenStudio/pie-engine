@@ -3,6 +3,9 @@
     "name": "engine",
     "version": "1.0.0",
     "dependencies": [
-        "gtest"
+      "gtest",
+      "vulkan-hpp",
+      "glfw3",
+      "glm"
     ]
 }   

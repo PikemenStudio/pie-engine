@@ -1,12 +1,14 @@
 #include "gtest/gtest.h"
 
-TEST(system, json)
-{
+#include "Core/Engine.hpp"
 
-}
+TEST(system, json) {}
 
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+int main(int argc, char **argv) {
+  auto engine = Engine();
+
+  engine.RunMainCycle();
+
+  /*::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();*/
 }

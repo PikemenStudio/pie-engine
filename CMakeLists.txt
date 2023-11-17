@@ -6,15 +6,47 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(Engine VERSION 0.0.1 LANGUAGES C CXX)
 
+include_directories(./)
+
+set(UTILS_SOURCE )
+set(UTILS_HEADERS 
+		"Utils/UtilsMacros.hpp")
+
+set(CORE_SOURCE 
+		"Core/Engine.cpp"
+		"Core/Window/Window.cpp")
+set(CORE_HEADERS 
+		"Core/Engine.hpp"
+		"Core/Window/Window.hpp")
+
+set(UTILS_ALL ${UTILS_SOURCE} ${UTILS_HEADERS})
+set(CORE_ALL ${CORE_SOURCE} ${CORE_HEADERS})
+
+find_package(GTest REQUIRED)
+find_package(VulkanHeaders CONFIG)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+
 # executable file
 # add main library file for engine
-add_library(Engine Engine.cpp)
+add_library(Engine ${CORE_ALL} ${UTILS_ALL})
 
-add_executable(test.exe Engine.cpp test/test.cpp)
+add_executable(test.exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test.exe)
 
 # test section with other executables
 enable_testing()
 
-find_package(GTest REQUIRED)
+# gtest
 target_link_libraries(test.exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+
+# vulkan
+link_libraries(Vulkan::Headers)
+
+# glfw
+target_link_libraries(Engine PUBLIC glfw)
+target_link_libraries(test.exe PUBLIC glfw)
+
+# glm
+target_link_libraries(Engine PUBLIC glm::glm)
+target_link_libraries(test.exe PUBLIC glm::glm)
