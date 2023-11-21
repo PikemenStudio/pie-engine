@@ -1,15 +1,20 @@
 #pragma once
 
+#include <memory>
 #include <vulkan/vulkan.hpp>
 
+#include "Window/Window.hpp"
+
 class Engine {
- public:
-  void RunMainCycle();
+public:
+    Engine();
 
-  protected:
-	  void BuildInstance() {
+    void RunMainCycle();
 
-  }
- protected:
-  vk::Instance m_instance{nullptr};
+protected:
+    void BuildInstance();
+protected:
+    vk::Instance m_instance{nullptr};
+
+    std::unique_ptr<Window> m_window;
 };

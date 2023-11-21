@@ -27,26 +27,20 @@ find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-# executable file
-# add main library file for engine
-add_library(Engine ${CORE_ALL} ${UTILS_ALL})
-
-add_executable(test.exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
-add_test(test test.exe)
+add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
+add_test(test test_exe)
 
 # test section with other executables
 enable_testing()
 
 # gtest
-target_link_libraries(test.exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+target_link_libraries(test_exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
 # vulkan
 link_libraries(Vulkan::Headers)
 
 # glfw
-target_link_libraries(Engine PUBLIC glfw)
-target_link_libraries(test.exe PUBLIC glfw)
+target_link_libraries(test_exe PUBLIC glfw)
 
 # glm
-target_link_libraries(Engine PUBLIC glm::glm)
-target_link_libraries(test.exe PUBLIC glm::glm)
+target_link_libraries(test_exe PUBLIC glm::glm)

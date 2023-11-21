@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Window.hpp"
 
 Window::Window(const glm::uvec2 &_size, const std::string &_title)

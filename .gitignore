@@ -3,6 +3,9 @@ out
 .vs
 build
 
+# CLion
+.idea
+
 # Prerequisites
 *.d
 
