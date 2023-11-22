@@ -27,6 +27,8 @@ find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
+add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL})
+
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)
 
@@ -41,6 +43,8 @@ link_libraries(Vulkan::Headers)
 
 # glfw
 target_link_libraries(test_exe PUBLIC glfw)
+target_link_libraries(main PUBLIC glfw)
 
 # glm
 target_link_libraries(test_exe PUBLIC glm::glm)
+target_link_libraries(main PUBLIC glm::glm)

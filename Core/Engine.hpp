@@ -8,11 +8,11 @@
 class Engine {
 public:
     Engine();
+    Engine(const glm::uvec2 _window_size, std::string window_title);
 
     void RunMainCycle();
 
 protected:
-    void BuildInstance();
 
 protected:
     vk::Instance m_instance{nullptr};

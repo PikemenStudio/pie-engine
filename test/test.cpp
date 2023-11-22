@@ -1,12 +1,14 @@
 #include "gtest/gtest.h"
 
-#include "core/Engine.hpp"
+#include "Core/Engine.hpp"
 
 //TEST(system, json) {}
 
 int main(int argc, char **argv) {
     //auto engine = Engine();
     std::cout << "Success!" << std::endl;
+    int a = 0;
+    std::cout << a;
 
     //engine.RunMainCycle();
 

@@ -3,8 +3,13 @@ out
 .vs
 build
 
+cmake-build-debug
+
 # CLion
 .idea
+
+# MacOS
+*.DS_Store
 
 # Prerequisites
 *.d

@@ -2,13 +2,12 @@
 
 #include <utility>
 
-//template<typename Str, typename>
-//Window::Window(const glm::uvec2 &_size, Str &&_title)
-//    : m_size(_size), m_title(_title) {
-//    BuildGlfwWindow();
-//}
-
 Window::Window() : m_size(0, 0) {
+    BuildGlfwWindow();
+}
+
+Window::Window(const glm::uvec2 &_size, std::string _title)
+        : m_size(_size), m_title(_title) {
     BuildGlfwWindow();
 }
 
