@@ -13,6 +13,7 @@ public:
 
 protected:
     void BuildInstance();
+
 protected:
     vk::Instance m_instance{nullptr};
 

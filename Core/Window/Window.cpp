@@ -1,9 +1,16 @@
 #include "Window.hpp"
 
-Window::Window(const glm::uvec2 &_size, const std::string &_title)
-    : m_size(_size), m_title(_title) {}
+#include <utility>
 
-Window::Window() : m_size(0, 0) {}
+//template<typename Str, typename>
+//Window::Window(const glm::uvec2 &_size, Str &&_title)
+//    : m_size(_size), m_title(_title) {
+//    BuildGlfwWindow();
+//}
+
+Window::Window() : m_size(0, 0) {
+    BuildGlfwWindow();
+}
 
 Window::~Window() { glfwTerminate(); }
 
@@ -13,7 +20,7 @@ void Window::BuildGlfwWindow() {
   glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
   m_window =
-      glfwCreateWindow(m_size.x, m_size.y, m_title.c_str(), nullptr, nullptr);
+      glfwCreateWindow((int)m_size.x, (int)m_size.y, m_title.c_str(), nullptr, nullptr);
 
   if (!m_window) {
     throw std::runtime_error("Can't setup monitor");

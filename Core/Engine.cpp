@@ -1,6 +1,6 @@
 #include "Engine.hpp"
 
-#include "Core/Window/Window.hpp"
+#include "core/Window/Window.hpp"
 
 #include <iostream>
 
@@ -20,7 +20,6 @@ Engine::Engine() {
 void Engine::BuildInstance() {
     try {
         m_window = std::make_unique<Window>(glm::uvec2(300, 200), "Engine");
-        m_window->BuildGlfwWindow();
     }
     catch (const std::runtime_error &e)
     {
