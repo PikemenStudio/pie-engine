@@ -14,10 +14,14 @@ set(UTILS_HEADERS
 
 set(CORE_SOURCE 
 		"Core/Engine.cpp"
-		"Core/Window/Window.cpp")
+		"Core/Window/Window.cpp"
+		Core/Instance.cpp
+		Core/Instance.hpp)
 set(CORE_HEADERS 
 		"Core/Engine.hpp"
-		"Core/Window/Window.hpp")
+		"Core/Window/Window.hpp"
+		Core/Instance.cpp
+		Core/Instance.hpp)
 
 set(UTILS_ALL ${UTILS_SOURCE} ${UTILS_HEADERS})
 set(CORE_ALL ${CORE_SOURCE} ${CORE_HEADERS})
@@ -27,7 +31,9 @@ find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL})
+add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
+		Core/Instance.cpp
+		Core/Instance.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)
@@ -39,7 +45,8 @@ enable_testing()
 target_link_libraries(test_exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
 # vulkan
-link_libraries(Vulkan::Headers)
+target_link_directories(main PRIVATE $ENV{VULKAN_SDK}/Lib)
+target_link_libraries(main PRIVATE Vulkan-1)
 
 # glfw
 target_link_libraries(test_exe PUBLIC glfw)

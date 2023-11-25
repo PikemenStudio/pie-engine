@@ -5,8 +5,11 @@
 #include <iostream>
 
 #include "Core/Engine.hpp"
+#include "Core/Instance.hpp"
 
 int main() {
-    Engine eng({300, 300}, "Engine");
-    eng.RunMainCycle();
+//    Engine eng({300, 300}, "Engine");
+//    eng.RunMainCycle();
+
+    peVk::Instance inst("");
 }
