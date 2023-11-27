@@ -1,2 +1,0 @@
-Get-ChildItem ./test -Recurse -Include *.cpp,*.hpp | ForEach-Object {& 'C:\Program Files\LLVM\bin\clang-format.exe' --dry-run --Werror -style=Google $_.FullName}
-Get-ChildItem ./test -Recurse -Include *.cpp,*.hpp | ForEach-Object {& 'C:\Program Files\LLVM\bin\clang-format.exe' -style=Google -i $_.FullName}

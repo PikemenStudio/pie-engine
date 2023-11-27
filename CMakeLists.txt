@@ -45,8 +45,15 @@ enable_testing()
 target_link_libraries(test_exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
 # vulkan
-target_link_directories(main PRIVATE $ENV{VULKAN_SDK}/Lib)
-target_link_libraries(main PRIVATE Vulkan-1)
+if (win32)
+	target_link_directories(main PRIVATE $ENV{VULKAN_SDK}/Lib)
+	target_link_libraries(main PRIVATE Vulkan-1)
+endif (win32)
+
+if (APPLE)
+	target_link_directories(main PRIVATE /Users/full-hat/VulkanSDK/1.3.268.1/macOS/lib)
+	target_link_libraries(main PRIVATE libvulkan.dylib)
+endif (APPLE)
 
 # glfw
 target_link_libraries(test_exe PUBLIC glfw)
