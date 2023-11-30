@@ -33,7 +33,9 @@ find_package(glm CONFIG REQUIRED)
 
 add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Core/Instance.cpp
-		Core/Instance.hpp)
+		Core/Instance.hpp
+        Core/DebugMessanger.hpp
+		Core/DebugMessanger.cpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)
@@ -51,8 +53,7 @@ if (win32)
 endif (win32)
 
 if (APPLE)
-	target_link_directories(main PRIVATE /Users/full-hat/VulkanSDK/1.3.268.1/macOS/lib)
-	target_link_libraries(main PRIVATE libvulkan.dylib)
+	target_link_libraries(main PRIVATE /Users/full-hat/VulkanSDK/1.3.268.1/macOS/lib/libvulkan.dylib)
 endif (APPLE)
 
 # glfw

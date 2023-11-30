@@ -8,8 +8,6 @@
 #include "Core/Instance.hpp"
 
 int main() {
-    Engine eng({300, 300}, "Engine");
+    Engine eng({300, 300}, "engine");
     eng.RunMainCycle();
-
-    peVk::Instance inst("");
 }

@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 
 #include "Core/Window/Window.hpp"
+#include "Core/DebugMessanger.hpp"
 
 #include <iostream>
 
@@ -27,4 +28,13 @@ Engine::Engine(const glm::uvec2 _window_size, std::string window_title) {
         std::cout << "Can't setup window" << std::endl;
         throw;
     }
+
+    m_instance = std::make_unique<peVk::Instance>("engine");
+    m_dldi = vk::DispatchLoaderDynamic(*m_instance->ToVkInstancePtr(), vkGetInstanceProcAddr);
+    m_debug_messenger = make_debug_messenger(m_instance->ToVkInstancePtr(), m_dldi);
+}
+
+Engine::~Engine() {
+    m_instance->ToVkInstancePtr()->destroyDebugUtilsMessengerEXT(m_debug_messenger, nullptr, m_dldi);
+    m_instance->ToVkInstancePtr()->destroy();
 }

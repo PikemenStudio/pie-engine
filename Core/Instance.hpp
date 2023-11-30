@@ -11,6 +11,17 @@ namespace peVk {
 class Instance {
 public:
     explicit Instance(std::string_view _application_name);
+
+    static void CheckForExtensionSupport(const std::vector<const char *> &_ext_name);
+    static void CheckForLayersSupport(std::vector<const char *> &_required_layers);
+
+    explicit operator vk::Instance&() {
+        return m_vk_instance;
+    }
+
+    vk::Instance* ToVkInstancePtr() {
+        return &m_vk_instance;
+    }
 protected:
     vk::Instance m_vk_instance { nullptr };
 
@@ -27,6 +38,22 @@ protected:
 
         operator uint32_t () const {
             return version;
+        }
+
+        [[nodiscard]] uint32_t get_variant() const {
+            return VK_VERSION_MAJOR(version);
+        }
+
+        [[nodiscard]] uint32_t get_major() const {
+            return VK_VERSION_MAJOR(version);
+        }
+
+        [[nodiscard]] uint32_t get_minor() const {
+            return VK_VERSION_MINOR(version);
+        }
+
+        [[nodiscard]] uint32_t get_patch() const {
+            return VK_VERSION_PATCH(version);
         }
     } m_version;
 };
