@@ -5,6 +5,7 @@
 
 #include "Window/Window.hpp"
 #include "Core/Instance.hpp"
+#include "Core/gpu.hpp"
 
 class Engine {
 public:
@@ -18,10 +19,13 @@ public:
 protected:
 
 protected:
-    std::unique_ptr<peVk::Instance> m_instance{nullptr};
+    std::shared_ptr<peVk::Instance> m_instance{nullptr};
 
     vk::DebugUtilsMessengerEXT m_debug_messenger{ nullptr };
     vk::DispatchLoaderDynamic m_dldi;
+
+    // Current GPU
+    std::unique_ptr<Gpu> m_gpu;
 
     std::unique_ptr<Window> m_window;
 };

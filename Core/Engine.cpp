@@ -1,6 +1,5 @@
 #include "Engine.hpp"
 
-#include "Core/Window/Window.hpp"
 #include "Core/DebugMessanger.hpp"
 
 #include <iostream>
@@ -18,10 +17,10 @@ Engine::Engine() :
         Engine(glm::vec2(300, 200), "Engine") {
 }
 
-Engine::Engine(const glm::uvec2 _window_size, std::string window_title) {
+Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
     try {
         // Make window
-        m_window = std::make_unique<Window>(std::move(_window_size), "Engine");
+        m_window = std::make_unique<Window>(_window_size, std::move(_window_title));
     }
     catch (const std::runtime_error &e)
     {
@@ -29,9 +28,14 @@ Engine::Engine(const glm::uvec2 _window_size, std::string window_title) {
         throw;
     }
 
-    m_instance = std::make_unique<peVk::Instance>("engine");
+    m_instance = std::make_shared<peVk::Instance>("engine");
     m_dldi = vk::DispatchLoaderDynamic(*m_instance->ToVkInstancePtr(), vkGetInstanceProcAddr);
     m_debug_messenger = make_debug_messenger(m_instance->ToVkInstancePtr(), m_dldi);
+
+    // Make physical device
+    m_gpu = std::make_unique<Gpu>(m_instance);
+    auto devices = m_gpu->GetAllAvailable();
+    m_gpu->SetCurrent(devices[0]);
 }
 
 Engine::~Engine() {

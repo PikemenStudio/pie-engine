@@ -49,6 +49,12 @@ Instance::Instance(std::string_view _application_name) {
     std::vector<const char*> layers;
     layers.push_back("VK_LAYER_KHRONOS_validation");
 
+    LOG("Layers to be requested:");
+
+    for (const char* layerName : layers) {
+        LOG("\t\"", layerName, "\"");
+    }
+
     // Load extensions
     vk::InstanceCreateInfo create_inf = vk::InstanceCreateInfo(
             vk::InstanceCreateFlags(),
@@ -62,9 +68,11 @@ Instance::Instance(std::string_view _application_name) {
     }
 
     try {
+        // Check for support
         CheckForExtensionSupport(extensions);
         CheckForLayersSupport(layers);
         m_vk_instance = vk::createInstance(create_inf);
+        LOG("OK", "instance created");
     }
     catch(vk::SystemError &err) {
         LOG("ERROR", err.what());
@@ -74,8 +82,6 @@ Instance::Instance(std::string_view _application_name) {
         LOG("ERROR", err.what());
         throw;
     }
-
-    // Check for support
 }
 
     void Instance::CheckForExtensionSupport(const std::vector<const char *> &_ext_name) {
