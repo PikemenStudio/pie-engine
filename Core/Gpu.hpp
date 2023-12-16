@@ -51,10 +51,17 @@ protected:
     vk::Queue m_graphics_queue { nullptr };
     vk::Queue m_present_queue { nullptr };
 
-    vk::SwapchainKHR m_swapchain{ nullptr };
-    std::vector<vk::Image> m_swapchain_images{ nullptr };
-    vk::Format m_swapchain_format;
-    vk::Extent2D m_swapchain_extent;
+    struct SwapChainFrame {
+        vk::Image m_image { nullptr };
+        vk::ImageView image_view { nullptr };
+    };
+
+    struct SwapChainBundle {
+        vk::SwapchainKHR m_swap_chain{ nullptr };
+        std::vector<SwapChainFrame> m_frames;
+        vk::Format m_format;
+        vk::Extent2D m_extent;
+    } m_swap_chain;
 
     vk::SurfaceKHR m_surface;
 

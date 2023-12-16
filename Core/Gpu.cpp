@@ -170,7 +170,11 @@ void Gpu::FindAndSetQueues() {
 }
 
 Gpu::~Gpu() {
-    m_logical_device.destroySwapchainKHR(m_swapchain);
+    for (auto frame : m_swap_chain.m_frames) {
+        m_logical_device.destroyImageView(frame.image_view);
+    }
+
+    m_logical_device.destroySwapchainKHR(m_swap_chain.m_swap_chain);
     m_logical_device.destroy();
 
     m_instance->ToVkInstancePtr()->destroySurfaceKHR(m_surface);
@@ -327,16 +331,39 @@ void Gpu::InitSwapchain() {
     createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
 
     try {
-        m_swapchain = m_logical_device.createSwapchainKHR(createInfo);
+        m_swap_chain.m_swap_chain = m_logical_device.createSwapchainKHR(createInfo);
     }
-    catch (vk::SystemError err) {
+    catch (vk::SystemError &err) {
         throw std::runtime_error(std::string("failed to create swap chain!") + err.what());
     }
 
-    m_swapchain_images = m_logical_device.getSwapchainImagesKHR(m_swapchain);
-    m_swapchain_format = format.format;
+    auto images = m_logical_device.getSwapchainImagesKHR(m_swap_chain.m_swap_chain);
+    m_swap_chain.m_frames.reserve(images.size());
+    for (auto image : images) {
+        SwapChainFrame frame{};
 
-    m_swapchain_extent = extent;
+        vk::ImageViewCreateInfo imageCreateInfo = {};
+        imageCreateInfo.image = image;
+        imageCreateInfo.viewType = vk::ImageViewType::e2D;
+        imageCreateInfo.format = format.format;
+        imageCreateInfo.components.r = vk::ComponentSwizzle::eIdentity;
+        imageCreateInfo.components.g = vk::ComponentSwizzle::eIdentity;
+        imageCreateInfo.components.b = vk::ComponentSwizzle::eIdentity;
+        imageCreateInfo.components.a = vk::ComponentSwizzle::eIdentity;
+        imageCreateInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+        imageCreateInfo.subresourceRange.baseMipLevel = 0;
+        imageCreateInfo.subresourceRange.levelCount = 1;
+        imageCreateInfo.subresourceRange.baseArrayLayer = 0;
+        imageCreateInfo.subresourceRange.layerCount = 1;
+
+        frame.m_image = image;
+        frame.image_view = m_logical_device.createImageView(imageCreateInfo);
+
+        m_swap_chain.m_frames.push_back(frame);
+    }
+    m_swap_chain.m_format = format.format;
+
+    m_swap_chain.m_extent = extent;
 }
 
 void Gpu::InitSurface() {
