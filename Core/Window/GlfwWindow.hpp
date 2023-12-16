@@ -6,13 +6,13 @@
 
 #include "GLFW/glfw3.h"
 
-class Window {
+class GlfwWindow {
 public:
-    Window(const glm::uvec2 &_size, std::string _title);
+    GlfwWindow(const glm::uvec2 &_size, std::string _title);
 
-    Window();
+    GlfwWindow();
 
-    ~Window();
+    ~GlfwWindow();
 
     glm::vec2 GetSize() { return m_size; }
 

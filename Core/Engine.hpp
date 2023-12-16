@@ -3,7 +3,7 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 
-#include "Window/Window.hpp"
+#include "Core/Window/GlfwWindow.hpp"
 #include "Core/Instance.hpp"
 #include "Core/Gpu.hpp"
 
@@ -27,5 +27,5 @@ protected:
     // Current GPU
     std::unique_ptr<Gpu> m_gpu;
 
-    std::unique_ptr<Window> m_window;
+    std::unique_ptr<GlfwWindow> m_window;
 };

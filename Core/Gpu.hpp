@@ -7,13 +7,13 @@
 #include "vulkan/vulkan.hpp"
 
 #include "Core/Instance.hpp"
-#include "Core/Window/VkWindow.hpp"
+#include "Core/Window/GlfwWindow.hpp"
 
 #include <optional>
 
 class Gpu {
 public:
-    explicit Gpu(std::shared_ptr<peVk::Instance> _instance, Window &_window);
+    explicit Gpu(std::shared_ptr<peVk::Instance> _instance, GlfwWindow &_window);
     ~Gpu();
 
     std::vector<vk::PhysicalDevice> GetAllAvailable();
@@ -43,6 +43,8 @@ protected:
 
     void InitSwapchain();
 
+    void InitSurface();
+
 protected:
     vk::PhysicalDevice m_device { nullptr };
     vk::Device m_logical_device { nullptr };
@@ -54,7 +56,7 @@ protected:
     vk::Format m_swapchain_format;
     vk::Extent2D m_swapchain_extent;
 
-    VkWindow m_vk_window;
+    vk::SurfaceKHR m_surface;
 
     SwapChainSupportDetails m_swap_chain_support_details;
 
@@ -79,4 +81,6 @@ protected:
     } m_queue_indexes;
 
     std::shared_ptr<peVk::Instance> m_instance;
+
+    GlfwWindow &m_window;
 };

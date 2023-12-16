@@ -20,7 +20,7 @@ Engine::Engine() :
 Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
     try {
         // Make window
-        m_window = std::make_unique<Window>(_window_size, std::move(_window_title));
+        m_window = std::make_unique<GlfwWindow>(_window_size, std::move(_window_title));
     }
     catch (const std::runtime_error &e)
     {

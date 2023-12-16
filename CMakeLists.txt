@@ -14,12 +14,12 @@ set(UTILS_HEADERS
 
 set(CORE_SOURCE 
 		"Core/Engine.cpp"
-		"Core/Window/Window.cpp"
+		"Core/Window/GlfwWindow.cpp"
 		Core/Instance.cpp
 		Core/Instance.hpp)
 set(CORE_HEADERS 
 		"Core/Engine.hpp"
-		"Core/Window/Window.hpp"
+		"Core/Window/GlfwWindow.hpp"
 		Core/Instance.cpp
 		Core/Instance.hpp)
 
@@ -38,9 +38,7 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Core/DebugMessanger.cpp
 		Core/Gpu.cpp
 		Core/Gpu.hpp
-		Core/Window/VkWindow.cpp
-		Core/Window/VkWindow.hpp
-        Utils/VkLog.hpp)
+		Utils/VkLog.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)

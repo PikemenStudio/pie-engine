@@ -143,8 +143,9 @@ bool Gpu::NoExceptCheckExtensions(const vk::PhysicalDevice &_device) {
     return true;
 }
 
-Gpu::Gpu(std::shared_ptr<peVk::Instance> _instance, Window &_window) : m_instance(_instance),
-                                                      m_vk_window(m_device, m_logical_device, _window, _instance) {
+Gpu::Gpu(std::shared_ptr<peVk::Instance> _instance, GlfwWindow &_window) : m_instance(_instance),
+                                                                           m_window(_window) {
+    InitSurface();
 }
 
 void Gpu::FindAndSetQueues() {
@@ -157,7 +158,7 @@ void Gpu::FindAndSetQueues() {
             m_queue_indexes.graphics_queue = i;
         }
 
-        if (m_device.getSurfaceSupportKHR(i, m_vk_window.GetSurface())) {
+        if (m_device.getSurfaceSupportKHR(i, m_surface)) {
             m_queue_indexes.present_queue = i;
         }
     }
@@ -171,10 +172,12 @@ void Gpu::FindAndSetQueues() {
 Gpu::~Gpu() {
     m_logical_device.destroySwapchainKHR(m_swapchain);
     m_logical_device.destroy();
+
+    m_instance->ToVkInstancePtr()->destroySurfaceKHR(m_surface);
 }
 
 void Gpu::QuerySwapChainSupport() {
-    m_swap_chain_support_details.capabilities = m_device.getSurfaceCapabilitiesKHR(m_vk_window.GetSurface());
+    m_swap_chain_support_details.capabilities = m_device.getSurfaceCapabilitiesKHR(m_surface);
 
     LOG("Swapchain can support the following surface capabilities:");
 
@@ -225,7 +228,7 @@ void Gpu::QuerySwapChainSupport() {
         LOG("\t\t", line);
     }
 
-    m_swap_chain_support_details.formats = m_device.getSurfaceFormatsKHR(m_vk_window.GetSurface());
+    m_swap_chain_support_details.formats = m_device.getSurfaceFormatsKHR(m_surface);
     for (vk::SurfaceFormatKHR supportedFormat : m_swap_chain_support_details.formats) {
         /*
         * typedef struct VkSurfaceFormatKHR {
@@ -238,7 +241,7 @@ void Gpu::QuerySwapChainSupport() {
         LOG("supported color space: ", vk::to_string(supportedFormat.colorSpace));
     }
 
-    m_swap_chain_support_details.presentModes = m_device.getSurfacePresentModesKHR(m_vk_window.GetSurface());
+    m_swap_chain_support_details.presentModes = m_device.getSurfacePresentModesKHR(m_surface);
     for (vk::PresentModeKHR presentMode : m_swap_chain_support_details.presentModes) {
         LOG("\t", log_present_mode(presentMode));
     }
@@ -269,8 +272,8 @@ vk::Extent2D Gpu::ChooseExtent() {
         return  m_swap_chain_support_details.capabilities.currentExtent;
     }
     vk::Extent2D extent = {
-            (uint32_t)m_vk_window.GetWindow().GetSize().x,
-            (uint32_t)m_vk_window.GetWindow().GetSize().y
+            (uint32_t)m_window.GetSize().x,
+            (uint32_t)m_window.GetSize().y
     };
 
     extent.width = std::min(
@@ -299,7 +302,7 @@ void Gpu::InitSwapchain() {
     );
 
     vk::SwapchainCreateInfoKHR createInfo = vk::SwapchainCreateInfoKHR(
-            vk::SwapchainCreateFlagsKHR(), m_vk_window.GetSurface(), imageCount, format.format, format.colorSpace,
+            vk::SwapchainCreateFlagsKHR(), m_surface, imageCount, format.format, format.colorSpace,
             extent, 1, vk::ImageUsageFlagBits::eColorAttachment
     );
 
@@ -334,4 +337,14 @@ void Gpu::InitSwapchain() {
     m_swapchain_format = format.format;
 
     m_swapchain_extent = extent;
+}
+
+void Gpu::InitSurface() {
+    VkSurfaceKHR c_style_surface;
+    if (glfwCreateWindowSurface(*m_instance->ToVkInstancePtr(), &m_window.ToWindow(), nullptr, &c_style_surface) != VK_SUCCESS) {
+        throw std::runtime_error("Can't create surface");
+    }
+    m_surface = c_style_surface;
+
+    LOG("OK", "surface created");
 }
