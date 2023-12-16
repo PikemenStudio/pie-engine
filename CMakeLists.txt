@@ -36,8 +36,11 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Core/Instance.hpp
         Core/DebugMessanger.hpp
 		Core/DebugMessanger.cpp
-		Core/gpu.cpp
-		Core/gpu.hpp)
+		Core/Gpu.cpp
+		Core/Gpu.hpp
+		Core/Window/VkWindow.cpp
+		Core/Window/VkWindow.hpp
+        Utils/VkLog.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)

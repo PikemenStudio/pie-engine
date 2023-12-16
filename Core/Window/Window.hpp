@@ -14,6 +14,8 @@ public:
 
     ~Window();
 
+    glm::vec2 GetSize() { return m_size; }
+
 protected:
     /**
     * @brief Create window using GLFW library
@@ -32,6 +34,8 @@ public:
 
     [[nodiscard]]
     bool IsShouldClose() const;
+
+    [[nodiscard]] GLFWwindow& ToWindow() const { return *m_window; }
 
 protected:
     glm::uvec2 m_size;

@@ -5,7 +5,7 @@
 
 #include "Window/Window.hpp"
 #include "Core/Instance.hpp"
-#include "Core/gpu.hpp"
+#include "Core/Gpu.hpp"
 
 class Engine {
 public:

@@ -15,6 +15,8 @@ public:
     static void CheckForExtensionSupport(const std::vector<const char *> &_ext_name);
     static void CheckForLayersSupport(std::vector<const char *> &_required_layers);
 
+    bool IsPortabilityRequired() const;
+
     explicit operator vk::Instance&() {
         return m_vk_instance;
     }

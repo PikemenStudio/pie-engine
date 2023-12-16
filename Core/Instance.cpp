@@ -130,4 +130,8 @@ Instance::Instance(std::string_view _application_name) {
         }
     }
 
+    bool Instance::IsPortabilityRequired() const {
+        return m_version >= VK_MAKE_API_VERSION(0, 1, 3, 216);
+    }
+
 } // peVk
