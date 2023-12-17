@@ -32,6 +32,12 @@ public:
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
+    vk::Device GetLogicalDevice() const { return m_logical_device; }
+    vk::Device& GetLogicalDevice() { return m_logical_device; }
+
+    vk::Format GetSwapChainFormat() const { return m_swap_chain.m_format; }
+    vk::Extent2D GetSwapChainExtent() const { return m_swap_chain.m_extent; }
+
 protected:
     void FindAndSetQueues();
 

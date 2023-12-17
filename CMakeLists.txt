@@ -39,7 +39,12 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Core/Gpu.cpp
 		Core/Gpu.hpp
 		Utils/VkLog.hpp
-		Utils/File.hpp)
+		Utils/File.hpp
+		Shaders/Shader.cpp
+		Shaders/Shader.hpp
+		Shaders/Pipeline.cpp
+		Shaders/Pipeline.hpp
+		Utils/Process.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)

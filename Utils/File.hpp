@@ -10,7 +10,9 @@
 
 class File {
 public:
-    static bool read(const std::string& file_name, std::vector<char>& file_buffer) {
+    static std::vector<char> read(const std::string& file_name) {
+        std::vector<char> file_buffer;
+
         try {
             std::ifstream file(file_name, std::ios::binary);
             if (!file.is_open()) {
@@ -33,10 +35,10 @@ public:
             }
 
             file.close();
-            return true;
+            return file_buffer;
         } catch (const std::exception& e) {
             LOG("File read error: ", e.what(), " - File: '", file_name, "'");
-            return false;
+            throw;
         }
     }
 

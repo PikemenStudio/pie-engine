@@ -6,6 +6,7 @@
 #include "Core/Window/GlfwWindow.hpp"
 #include "Core/Instance.hpp"
 #include "Core/Gpu.hpp"
+#include "Shaders/Pipeline.hpp"
 
 class Engine {
 public:
@@ -28,4 +29,6 @@ protected:
     std::unique_ptr<Gpu> m_gpu;
 
     std::unique_ptr<GlfwWindow> m_window;
+
+    std::unique_ptr<GraphicsPipeline> m_pipeline;
 };

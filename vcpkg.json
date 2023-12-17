@@ -6,6 +6,7 @@
       "gtest",
       "vulkan-headers",
       "glfw3",
-      "glm"
+      "glm",
+      "boost-process"
     ]
 }   
