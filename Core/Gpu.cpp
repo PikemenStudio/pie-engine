@@ -6,6 +6,7 @@
 
 #include "Utils/UtilsMacros.hpp"
 #include "Utils/VkLog.hpp"
+#include "Utils/Sync.hpp"
 
 #include <iomanip>
 
@@ -170,8 +171,15 @@ void Gpu::FindAndSetQueues() {
 }
 
 Gpu::~Gpu() {
+    m_logical_device.destroyFence(inFlightFence);
+    m_logical_device.destroySemaphore(imageAvailable);
+    m_logical_device.destroySemaphore(renderFinished);
+
+    m_logical_device.destroyCommandPool(m_command_pool);
+
     for (auto frame : m_swap_chain.m_frames) {
         m_logical_device.destroyImageView(frame.image_view);
+        m_logical_device.destroyFramebuffer(frame.frame_buffer);
     }
 
     m_logical_device.destroySwapchainKHR(m_swap_chain.m_swap_chain);
@@ -374,4 +382,175 @@ void Gpu::InitSurface() {
     m_surface = c_style_surface;
 
     LOG("OK", "surface created");
+}
+
+void Gpu::make_command_pool() {
+
+    QueueIndexes queueFamilyIndices = m_queue_indexes;
+
+    vk::CommandPoolCreateInfo poolInfo;
+    poolInfo.flags = vk::CommandPoolCreateFlags() | vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphics_queue.value();
+
+    try {
+        m_command_pool = m_logical_device.createCommandPool(poolInfo);
+    }
+    catch (vk::SystemError &err) {
+        LOG("Failed to create Command Pool");
+        throw;
+    }
+}
+
+void Gpu::make_framebuffers(Gpu::framebufferInput _input_chunk) {
+    for (int i = 0; i < m_swap_chain.m_frames.size(); ++i) {
+
+        std::vector<vk::ImageView> attachments = {
+                m_swap_chain.m_frames[i].image_view
+        };
+
+        vk::FramebufferCreateInfo framebufferInfo;
+        framebufferInfo.flags = vk::FramebufferCreateFlags();
+        framebufferInfo.renderPass = _input_chunk.renderpass;
+        framebufferInfo.attachmentCount = attachments.size();
+        framebufferInfo.pAttachments = attachments.data();
+        framebufferInfo.width = _input_chunk.swapchainExtent.width;
+        framebufferInfo.height = _input_chunk.swapchainExtent.height;
+        framebufferInfo.layers = 1;
+
+        try {
+            m_swap_chain.m_frames[i].frame_buffer = _input_chunk.device.createFramebuffer(framebufferInfo);
+
+            LOG("Created framebuffer for frame ", i);
+        }
+        catch (vk::SystemError &err) {
+            LOG("Failed to create framebuffer for frame ", i);
+            throw;
+        }
+
+    }
+}
+
+void Gpu::make_command_buffers() {
+
+    vk::CommandBufferAllocateInfo allocInfo = {};
+    allocInfo.commandPool = m_command_pool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+
+    //Make a command buffer for each frame
+    for (int i = 0; i < m_swap_chain.m_frames.size(); ++i) {
+        try {
+            m_swap_chain.m_frames[i].command_buffer = m_logical_device.allocateCommandBuffers(allocInfo)[0];
+
+            LOG("Allocated command buffer for frame ", i);
+        }
+        catch (vk::SystemError &err) {
+            LOG("Failed to allocate command buffer for frame ", i);
+        }
+    }
+
+
+    //Make a "main" command buffer for the engine
+    try {
+        m_command_buffer = m_logical_device.allocateCommandBuffers(allocInfo)[0];
+
+        LOG("Allocated main command buffer ");
+    }
+    catch (vk::SystemError &err) {
+        LOG("Failed to allocate main command buffer");
+        throw;
+    }
+}
+
+void Gpu::make_syncs_objs() {
+    inFlightFence = Sync::make_fence(m_logical_device);
+    imageAvailable = Sync::make_semaphore(m_logical_device);
+    renderFinished = Sync::make_semaphore(m_logical_device);
+}
+
+void Gpu::Render(GraphicsPipeline &pipeline) {
+    m_logical_device.waitForFences(1, &inFlightFence, VK_TRUE, UINT64_MAX);
+    m_logical_device.resetFences(1, &inFlightFence);
+
+    //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
+    uint32_t imageIndex{ m_logical_device.acquireNextImageKHR(m_swap_chain.m_swap_chain, UINT64_MAX, imageAvailable, nullptr).value };
+
+    vk::CommandBuffer commandBuffer = m_swap_chain.m_frames[imageIndex].command_buffer;
+
+    commandBuffer.reset();
+
+    RecordDrawCommand(commandBuffer, imageIndex, pipeline);
+
+    vk::SubmitInfo submitInfo = {};
+
+    vk::Semaphore waitSemaphores[] = { imageAvailable };
+    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vk::Semaphore signalSemaphores[] = { renderFinished };
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    try {
+        m_graphics_queue.submit(submitInfo, inFlightFence);
+    }
+    catch (vk::SystemError &err) {
+        LOG("failed to submit draw command buffer!");
+    }
+
+    vk::PresentInfoKHR presentInfo = {};
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    vk::SwapchainKHR swapChains[] = { m_swap_chain.m_swap_chain };
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+
+    presentInfo.pImageIndices = &imageIndex;
+
+    m_present_queue.presentKHR(presentInfo);
+}
+
+#include <thread>
+
+void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline) {
+    vk::CommandBufferBeginInfo beginInfo = {};
+
+    try {
+        command_buffer.begin(beginInfo);
+    }
+    catch (vk::SystemError &err) {
+        LOG("Failed to begin recording command buffer!");
+    }
+
+    vk::RenderPassBeginInfo renderPassInfo = {};
+    renderPassInfo.renderPass = pipeline.GetRenderPass();
+    renderPassInfo.framebuffer = m_swap_chain.m_frames[image_index].frame_buffer;
+    renderPassInfo.renderArea.offset.x = 0;
+    renderPassInfo.renderArea.offset.y = 0;
+    renderPassInfo.renderArea.extent = m_swap_chain.m_extent;
+
+    vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    command_buffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+
+    command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
+
+    command_buffer.draw(3, 1, 0, 0);
+
+    command_buffer.endRenderPass();
+
+    try {
+        command_buffer.end();
+    }
+    catch (vk::SystemError &err) {
+        LOG("failed to record command buffer!");
+    }
 }

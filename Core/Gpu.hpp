@@ -8,6 +8,7 @@
 
 #include "Core/Instance.hpp"
 #include "Core/Window/GlfwWindow.hpp"
+#include "Shaders/Pipeline.hpp"
 
 #include <optional>
 
@@ -38,6 +39,34 @@ public:
     vk::Format GetSwapChainFormat() const { return m_swap_chain.m_format; }
     vk::Extent2D GetSwapChainExtent() const { return m_swap_chain.m_extent; }
 
+    struct SwapChainFrame {
+        vk::Image m_image { nullptr };
+        vk::ImageView image_view { nullptr };
+        vk::Framebuffer frame_buffer;
+        vk::CommandBuffer command_buffer;
+    };
+
+    std::vector<SwapChainFrame>& GetSwapChainFrames() { return m_swap_chain.m_frames; }
+
+    // Command pool
+    void make_command_pool();
+
+    // Framebuffer
+    struct framebufferInput {
+        vk::Device device;
+        vk::RenderPass renderpass;
+        vk::Extent2D swapchainExtent;
+    };
+
+    void make_framebuffers(framebufferInput _input_chunk);
+
+    void make_command_buffers();
+
+    void make_syncs_objs();
+
+    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline);
+    void Render(GraphicsPipeline &pipeline);
+
 protected:
     void FindAndSetQueues();
 
@@ -56,11 +85,6 @@ protected:
     vk::Device m_logical_device { nullptr };
     vk::Queue m_graphics_queue { nullptr };
     vk::Queue m_present_queue { nullptr };
-
-    struct SwapChainFrame {
-        vk::Image m_image { nullptr };
-        vk::ImageView image_view { nullptr };
-    };
 
     struct SwapChainBundle {
         vk::SwapchainKHR m_swap_chain{ nullptr };
@@ -96,4 +120,10 @@ protected:
     std::shared_ptr<peVk::Instance> m_instance;
 
     GlfwWindow &m_window;
+
+    vk::CommandPool m_command_pool;
+    vk::CommandBuffer m_command_buffer;
+
+    vk::Fence inFlightFence;
+    vk::Semaphore imageAvailable, renderFinished;
 };

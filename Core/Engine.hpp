@@ -17,6 +17,13 @@ public:
 
     void RunMainCycle();
 
+    void Render();
+
+    double lastTime, currentTime;
+    int numFrames;
+    float frameTime;
+    void CalculateFrameRate();
+
 protected:
 
 protected:

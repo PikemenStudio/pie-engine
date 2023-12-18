@@ -27,6 +27,21 @@ public:
         vk::Format swapchainImageFormat;
     };
 
+    [[nodiscard]]
+    vk::PipelineLayout GetPipelineLayout() const {
+        return m_bundle.layout;
+    }
+
+    [[nodiscard]]
+    vk::RenderPass GetRenderPass() const {
+        return m_bundle.renderpass;
+    }
+
+    [[nodiscard]]
+    vk::Pipeline& GetPipeline() {
+        return m_bundle.pipeline;
+    }
+
 protected:
     [[nodiscard]]
     vk::PipelineLayout init_pipeline_layout(const vk::Device &device);

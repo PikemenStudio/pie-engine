@@ -1,15 +1,20 @@
 #include "Engine.hpp"
 
 #include "Core/DebugMessanger.hpp"
+#include "Core/FrameBuffer.hpp"
+#include "Utils/Sync.hpp"
 
 #include <iostream>
 
 void Engine::RunMainCycle() {
     m_window->Start();
     while (!m_window->IsShouldClose()) {
-        m_window->ClearBuffer();
-        m_window->SwapBuffers();
         m_window->PollEvents();
+        m_gpu->Render(*m_pipeline);
+        CalculateFrameRate();
+        //Render();
+        //m_window->ClearBuffer();
+        //m_window->SwapBuffers();
     }
 }
 
@@ -47,6 +52,17 @@ Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
     specification.swapchainImageFormat = m_gpu->GetSwapChainFormat();
 
     m_pipeline = std::make_unique<GraphicsPipeline>(specification);
+
+    Gpu::framebufferInput frameBufferInput;
+    frameBufferInput.device = m_gpu->GetLogicalDevice();
+    frameBufferInput.renderpass = m_pipeline->GetRenderPass();
+    frameBufferInput.swapchainExtent = m_gpu->GetSwapChainExtent();
+    m_gpu->make_framebuffers(frameBufferInput);
+
+    m_gpu->make_command_pool();
+    m_gpu->make_command_buffers();
+
+    m_gpu->make_syncs_objs();
 }
 
 Engine::~Engine() {
@@ -55,4 +71,25 @@ Engine::~Engine() {
 
     m_instance->ToVkInstancePtr()->destroyDebugUtilsMessengerEXT(m_debug_messenger, nullptr, m_dldi);
     m_instance->ToVkInstancePtr()->destroy();
+}
+
+void Engine::CalculateFrameRate() {
+    currentTime = glfwGetTime();
+    double delta = currentTime - lastTime;
+
+    if (delta >= 1) {
+        int framerate{ std::max(1, int(numFrames / delta)) };
+        std::stringstream title;
+        title << "Running at " << framerate << " fps.";
+        glfwSetWindowTitle(&m_window->ToWindow(), title.str().c_str());
+        lastTime = currentTime;
+        numFrames = -1;
+        frameTime = float(1000.0 / framerate);
+    }
+
+    ++numFrames;
+}
+
+void Engine::Render() {
+    m_gpu->Render(*m_pipeline);
 }
