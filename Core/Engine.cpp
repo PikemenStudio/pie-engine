@@ -1,7 +1,6 @@
 #include "Engine.hpp"
 
 #include "Core/DebugMessanger.hpp"
-#include "Core/FrameBuffer.hpp"
 #include "Utils/Sync.hpp"
 
 #include <iostream>
@@ -66,6 +65,7 @@ Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
 }
 
 Engine::~Engine() {
+    m_gpu->DestroyCommandPool();
     m_pipeline.reset();
     m_gpu.reset();
 

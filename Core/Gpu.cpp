@@ -171,15 +171,13 @@ void Gpu::FindAndSetQueues() {
 }
 
 Gpu::~Gpu() {
-    m_logical_device.destroyFence(inFlightFence);
-    m_logical_device.destroySemaphore(imageAvailable);
-    m_logical_device.destroySemaphore(renderFinished);
-
-    m_logical_device.destroyCommandPool(m_command_pool);
-
     for (auto frame : m_swap_chain.m_frames) {
         m_logical_device.destroyImageView(frame.image_view);
         m_logical_device.destroyFramebuffer(frame.frame_buffer);
+
+        m_logical_device.destroyFence(frame.inFlightFence);
+        m_logical_device.destroySemaphore(frame.imageAvailable);
+        m_logical_device.destroySemaphore(frame.renderFinished);
     }
 
     m_logical_device.destroySwapchainKHR(m_swap_chain.m_swap_chain);
@@ -270,6 +268,9 @@ vk::SurfaceFormatKHR Gpu::ChooseSurfaceFormat() {
 }
 
 vk::PresentModeKHR Gpu::ChoosePresentMode() {
+//    // !!! Force mailbox
+//    return vk::PresentModeKHR::eMailbox;
+
     for (vk::PresentModeKHR presentMode : m_swap_chain_support_details.presentModes) {
         if (presentMode == vk::PresentModeKHR::eMailbox) {
             return presentMode;
@@ -372,6 +373,9 @@ void Gpu::InitSwapchain() {
     m_swap_chain.m_format = format.format;
 
     m_swap_chain.m_extent = extent;
+
+    MaxFramesInFlight = m_swap_chain.m_frames.size();
+    FrameNumber = 0;
 }
 
 void Gpu::InitSurface() {
@@ -463,19 +467,26 @@ void Gpu::make_command_buffers() {
 }
 
 void Gpu::make_syncs_objs() {
-    inFlightFence = Sync::make_fence(m_logical_device);
-    imageAvailable = Sync::make_semaphore(m_logical_device);
-    renderFinished = Sync::make_semaphore(m_logical_device);
+    for (auto &frame : m_swap_chain.m_frames) {
+        frame.inFlightFence = Sync::make_fence(m_logical_device);
+        frame.imageAvailable = Sync::make_semaphore(m_logical_device);
+        frame.renderFinished = Sync::make_semaphore(m_logical_device);
+    }
 }
 
 void Gpu::Render(GraphicsPipeline &pipeline) {
-    m_logical_device.waitForFences(1, &inFlightFence, VK_TRUE, UINT64_MAX);
-    m_logical_device.resetFences(1, &inFlightFence);
+    assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
+    assert(m_logical_device.resetFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence) == vk::Result::eSuccess);
 
     //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
-    uint32_t imageIndex{ m_logical_device.acquireNextImageKHR(m_swap_chain.m_swap_chain, UINT64_MAX, imageAvailable, nullptr).value };
+    uint32_t imageIndex{
+        m_logical_device.acquireNextImageKHR(m_swap_chain.m_swap_chain,
+                                             UINT64_MAX,
+                                             m_swap_chain.m_frames[FrameNumber].imageAvailable,
+                                             nullptr).value
+    };
 
-    vk::CommandBuffer commandBuffer = m_swap_chain.m_frames[imageIndex].command_buffer;
+    vk::CommandBuffer commandBuffer = m_swap_chain.m_frames[FrameNumber].command_buffer;
 
     commandBuffer.reset();
 
@@ -483,7 +494,7 @@ void Gpu::Render(GraphicsPipeline &pipeline) {
 
     vk::SubmitInfo submitInfo = {};
 
-    vk::Semaphore waitSemaphores[] = { imageAvailable };
+    vk::Semaphore waitSemaphores[] = { m_swap_chain.m_frames[FrameNumber].imageAvailable };
     vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = waitSemaphores;
@@ -492,12 +503,12 @@ void Gpu::Render(GraphicsPipeline &pipeline) {
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vk::Semaphore signalSemaphores[] = { renderFinished };
+    vk::Semaphore signalSemaphores[] = { m_swap_chain.m_frames[FrameNumber].renderFinished };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     try {
-        m_graphics_queue.submit(submitInfo, inFlightFence);
+        m_graphics_queue.submit(submitInfo, m_swap_chain.m_frames[FrameNumber].inFlightFence);
     }
     catch (vk::SystemError &err) {
         LOG("failed to submit draw command buffer!");
@@ -513,7 +524,9 @@ void Gpu::Render(GraphicsPipeline &pipeline) {
 
     presentInfo.pImageIndices = &imageIndex;
 
-    m_present_queue.presentKHR(presentInfo);
+    assert(m_present_queue.presentKHR(presentInfo) == vk::Result::eSuccess);
+
+    FrameNumber = (FrameNumber + 1) % MaxFramesInFlight;
 }
 
 #include <thread>
@@ -553,4 +566,9 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
     catch (vk::SystemError &err) {
         LOG("failed to record command buffer!");
     }
+}
+
+void Gpu::DestroyCommandPool() {
+    m_logical_device.waitIdle();
+    m_logical_device.destroyCommandPool(m_command_pool);
 }

@@ -44,6 +44,9 @@ public:
         vk::ImageView image_view { nullptr };
         vk::Framebuffer frame_buffer;
         vk::CommandBuffer command_buffer;
+        // Syncs
+        vk::Fence inFlightFence;
+        vk::Semaphore imageAvailable, renderFinished;
     };
 
     std::vector<SwapChainFrame>& GetSwapChainFrames() { return m_swap_chain.m_frames; }
@@ -66,6 +69,8 @@ public:
 
     void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline);
     void Render(GraphicsPipeline &pipeline);
+
+    void DestroyCommandPool();
 
 protected:
     void FindAndSetQueues();
@@ -124,6 +129,6 @@ protected:
     vk::CommandPool m_command_pool;
     vk::CommandBuffer m_command_buffer;
 
-    vk::Fence inFlightFence;
-    vk::Semaphore imageAvailable, renderFinished;
+    size_t MaxFramesInFlight;
+    size_t FrameNumber;
 };

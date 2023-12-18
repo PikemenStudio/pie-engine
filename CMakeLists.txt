@@ -45,10 +45,6 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Shaders/Pipeline.cpp
 		Shaders/Pipeline.hpp
 		Utils/Process.hpp
-		Core/FrameBuffer.cpp
-		Core/FrameBuffer.hpp
-		Core/CommandBuffer.cpp
-		Core/CommandBuffer.hpp
 		Utils/Sync.cpp
 		Utils/Sync.hpp)
 
