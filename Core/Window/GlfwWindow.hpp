@@ -16,6 +16,14 @@ public:
 
     glm::vec2 GetSize() { return m_size; }
 
+    glm::vec2 UpdateSize() {
+        int x, y;
+        glfwGetFramebufferSize(m_window, &x, &y);
+        m_size = { x, y };
+        glfwWaitEvents();
+        return m_size;
+    }
+
 protected:
     /**
     * @brief Create window using GLFW library

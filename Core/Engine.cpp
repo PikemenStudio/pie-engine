@@ -60,9 +60,8 @@ Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
     m_gpu->make_framebuffers(frameBufferInput);
 
     m_gpu->make_command_pool();
-    m_gpu->make_command_buffers();
-
-    m_gpu->make_syncs_objs();
+    m_gpu->make_main_command_buffer();
+    m_gpu->make_frame_command_buffers();
 }
 
 Engine::~Engine() {

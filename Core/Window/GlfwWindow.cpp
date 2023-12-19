@@ -16,7 +16,7 @@ GlfwWindow::~GlfwWindow() { glfwTerminate(); }
 void GlfwWindow::BuildGlfwWindow() {
   glfwInit();
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
   m_window =
       glfwCreateWindow((int)m_size.x, (int)m_size.y, m_title.c_str(), nullptr, nullptr);

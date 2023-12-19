@@ -174,16 +174,7 @@ void Gpu::FindAndSetQueues() {
 }
 
 Gpu::~Gpu() {
-    for (auto frame : m_swap_chain.m_frames) {
-        m_logical_device.destroyImageView(frame.image_view);
-        m_logical_device.destroyFramebuffer(frame.frame_buffer);
-
-        m_logical_device.destroyFence(frame.inFlightFence);
-        m_logical_device.destroySemaphore(frame.imageAvailable);
-        m_logical_device.destroySemaphore(frame.renderFinished);
-    }
-
-    m_logical_device.destroySwapchainKHR(m_swap_chain.m_swap_chain);
+    DestroySwapchain();
     m_logical_device.destroy();
 
     m_instance->ToVkInstancePtr()->destroySurfaceKHR(m_surface);
@@ -350,7 +341,9 @@ void Gpu::InitSwapchain() {
     }
 
     auto images = m_logical_device.getSwapchainImagesKHR(m_swap_chain.m_swap_chain);
+    m_swap_chain.m_frames.clear();
     m_swap_chain.m_frames.reserve(images.size());
+
     for (auto image : images) {
         SwapChainFrame frame{};
 
@@ -379,6 +372,8 @@ void Gpu::InitSwapchain() {
 
     MaxFramesInFlight = m_swap_chain.m_frames.size();
     FrameNumber = 0;
+
+    make_syncs_objs();
 }
 
 void Gpu::InitSurface() {
@@ -409,6 +404,8 @@ void Gpu::make_command_pool() {
 }
 
 void Gpu::make_framebuffers(Gpu::framebufferInput _input_chunk) {
+    m_render_pass = _input_chunk.renderpass;
+
     for (int i = 0; i < m_swap_chain.m_frames.size(); ++i) {
 
         std::vector<vk::ImageView> attachments = {
@@ -437,25 +434,11 @@ void Gpu::make_framebuffers(Gpu::framebufferInput _input_chunk) {
     }
 }
 
-void Gpu::make_command_buffers() {
-
+void Gpu::make_main_command_buffer() {
     vk::CommandBufferAllocateInfo allocInfo = {};
     allocInfo.commandPool = m_command_pool;
     allocInfo.level = vk::CommandBufferLevel::ePrimary;
     allocInfo.commandBufferCount = 1;
-
-    //Make a command buffer for each frame
-    for (int i = 0; i < m_swap_chain.m_frames.size(); ++i) {
-        try {
-            m_swap_chain.m_frames[i].command_buffer = m_logical_device.allocateCommandBuffers(allocInfo)[0];
-
-            LOG("Allocated command buffer for frame ", i);
-        }
-        catch (vk::SystemError &err) {
-            LOG("Failed to allocate command buffer for frame ", i);
-        }
-    }
-
 
     //Make a "main" command buffer for the engine
     try {
@@ -479,15 +462,21 @@ void Gpu::make_syncs_objs() {
 
 void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
     assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
-    assert(m_logical_device.resetFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence) == vk::Result::eSuccess);
 
     //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
-    uint32_t imageIndex{
-        m_logical_device.acquireNextImageKHR(m_swap_chain.m_swap_chain,
-                                             UINT64_MAX,
-                                             m_swap_chain.m_frames[FrameNumber].imageAvailable,
-                                             nullptr).value
-    };
+    uint32_t imageIndex;
+    try {
+        vk::ResultValue acquire = m_logical_device.acquireNextImageKHR(m_swap_chain.m_swap_chain,
+                                                                       UINT64_MAX,
+                                                                       m_swap_chain.m_frames[FrameNumber].imageAvailable,
+                                                                       nullptr);
+        imageIndex = acquire.value;
+    }
+    catch(vk::OutOfDateKHRError) {
+        LOG("Recreate swapchain");
+        RecreateSwapchain();
+        return;
+    }
 
     vk::CommandBuffer commandBuffer = m_swap_chain.m_frames[FrameNumber].command_buffer;
 
@@ -510,6 +499,8 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
+    assert(m_logical_device.resetFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence) == vk::Result::eSuccess);
+
     try {
         m_graphics_queue.submit(submitInfo, m_swap_chain.m_frames[FrameNumber].inFlightFence);
     }
@@ -527,7 +518,19 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
 
     presentInfo.pImageIndices = &imageIndex;
 
-    assert(m_present_queue.presentKHR(presentInfo) == vk::Result::eSuccess);
+    vk::Result present;
+    try {
+        present = m_present_queue.presentKHR(presentInfo);
+    }
+    catch (vk::OutOfDateKHRError) {
+        present = vk::Result::eErrorOutOfDateKHR;
+    }
+
+    if (present == vk::Result::eErrorOutOfDateKHR || present == vk::Result::eSuboptimalKHR) {
+        LOG("Recreate swapchain");
+        RecreateSwapchain();
+        return;
+    }
 
     FrameNumber = (FrameNumber + 1) % MaxFramesInFlight;
 }
@@ -580,4 +583,50 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
 void Gpu::DestroyCommandPool() {
     m_logical_device.waitIdle();
     m_logical_device.destroyCommandPool(m_command_pool);
+}
+
+void Gpu::RecreateSwapchain() {
+    auto size = m_window.UpdateSize();
+    while (size.x == 0 || size.y == 0) {
+        size = m_window.UpdateSize();
+    }
+
+    m_logical_device.waitIdle();
+
+    DestroySwapchain();
+    InitSwapchain();
+    make_framebuffers({ m_logical_device, m_render_pass.value(), m_swap_chain.m_extent });
+    make_frame_command_buffers();
+}
+
+void Gpu::DestroySwapchain() {
+    for (auto frame : m_swap_chain.m_frames) {
+        m_logical_device.destroyImageView(frame.image_view);
+        m_logical_device.destroyFramebuffer(frame.frame_buffer);
+
+        m_logical_device.destroyFence(frame.inFlightFence);
+        m_logical_device.destroySemaphore(frame.imageAvailable);
+        m_logical_device.destroySemaphore(frame.renderFinished);
+    }
+
+    m_logical_device.destroySwapchainKHR(m_swap_chain.m_swap_chain);
+}
+
+void Gpu::make_frame_command_buffers() {
+    vk::CommandBufferAllocateInfo allocInfo = {};
+    allocInfo.commandPool = m_command_pool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = 1;
+
+    //Make a command buffer for each frame
+    for (int i = 0; i < m_swap_chain.m_frames.size(); ++i) {
+        try {
+            m_swap_chain.m_frames[i].command_buffer = m_logical_device.allocateCommandBuffers(allocInfo)[0];
+
+            LOG("Allocated command buffer for frame ", i);
+        }
+        catch (vk::SystemError &err) {
+            LOG("Failed to allocate command buffer for frame ", i);
+        }
+    }
 }

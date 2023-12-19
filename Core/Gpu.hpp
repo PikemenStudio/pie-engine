@@ -64,9 +64,8 @@ public:
 
     void make_framebuffers(framebufferInput _input_chunk);
 
-    void make_command_buffers();
-
-    void make_syncs_objs();
+    void make_main_command_buffer();
+    void make_frame_command_buffers();
 
     void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene);
     void Render(GraphicsPipeline &pipeline, Scene _render);
@@ -82,7 +81,11 @@ protected:
     vk::PresentModeKHR ChoosePresentMode();
     vk::Extent2D ChooseExtent();
 
+    void make_syncs_objs();
+
     void InitSwapchain();
+    void RecreateSwapchain();
+    void DestroySwapchain();
 
     void InitSurface();
 
@@ -132,4 +135,6 @@ protected:
 
     size_t MaxFramesInFlight;
     size_t FrameNumber;
+
+    std::optional<vk::RenderPass> m_render_pass;
 };
