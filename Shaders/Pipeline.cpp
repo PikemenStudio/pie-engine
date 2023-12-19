@@ -5,12 +5,19 @@
 #include "Pipeline.hpp"
 
 #include "Utils/UtilsMacros.hpp"
+#include "Shaders/Shaders/empty.hpp"
 
 vk::PipelineLayout GraphicsPipeline::init_pipeline_layout(const vk::Device &device) {
     vk::PipelineLayoutCreateInfo layoutInfo;
     layoutInfo.flags = vk::PipelineLayoutCreateFlags();
     layoutInfo.setLayoutCount = 0;
-    layoutInfo.pushConstantRangeCount = 0;
+    layoutInfo.pushConstantRangeCount = 1;
+    vk::PushConstantRange pushConstantInfo;
+    pushConstantInfo.offset = 0;
+    pushConstantInfo.size = sizeof(ObjectData);
+    pushConstantInfo.stageFlags = vk::ShaderStageFlagBits::eVertex;
+    layoutInfo.pPushConstantRanges = &pushConstantInfo;
+
     try {
         return device.createPipelineLayout(layoutInfo);
     }

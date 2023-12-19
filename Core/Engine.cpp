@@ -7,9 +7,10 @@
 
 void Engine::RunMainCycle() {
     m_window->Start();
+    Scene scene;
     while (!m_window->IsShouldClose()) {
         m_window->PollEvents();
-        m_gpu->Render(*m_pipeline);
+        m_gpu->Render(*m_pipeline, scene);
         CalculateFrameRate();
         //Render();
         //m_window->ClearBuffer();
@@ -90,6 +91,6 @@ void Engine::CalculateFrameRate() {
     ++numFrames;
 }
 
-void Engine::Render() {
-    m_gpu->Render(*m_pipeline);
+void Engine::Render(Scene _scene) {
+    m_gpu->Render(*m_pipeline, _scene);
 }

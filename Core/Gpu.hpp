@@ -9,6 +9,7 @@
 #include "Core/Instance.hpp"
 #include "Core/Window/GlfwWindow.hpp"
 #include "Shaders/Pipeline.hpp"
+#include "Project/Scene.hpp"
 
 #include <optional>
 
@@ -67,8 +68,8 @@ public:
 
     void make_syncs_objs();
 
-    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline);
-    void Render(GraphicsPipeline &pipeline);
+    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene);
+    void Render(GraphicsPipeline &pipeline, Scene _render);
 
     void DestroyCommandPool();
 

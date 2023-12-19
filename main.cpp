@@ -8,6 +8,6 @@
 #include "Core/Instance.hpp"
 
 int main() {
-    Engine eng({300, 300}, "engine");
+    Engine eng({1000, 1000}, "engine");
     eng.RunMainCycle();
 }

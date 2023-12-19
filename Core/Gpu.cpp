@@ -8,6 +8,9 @@
 #include "Utils/VkLog.hpp"
 #include "Utils/Sync.hpp"
 
+#include "glm/gtc/matrix_transform.hpp"
+#include "Shaders/Shaders/empty.hpp"
+
 #include <iomanip>
 
 
@@ -474,7 +477,7 @@ void Gpu::make_syncs_objs() {
     }
 }
 
-void Gpu::Render(GraphicsPipeline &pipeline) {
+void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
     assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
     assert(m_logical_device.resetFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence) == vk::Result::eSuccess);
 
@@ -490,7 +493,7 @@ void Gpu::Render(GraphicsPipeline &pipeline) {
 
     commandBuffer.reset();
 
-    RecordDrawCommand(commandBuffer, imageIndex, pipeline);
+    RecordDrawCommand(commandBuffer, imageIndex, pipeline, _scene);
 
     vk::SubmitInfo submitInfo = {};
 
@@ -531,7 +534,7 @@ void Gpu::Render(GraphicsPipeline &pipeline) {
 
 #include <thread>
 
-void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline) {
+void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene) {
     vk::CommandBufferBeginInfo beginInfo = {};
 
     try {
@@ -556,7 +559,13 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
 
     command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
 
-    command_buffer.draw(3, 1, 0, 0);
+    for (auto position : _scene.m_positions) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
+        ObjectData objectData;
+        objectData.model = model;
+        command_buffer.pushConstants(pipeline.GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData);
+        command_buffer.draw(3, 1, 0, 0);
+    }
 
     command_buffer.endRenderPass();
 

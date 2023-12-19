@@ -7,6 +7,7 @@
 #include "Core/Instance.hpp"
 #include "Core/Gpu.hpp"
 #include "Shaders/Pipeline.hpp"
+#include "Project/Scene.hpp"
 
 class Engine {
 public:
@@ -17,7 +18,7 @@ public:
 
     void RunMainCycle();
 
-    void Render();
+    void Render(Scene _scene);
 
     double lastTime, currentTime;
     int numFrames;
