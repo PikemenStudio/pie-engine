@@ -8,13 +8,11 @@
 void Engine::RunMainCycle() {
     m_window->Start();
     Scene scene;
+    MakeAssets();
     while (!m_window->IsShouldClose()) {
         m_window->PollEvents();
-        m_gpu->Render(*m_pipeline, scene);
+        Render(scene);
         CalculateFrameRate();
-        //Render();
-        //m_window->ClearBuffer();
-        //m_window->SwapBuffers();
     }
 }
 
@@ -67,6 +65,7 @@ Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
 Engine::~Engine() {
     m_gpu->DestroyCommandPool();
     m_pipeline.reset();
+    m_mesh.reset();
     m_gpu.reset();
 
     m_instance->ToVkInstancePtr()->destroyDebugUtilsMessengerEXT(m_debug_messenger, nullptr, m_dldi);
@@ -91,5 +90,9 @@ void Engine::CalculateFrameRate() {
 }
 
 void Engine::Render(Scene _scene) {
-    m_gpu->Render(*m_pipeline, _scene);
+    m_gpu->Render(*m_pipeline, _scene, *m_mesh);
+}
+
+void Engine::MakeAssets() {
+    m_mesh = std::make_unique<Triangle>(m_gpu->GetLogicalDevice(), m_gpu->GetDevice());
 }

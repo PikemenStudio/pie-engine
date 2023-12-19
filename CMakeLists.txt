@@ -49,7 +49,11 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Utils/Sync.hpp
 		Shaders/Shaders/empty.hpp
 		Project/Scene.cpp
-		Project/Scene.hpp)
+		Project/Scene.hpp
+		Project/Mesh.cpp
+		Project/Mesh.hpp
+		Core/Memory.cpp
+		Core/Memory.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)

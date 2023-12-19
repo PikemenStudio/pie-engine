@@ -10,6 +10,7 @@
 #include "Core/Window/GlfwWindow.hpp"
 #include "Shaders/Pipeline.hpp"
 #include "Project/Scene.hpp"
+#include "Project/Mesh.hpp"
 
 #include <optional>
 
@@ -36,6 +37,11 @@ public:
 
     vk::Device GetLogicalDevice() const { return m_logical_device; }
     vk::Device& GetLogicalDevice() { return m_logical_device; }
+
+    vk::PhysicalDevice GetDevice() const { return m_device; }
+    vk::PhysicalDevice& GetDevice() { return m_device; }
+
+    vk::CommandBuffer GetCommandBuffer() { return m_command_buffer; }
 
     vk::Format GetSwapChainFormat() const { return m_swap_chain.m_format; }
     vk::Extent2D GetSwapChainExtent() const { return m_swap_chain.m_extent; }
@@ -67,8 +73,8 @@ public:
     void make_main_command_buffer();
     void make_frame_command_buffers();
 
-    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene);
-    void Render(GraphicsPipeline &pipeline, Scene _render);
+    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh);
+    void Render(GraphicsPipeline &pipeline, Scene _render, Mesh &_mesh);
 
     void DestroyCommandPool();
 
@@ -88,6 +94,8 @@ protected:
     void DestroySwapchain();
 
     void InitSurface();
+
+    void PrepareScene(vk::CommandBuffer command_buffer, Mesh &_mesh);
 
 protected:
     vk::PhysicalDevice m_device { nullptr };

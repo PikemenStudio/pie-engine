@@ -460,7 +460,7 @@ void Gpu::make_syncs_objs() {
     }
 }
 
-void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
+void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh) {
     assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
 
     //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
@@ -482,7 +482,7 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
 
     commandBuffer.reset();
 
-    RecordDrawCommand(commandBuffer, imageIndex, pipeline, _scene);
+    RecordDrawCommand(commandBuffer, imageIndex, pipeline, _scene, _mesh);
 
     vk::SubmitInfo submitInfo = {};
 
@@ -537,7 +537,7 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene) {
 
 #include <thread>
 
-void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene) {
+void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh) {
     vk::CommandBufferBeginInfo beginInfo = {};
 
     try {
@@ -561,6 +561,8 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
     command_buffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 
     command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
+
+    PrepareScene(command_buffer, _mesh);
 
     for (auto position : _scene.m_positions) {
         glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
@@ -629,4 +631,10 @@ void Gpu::make_frame_command_buffers() {
             LOG("Failed to allocate command buffer for frame ", i);
         }
     }
+}
+
+void Gpu::PrepareScene(vk::CommandBuffer command_buffer, Mesh &_mesh) {
+    vk::Buffer vertexBuffers[] = {_mesh.vertexBuffer.buffer};
+    vk::DeviceSize offsets[] = { 0 };
+    command_buffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);
 }

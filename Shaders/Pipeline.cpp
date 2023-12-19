@@ -6,6 +6,7 @@
 
 #include "Utils/UtilsMacros.hpp"
 #include "Shaders/Shaders/empty.hpp"
+#include "Project/Mesh.hpp"
 
 vk::PipelineLayout GraphicsPipeline::init_pipeline_layout(const vk::Device &device) {
     vk::PipelineLayoutCreateInfo layoutInfo;
@@ -77,10 +78,14 @@ void GraphicsPipeline::init_graphics_pipeline(const GraphicsPipeline::GraphicsPi
     std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
 
     //Vertex Input
+    auto PosColorBindingDescription = Mesh::GetPosColorBindingDescription();
+    auto PosColorAttributeDescriptions = Mesh::GetPosColorAttributeDescriptions();
     vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
     vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &PosColorBindingDescription;
+    vertexInputInfo.vertexAttributeDescriptionCount = 2;
+    vertexInputInfo.pVertexAttributeDescriptions = PosColorAttributeDescriptions.data();
     pipelineInfo.pVertexInputState = &vertexInputInfo;
 
     //Input Assembly
