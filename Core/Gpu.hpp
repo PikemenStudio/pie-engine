@@ -11,6 +11,7 @@
 #include "Shaders/Pipeline.hpp"
 #include "Project/Scene.hpp"
 #include "Project/Mesh.hpp"
+#include "Project/MeshesManager.hpp"
 
 #include <optional>
 
@@ -73,8 +74,8 @@ public:
     void make_main_command_buffer();
     void make_frame_command_buffers();
 
-    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh);
-    void Render(GraphicsPipeline &pipeline, Scene _render, Mesh &_mesh);
+    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh);
+    void Render(GraphicsPipeline &pipeline, Scene _render, MeshesManager &_mesh);
 
     void DestroyCommandPool();
 
@@ -95,7 +96,7 @@ protected:
 
     void InitSurface();
 
-    void PrepareScene(vk::CommandBuffer command_buffer, Mesh &_mesh);
+    void PrepareScene(vk::CommandBuffer command_buffer, MeshesManager &_mesh);
 
 protected:
     vk::PhysicalDevice m_device { nullptr };

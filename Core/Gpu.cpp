@@ -460,7 +460,7 @@ void Gpu::make_syncs_objs() {
     }
 }
 
-void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh) {
+void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh) {
     assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
 
     //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
@@ -537,7 +537,7 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh) {
 
 #include <thread>
 
-void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, Mesh &_mesh) {
+void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh) {
     vk::CommandBufferBeginInfo beginInfo = {};
 
     try {
@@ -564,12 +564,20 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
 
     PrepareScene(command_buffer, _mesh);
 
-    for (auto position : _scene.m_positions) {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
-        ObjectData objectData;
-        objectData.model = model;
-        command_buffer.pushConstants(pipeline.GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData);
-        command_buffer.draw(3, 1, 0, 0);
+    for (auto size : _mesh.sizes) {
+        auto type = size.first;
+
+        int vertexCount = _mesh.sizes.find(type)->second;
+        int firstVertex = _mesh.offsets.find(type)->second;
+        for (glm::vec3 position : _scene.trianglePositions) {
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
+            ObjectData objectData;
+            objectData.model = model;
+            command_buffer.pushConstants(pipeline.GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData
+            );
+            command_buffer.draw(vertexCount, 1, firstVertex, 0);
+        }
     }
 
     command_buffer.endRenderPass();
@@ -633,7 +641,7 @@ void Gpu::make_frame_command_buffers() {
     }
 }
 
-void Gpu::PrepareScene(vk::CommandBuffer command_buffer, Mesh &_mesh) {
+void Gpu::PrepareScene(vk::CommandBuffer command_buffer, MeshesManager &_mesh) {
     vk::Buffer vertexBuffers[] = {_mesh.vertexBuffer.buffer};
     vk::DeviceSize offsets[] = { 0 };
     command_buffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);

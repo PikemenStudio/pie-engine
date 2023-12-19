@@ -8,7 +8,7 @@
 #include "Core/Gpu.hpp"
 #include "Shaders/Pipeline.hpp"
 #include "Project/Scene.hpp"
-#include "Project/Mesh.hpp"
+#include "Project/MeshesManager.hpp"
 
 class Engine {
 public:
@@ -42,5 +42,5 @@ protected:
 
     std::unique_ptr<GraphicsPipeline> m_pipeline;
 
-    std::unique_ptr<Triangle> m_mesh;
+    std::unique_ptr<MeshesManager> m_mesh;
 };

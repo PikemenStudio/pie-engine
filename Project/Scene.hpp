@@ -13,5 +13,7 @@ public:
     Scene();
 
 public:
-    std::vector<glm::vec3> m_positions;
+    std::vector<glm::vec3> trianglePositions;
+
+    std::vector<glm::vec3> squarePositions;
 };

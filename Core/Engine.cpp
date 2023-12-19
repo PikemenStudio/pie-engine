@@ -94,5 +94,26 @@ void Engine::Render(Scene _scene) {
 }
 
 void Engine::MakeAssets() {
-    m_mesh = std::make_unique<Triangle>(m_gpu->GetLogicalDevice(), m_gpu->GetDevice());
+    m_mesh = std::make_unique<MeshesManager>();
+
+    std::vector<float> vertices = { {
+                                            0.0f, -0.05f, 0.0f, 1.0f, 0.0f,
+                                            0.05f, 0.05f, 0.0f, 1.0f, 0.0f,
+                                            -0.05f, 0.05f, 0.0f, 1.0f, 0.0f
+                                    } };
+    Mesh::Types type = Mesh::Types::eTriangle;
+    m_mesh->Consume(type, vertices);
+
+    vertices = { {
+                         -0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
+                         -0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+                         0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+                         0.05f, -0.05f, 1.0f, 0.0f, 0.0f,
+                         0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
+                         -0.05f,  0.05f, 1.0f, 0.0f, 0.0f
+                 } };
+    type = Mesh::Types::eSquare;
+    m_mesh->Consume(type, vertices);
+
+    m_mesh->Finalize(m_gpu->GetLogicalDevice(), m_gpu->GetDevice());
 }
