@@ -21,7 +21,9 @@ public:
         vk::Queue queue;
     };
     void Finalize(FinalizationChunk finalizationChunk);
-    Memory::Buffer vertexBuffer;
+    std::optional<Memory::Buffer> vertexBuffer;
+
+    void Destroy();
 
     struct DataUnit {
         int offset;

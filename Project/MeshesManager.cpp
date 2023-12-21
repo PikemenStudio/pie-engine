@@ -44,16 +44,23 @@ void MeshesManager::Finalize(FinalizationChunk finalizationChunk) {
     inputChunk.memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal;
     vertexBuffer = Memory::createBuffer(inputChunk);
 
-    Memory::copyBuffer(stagingBuffer, vertexBuffer, inputChunk.size, finalizationChunk.queue, finalizationChunk.commandBuffer);
+    Memory::copyBuffer(stagingBuffer, vertexBuffer.value(), inputChunk.size, finalizationChunk.queue, finalizationChunk.commandBuffer);
 
     logicalDevice.destroyBuffer(stagingBuffer.buffer);
     logicalDevice.freeMemory(stagingBuffer.bufferMemory);
 }
 
 MeshesManager::~MeshesManager() {
+}
+
+void MeshesManager::Destroy() {
+    if (!vertexBuffer.has_value()) {
+        return;
+    }
+
     LOG("Destroy mesh manager");
-    logicalDevice.destroyBuffer(vertexBuffer.buffer);
-    logicalDevice.freeMemory(vertexBuffer.bufferMemory);
+    logicalDevice.destroyBuffer(vertexBuffer.value().buffer);
+    logicalDevice.freeMemory(vertexBuffer.value().bufferMemory);
 }
 
 

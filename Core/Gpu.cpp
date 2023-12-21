@@ -642,7 +642,7 @@ void Gpu::make_frame_command_buffers() {
 }
 
 void Gpu::PrepareScene(vk::CommandBuffer command_buffer, MeshesManager &_mesh) {
-    vk::Buffer vertexBuffers[] = {_mesh.vertexBuffer.buffer};
+    vk::Buffer vertexBuffers[] = {_mesh.vertexBuffer.value().buffer};
     vk::DeviceSize offsets[] = { 0 };
     command_buffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);
 }

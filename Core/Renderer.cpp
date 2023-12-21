@@ -57,6 +57,8 @@ void Renderer::Render() {
 void Renderer::SetSceneReference(Scene *_scene) {
     m_scene = _scene;
 
+    m_scene->DestroyMeshesSystem();
+
     // Finalize meshes
     MeshesManager::FinalizationChunk finalizationInfo;
     finalizationInfo.logicalDevice = m_gpu->GetLogicalDevice();

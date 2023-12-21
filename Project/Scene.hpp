@@ -23,7 +23,9 @@ public:
     MeshesManager& GetMeshes() { return *m_meshes; }
     void SetMeshes(std::unique_ptr<MeshesManager> meshes) { m_meshes = std::move(meshes); }
 
-    void DestroyMeshesSystem() { m_meshes.reset(); }
+    void DestroyMeshesSystem() {
+        m_meshes->Destroy();
+    }
 
 protected:
     std::unique_ptr<MeshesManager> m_meshes;
