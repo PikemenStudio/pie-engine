@@ -17,9 +17,10 @@ public:
 
     struct BufferInputChunk {
         size_t size = 0;
-        vk::BufferUsageFlagBits usage {};
+        vk::BufferUsageFlags usage {};
         vk::Device logicalDevice;
         vk::PhysicalDevice physicalDevice;
+        vk::MemoryPropertyFlags memoryProperties;
     };
 
     static uint32_t findMemoryTypeIndex(
@@ -29,4 +30,6 @@ public:
     static void allocateBufferMemory(Buffer& buffer, const BufferInputChunk& input);
 
     static Buffer createBuffer(BufferInputChunk input);
+
+    static void copyBuffer(Buffer& srcBuffer, Buffer& dstBuffer, vk::DeviceSize size, vk::Queue queue, vk::CommandBuffer commandBuffer);
 };

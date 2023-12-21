@@ -47,6 +47,13 @@ public:
     vk::Format GetSwapChainFormat() const { return m_swap_chain.m_format; }
     vk::Extent2D GetSwapChainExtent() const { return m_swap_chain.m_extent; }
 
+    [[nodiscard]]
+    vk::Queue GetGraphicsQueue() const { return m_graphics_queue; }
+
+    [[maybe_unused]]
+    [[nodiscard]]
+    vk::Queue GetPresentQueue() const { return m_present_queue; }
+
     struct SwapChainFrame {
         vk::Image m_image { nullptr };
         vk::ImageView image_view { nullptr };

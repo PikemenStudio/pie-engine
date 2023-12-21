@@ -13,7 +13,14 @@ public:
     MeshesManager();
     ~MeshesManager();
     void Consume(std::string type, std::vector<float> vertexData);
-    void Finalize(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice);
+
+    struct FinalizationChunk {
+        vk::Device logicalDevice;
+        vk::PhysicalDevice physicalDevice;
+        vk::CommandBuffer commandBuffer;
+        vk::Queue queue;
+    };
+    void Finalize(FinalizationChunk finalizationChunk);
     Memory::Buffer vertexBuffer;
 
     struct DataUnit {

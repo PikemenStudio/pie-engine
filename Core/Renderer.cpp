@@ -58,7 +58,13 @@ void Renderer::SetSceneReference(Scene *_scene) {
     m_scene = _scene;
 
     // Finalize meshes
-    m_scene->GetMeshes().Finalize(m_gpu->GetLogicalDevice(), m_gpu->GetDevice());
+    MeshesManager::FinalizationChunk finalizationInfo;
+    finalizationInfo.logicalDevice = m_gpu->GetLogicalDevice();
+    finalizationInfo.physicalDevice = m_gpu->GetDevice();
+    finalizationInfo.commandBuffer = m_gpu->GetCommandBuffer();
+    finalizationInfo.queue = m_gpu->GetGraphicsQueue();
+
+    m_scene->GetMeshes().Finalize(finalizationInfo);
 }
 
 Renderer::~Renderer() {
