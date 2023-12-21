@@ -7,11 +7,13 @@
 
 void Engine::RunMainCycle() {
     m_window->Start();
-    Scene scene;
+    m_scene = std::make_unique<Scene>();
+
     MakeAssets();
+    m_renderer->SetSceneReference(m_scene.get());
     while (!m_window->IsShouldClose()) {
         m_window->PollEvents();
-        Render(scene);
+        Render();
         CalculateFrameRate();
     }
 }
@@ -35,38 +37,21 @@ Engine::Engine(const glm::uvec2 _window_size, std::string _window_title) {
     m_dldi = vk::DispatchLoaderDynamic(*m_instance->ToVkInstancePtr(), vkGetInstanceProcAddr);
     m_debug_messenger = make_debug_messenger(m_instance->ToVkInstancePtr(), m_dldi);
 
-    // Make physical device
-    m_gpu = std::make_unique<Gpu>(m_instance, *m_window);
-    auto devices = m_gpu->GetAllAvailable();
-    m_gpu->SetCurrent(devices[0]);
+    // Create renderer
+    Renderer::RendererCreateInfo inf {
+        *m_instance,
+        m_window
+    };
+    m_renderer = std::make_unique<Renderer>(inf);
 
-    // Make shader system
-    GraphicsPipeline::GraphicsPipelineInBundle specification(m_gpu->GetLogicalDevice());
-    Shader::compile_shader("/Users/full-hat/Documents/UnrealProjects/pie-engine/Shaders/Shaders/empty_f.frag", "./");
-    Shader::compile_shader("/Users/full-hat/Documents/UnrealProjects/pie-engine/Shaders/Shaders/empty_v.vert", "./");
-    specification.vertexFilepath = "./empty_v.spv";
-    specification.fragmentFilepath = "./empty_f.spv";
-    specification.swapchainExtent = m_gpu->GetSwapChainExtent();
-    specification.swapchainImageFormat = m_gpu->GetSwapChainFormat();
-
-    m_pipeline = std::make_unique<GraphicsPipeline>(specification);
-
-    Gpu::framebufferInput frameBufferInput;
-    frameBufferInput.device = m_gpu->GetLogicalDevice();
-    frameBufferInput.renderpass = m_pipeline->GetRenderPass();
-    frameBufferInput.swapchainExtent = m_gpu->GetSwapChainExtent();
-    m_gpu->make_framebuffers(frameBufferInput);
-
-    m_gpu->make_command_pool();
-    m_gpu->make_main_command_buffer();
-    m_gpu->make_frame_command_buffers();
+    // Init renderer fields
+    m_renderer->InitGpu();
+    m_renderer->InitPipeline();
+    m_renderer->InitBuffers();
 }
 
 Engine::~Engine() {
-    m_gpu->DestroyCommandPool();
-    m_pipeline.reset();
-    m_mesh.reset();
-    m_gpu.reset();
+    m_renderer.reset();
 
     m_instance->ToVkInstancePtr()->destroyDebugUtilsMessengerEXT(m_debug_messenger, nullptr, m_dldi);
     m_instance->ToVkInstancePtr()->destroy();
@@ -89,20 +74,18 @@ void Engine::CalculateFrameRate() {
     ++numFrames;
 }
 
-void Engine::Render(Scene _scene) {
-    m_gpu->Render(*m_pipeline, _scene, *m_mesh);
+void Engine::Render() {
+    m_renderer->Render();
 }
 
 void Engine::MakeAssets() {
-    m_mesh = std::make_unique<MeshesManager>();
-
     std::vector<float> vertices = { {
                                             0.0f, -0.05f, 0.0f, 1.0f, 0.0f,
                                             0.05f, 0.05f, 0.0f, 1.0f, 0.0f,
                                             -0.05f, 0.05f, 0.0f, 1.0f, 0.0f
                                     } };
-    Mesh::Types type = Mesh::Types::eTriangle;
-    m_mesh->Consume(type, vertices);
+    std::string type = "triangle";
+    m_scene->GetMeshes().Consume(type, vertices);
 
     vertices = { {
                          -0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
@@ -112,8 +95,6 @@ void Engine::MakeAssets() {
                          0.05f,  0.05f, 1.0f, 0.0f, 0.0f,
                          -0.05f,  0.05f, 1.0f, 0.0f, 0.0f
                  } };
-    type = Mesh::Types::eSquare;
-    m_mesh->Consume(type, vertices);
-
-    m_mesh->Finalize(m_gpu->GetLogicalDevice(), m_gpu->GetDevice());
+    type = "square";
+    m_scene->GetMeshes().Consume(type, vertices);
 }

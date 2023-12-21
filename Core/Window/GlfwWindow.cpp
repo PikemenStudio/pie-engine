@@ -1,5 +1,7 @@
 #include "GlfwWindow.hpp"
 
+#include "Utils/UtilsMacros.hpp"
+
 #include <utility>
 
 GlfwWindow::GlfwWindow() : m_size(0, 0) {
@@ -11,7 +13,10 @@ GlfwWindow::GlfwWindow(const glm::uvec2 &_size, std::string _title)
     BuildGlfwWindow();
 }
 
-GlfwWindow::~GlfwWindow() { glfwTerminate(); }
+GlfwWindow::~GlfwWindow() {
+    LOG("Destroy window");
+    glfwTerminate();
+}
 
 void GlfwWindow::BuildGlfwWindow() {
   glfwInit();

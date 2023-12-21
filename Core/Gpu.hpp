@@ -17,7 +17,7 @@
 
 class Gpu {
 public:
-    explicit Gpu(std::shared_ptr<peVk::Instance> _instance, GlfwWindow &_window);
+    explicit Gpu(std::shared_ptr<peVk::Instance> _instance, std::shared_ptr<GlfwWindow> _window);
     ~Gpu();
 
     std::vector<vk::PhysicalDevice> GetAllAvailable();
@@ -74,10 +74,11 @@ public:
     void make_main_command_buffer();
     void make_frame_command_buffers();
 
-    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh);
-    void Render(GraphicsPipeline &pipeline, Scene _render, MeshesManager &_mesh);
+    void RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene &_scene);
+    void Render(GraphicsPipeline &pipeline, Scene &_render);
 
     void DestroyCommandPool();
+    void DestroySwapchain();
 
 protected:
     void FindAndSetQueues();
@@ -92,7 +93,6 @@ protected:
 
     void InitSwapchain();
     void RecreateSwapchain();
-    void DestroySwapchain();
 
     void InitSurface();
 
@@ -137,7 +137,7 @@ protected:
 
     std::shared_ptr<peVk::Instance> m_instance;
 
-    GlfwWindow &m_window;
+    std::shared_ptr<GlfwWindow> m_window;
 
     vk::CommandPool m_command_pool;
     vk::CommandBuffer m_command_buffer;

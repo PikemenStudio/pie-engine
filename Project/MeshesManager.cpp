@@ -4,18 +4,23 @@
 
 #include "MeshesManager.hpp"
 
+#include "Utils/UtilsMacros.hpp"
+
 MeshesManager::MeshesManager() {
     offset = 0;
 }
 
-void MeshesManager::Consume(Mesh::Types type, std::vector<float> vertexData) {
+void MeshesManager::Consume(std::string type, std::vector<float> vertexData) {
     for (float attribute : vertexData) {
         lump.push_back(attribute);
     }
     int vertexCount = static_cast<int>(vertexData.size() / 5);
 
-    offsets.insert(std::make_pair(type, offset));
-    sizes.insert(std::make_pair(type, vertexCount));
+    DataUnit data_unit;
+    data_unit.size = vertexCount;
+    data_unit.offset = offset;
+
+    data.insert({ type, data_unit });
 
     offset += vertexCount;
 }
@@ -37,6 +42,7 @@ void MeshesManager::Finalize(vk::Device logicalDevice, vk::PhysicalDevice physic
 }
 
 MeshesManager::~MeshesManager() {
+    LOG("Destroy mesh manager");
     logicalDevice.destroyBuffer(vertexBuffer.buffer);
     logicalDevice.freeMemory(vertexBuffer.bufferMemory);
 }

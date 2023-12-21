@@ -9,6 +9,7 @@
 #include "Shaders/Pipeline.hpp"
 #include "Project/Scene.hpp"
 #include "Project/MeshesManager.hpp"
+#include "Core/Renderer.hpp"
 
 class Engine {
 public:
@@ -19,7 +20,7 @@ public:
 
     void RunMainCycle();
 
-    void Render(Scene _scene);
+    void Render();
 
     double lastTime, currentTime;
     int numFrames;
@@ -35,12 +36,9 @@ protected:
     vk::DebugUtilsMessengerEXT m_debug_messenger{ nullptr };
     vk::DispatchLoaderDynamic m_dldi;
 
-    // Current GPU
-    std::unique_ptr<Gpu> m_gpu;
+    std::unique_ptr<Renderer> m_renderer;
 
-    std::unique_ptr<GlfwWindow> m_window;
+    std::shared_ptr<GlfwWindow> m_window;
 
-    std::unique_ptr<GraphicsPipeline> m_pipeline;
-
-    std::unique_ptr<MeshesManager> m_mesh;
+    std::unique_ptr<Scene> m_scene;
 };

@@ -12,11 +12,15 @@ class MeshesManager {
 public:
     MeshesManager();
     ~MeshesManager();
-    void Consume(Mesh::Types type, std::vector<float> vertexData);
+    void Consume(std::string type, std::vector<float> vertexData);
     void Finalize(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice);
     Memory::Buffer vertexBuffer;
-    std::unordered_map<Mesh::Types, int> offsets;
-    std::unordered_map<Mesh::Types, int> sizes;
+
+    struct DataUnit {
+        int offset;
+        int size;
+    };
+    std::unordered_map<std::string, DataUnit> data;
 private:
     int offset;
     vk::Device logicalDevice;

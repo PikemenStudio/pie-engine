@@ -55,7 +55,9 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 		Core/Memory.cpp
 		Core/Memory.hpp
 		Project/MeshesManager.cpp
-		Project/MeshesManager.hpp)
+		Project/MeshesManager.hpp
+		Core/Renderer.cpp
+		Core/Renderer.hpp)
 
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)

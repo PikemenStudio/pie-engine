@@ -147,7 +147,7 @@ bool Gpu::NoExceptCheckExtensions(const vk::PhysicalDevice &_device) {
     return true;
 }
 
-Gpu::Gpu(std::shared_ptr<peVk::Instance> _instance, GlfwWindow &_window) : m_instance(_instance),
+Gpu::Gpu(std::shared_ptr<peVk::Instance> _instance, std::shared_ptr<GlfwWindow> _window) : m_instance(_instance),
                                                                            m_window(_window) {
     InitSurface();
 }
@@ -174,7 +174,8 @@ void Gpu::FindAndSetQueues() {
 }
 
 Gpu::~Gpu() {
-    DestroySwapchain();
+    LOG("Destroy gpu");
+
     m_logical_device.destroy();
 
     m_instance->ToVkInstancePtr()->destroySurfaceKHR(m_surface);
@@ -279,8 +280,8 @@ vk::Extent2D Gpu::ChooseExtent() {
         return  m_swap_chain_support_details.capabilities.currentExtent;
     }
     vk::Extent2D extent = {
-            (uint32_t)m_window.GetSize().x,
-            (uint32_t)m_window.GetSize().y
+            (uint32_t)m_window->GetSize().x,
+            (uint32_t)m_window->GetSize().y
     };
 
     extent.width = std::min(
@@ -378,7 +379,7 @@ void Gpu::InitSwapchain() {
 
 void Gpu::InitSurface() {
     VkSurfaceKHR c_style_surface;
-    if (glfwCreateWindowSurface(*m_instance->ToVkInstancePtr(), &m_window.ToWindow(), nullptr, &c_style_surface) != VK_SUCCESS) {
+    if (glfwCreateWindowSurface(*m_instance->ToVkInstancePtr(), &m_window->ToWindow(), nullptr, &c_style_surface) != VK_SUCCESS) {
         throw std::runtime_error("Can't create surface");
     }
     m_surface = c_style_surface;
@@ -460,7 +461,7 @@ void Gpu::make_syncs_objs() {
     }
 }
 
-void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh) {
+void Gpu::Render(GraphicsPipeline &pipeline, Scene &_scene) {
     assert(m_logical_device.waitForFences(1, &m_swap_chain.m_frames[FrameNumber].inFlightFence, VK_TRUE, UINT64_MAX) == vk::Result::eSuccess);
 
     //acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
@@ -482,7 +483,7 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh)
 
     commandBuffer.reset();
 
-    RecordDrawCommand(commandBuffer, imageIndex, pipeline, _scene, _mesh);
+    RecordDrawCommand(commandBuffer, imageIndex, pipeline, _scene);
 
     vk::SubmitInfo submitInfo = {};
 
@@ -537,7 +538,7 @@ void Gpu::Render(GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh)
 
 #include <thread>
 
-void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene _scene, MeshesManager &_mesh) {
+void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_index, GraphicsPipeline &pipeline, Scene &_scene) {
     vk::CommandBufferBeginInfo beginInfo = {};
 
     try {
@@ -562,13 +563,11 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
 
     command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.GetPipeline());
 
-    PrepareScene(command_buffer, _mesh);
+    PrepareScene(command_buffer, _scene.GetMeshes());
 
-    for (auto size : _mesh.sizes) {
-        auto type = size.first;
+    for (auto mesh_data : _scene.GetMeshes().data) {
+        auto mesh_name = mesh_data.first;
 
-        int vertexCount = _mesh.sizes.find(type)->second;
-        int firstVertex = _mesh.offsets.find(type)->second;
         for (glm::vec3 position : _scene.trianglePositions) {
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
@@ -576,7 +575,7 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
             objectData.model = model;
             command_buffer.pushConstants(pipeline.GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, sizeof(objectData), &objectData
             );
-            command_buffer.draw(vertexCount, 1, firstVertex, 0);
+            command_buffer.draw(mesh_data.second.size, 1, mesh_data.second.offset, 0);
         }
     }
 
@@ -591,14 +590,15 @@ void Gpu::RecordDrawCommand(vk::CommandBuffer command_buffer, uint32_t image_ind
 }
 
 void Gpu::DestroyCommandPool() {
+    LOG("Destroy command pool");
     m_logical_device.waitIdle();
     m_logical_device.destroyCommandPool(m_command_pool);
 }
 
 void Gpu::RecreateSwapchain() {
-    auto size = m_window.UpdateSize();
+    auto size = m_window->UpdateSize();
     while (size.x == 0 || size.y == 0) {
-        size = m_window.UpdateSize();
+        size = m_window->UpdateSize();
     }
 
     m_logical_device.waitIdle();

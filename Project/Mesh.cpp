@@ -32,30 +32,3 @@ std::array<vk::VertexInputAttributeDescription, 2> Mesh::GetPosColorAttributeDes
 
     return attributes;
 }
-
-Triangle::Triangle(vk::Device logicalDevice, vk::PhysicalDevice physicalDevice) {
-    this->logicalDevice = logicalDevice;
-
-    std::vector<float> vertices = { {
-            0.0f, -0.05f, 0.0f, 1.0f, 0.0f,
-            0.05f, 0.05f, 0.0f, 1.0f, 0.0f,
-            -0.05f, 0.05f, 0.0f, 1.0f, 0.0f
-    } };
-
-    Memory::BufferInputChunk inputChunk;
-    inputChunk.logicalDevice = logicalDevice;
-    inputChunk.physicalDevice = physicalDevice;
-    inputChunk.size = sizeof(float) * vertices.size();
-    inputChunk.usage = vk::BufferUsageFlagBits::eVertexBuffer;
-
-    vertexBuffer = Memory::createBuffer(inputChunk);
-
-    void* memoryLocation = logicalDevice.mapMemory(vertexBuffer.bufferMemory, 0, inputChunk.size);
-    memcpy(memoryLocation, vertices.data(), inputChunk.size);
-    logicalDevice.unmapMemory(vertexBuffer.bufferMemory);
-}
-
-Triangle::~Triangle() {
-    logicalDevice.destroyBuffer(vertexBuffer.buffer);
-    logicalDevice.freeMemory(vertexBuffer.bufferMemory);
-}

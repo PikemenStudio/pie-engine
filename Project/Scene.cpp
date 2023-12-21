@@ -5,6 +5,10 @@
 #include "Scene.hpp"
 
 Scene::Scene() {
+    // Init meshes
+    m_meshes = std::make_unique<MeshesManager>();
+
+    // Init scene
     float x = -0.6f;
     for (float y = -1.0f; y < 1.0f; y += 0.2f) {
 

@@ -209,6 +209,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipeline::GraphicsPipelineInBundle &s
 }
 
 GraphicsPipeline::~GraphicsPipeline() {
+    LOG("Destroy pipeline");
     m_device.destroyPipeline(m_bundle.pipeline);
     m_device.destroyPipelineLayout(m_bundle.layout);
     m_device.destroyRenderPass(m_bundle.renderpass);
