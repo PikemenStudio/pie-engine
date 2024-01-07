@@ -62,6 +62,9 @@ add_executable(main "main.cpp" ${CORE_ALL} ${UTILS_ALL}
 add_executable(test_exe "Test/Test.cpp" ${CORE_ALL} ${UTILS_ALL})
 add_test(test test_exe)
 
+# define path constants
+target_compile_definitions(main PRIVATE VULKAN_SDK_PATH="$ENV{VULKAN_SDK}" PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
 # test section with other executables
 enable_testing()
 
@@ -75,7 +78,7 @@ if (win32)
 endif (win32)
 
 if (APPLE)
-	target_link_libraries(main PRIVATE /Users/full-hat/VulkanSDK/1.3.268.1/macOS/lib/libvulkan.dylib)
+	target_link_libraries(main PRIVATE $ENV{VULKAN_SDK}/lib/libvulkan.dylib)
 endif (APPLE)
 
 # glfw

@@ -30,10 +30,7 @@ Shader::Shader(const std::string &_file_name, const vk::Device &device) {
 }
 
 void Shader::compile_shader(const std::string _filepath, const std::string& _outputFolder) {
-    const char* vulkanSdkPath = std::getenv("VULKAN_SDK");
-    if (!vulkanSdkPath) {
-        throw std::runtime_error("VULKAN_SDK environment variable not set");
-    }
+    constexpr std::string_view vulkanSdkPath = VULKAN_SDK_PATH;
 
     // Construct the full path to the output file
     std::filesystem::path outputPath = std::filesystem::path(_outputFolder) / std::filesystem::path(_filepath).filename();
