@@ -7,9 +7,10 @@
 3. Setup vcpkg ```./vcpkg/bootstrap-vcpkg.sh```
 ## Build Instructions
 ### Apple
-Change SDK path for your system
-
-`target_link_directories(main PRIVATE /Users/full-hat/VulkanSDK/1.3.268.1/macOS/lib)`
+Set VULKAN_SDK env for your system:
+```sh
+export VULKAN_SDK=~/VulkanSDK/1.3.268.1/macOS/
+```
 ### Windows
-
+Not tested yet
 ## Usage
