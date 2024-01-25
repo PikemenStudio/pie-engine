@@ -19,10 +19,16 @@ void Renderer::InitPipeline() {
     // Must be inited
     assert(m_gpu != nullptr);
 
+#ifdef _WIN32
+    const std::string shaderDir = std::string(PROJECT_SOURCE_DIR) + "\\Shaders\\Shaders\\";
+#else
+    const std::string shaderDir = std::string(PROJECT_SOURCE_DIR) + "/Shaders/Shaders/";
+#endif
+    
     // Make shader system
     GraphicsPipeline::GraphicsPipelineInBundle specification(m_gpu->GetLogicalDevice());
-    Shader::compile_shader("/Users/full-hat/Documents/UnrealProjects/pie-engine/Shaders/Shaders/empty_f.frag", "./");
-    Shader::compile_shader("/Users/full-hat/Documents/UnrealProjects/pie-engine/Shaders/Shaders/empty_v.vert", "./");
+    Shader::compile_shader(shaderDir + "empty_f.frag", "./");
+    Shader::compile_shader(shaderDir + "empty_v.vert", "./");
     specification.vertexFilepath = "./empty_v.spv";
     specification.fragmentFilepath = "./empty_f.spv";
     specification.swapchainExtent = m_gpu->GetSwapChainExtent();
