@@ -15,22 +15,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Download Clang and LLVM Source Code
-        run: wget https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.2/clang+llvm-18.1.2.src.tar.xz
-
-      - name: Extract Clang and LLVM Source Code
-        run: tar -xf clang+llvm-18.1.2.src.tar.xz
-
-      - name: Build Clang Format
-        run: |
-          cd clang+llvm-18.1.2.src
-          mkdir build
-          cd build
-          cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build .
-
-      - name: Install Clang Format Binary
-        run: sudo cp bin/clang-format /usr/local/bin/
+      run: |
+        sudo apt update
+        sudo apt install -y clang-format 
 
       - name: Verify Clang Format Installation
         run: clang-format --version
