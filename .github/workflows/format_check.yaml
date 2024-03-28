@@ -1,0 +1,28 @@
+name: Clang Format Check
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch name as needed
+  pull_request:
+    branches:
+      - main  # Adjust branch name as needed
+
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest  # Choose an appropriate runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Clang Format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check code formatting with Clang Format
+        id: clang-format-check
+        run: |
+          find src -iname *.h -o -iname *.cpp | xargs clang-format -style=file -output-replacements-xml
+        continue-on-error: true
+
+      - name: Check formatting status
+        run: exit ${{ steps.clang-format-check.outcome }}
