@@ -15,9 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      run: |
-        sudo apt update
-        sudo apt install -y clang-format 
+      - name: Download clangFormat
+        run: |
+          sudo apt update
+          sudo apt install -y clang-format 
 
       - name: Verify Clang Format Installation
         run: clang-format --version
