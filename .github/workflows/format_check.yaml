@@ -1,0 +1,35 @@
+name: Clang Format Check
+
+on:
+  push:
+    branches:
+      - main  # Adjust branch name as needed
+  pull_request:
+    branches:
+      - main  # Adjust branch name as needed
+
+jobs:
+  clang-format-check:
+    runs-on: ubuntu-latest  # Choose an appropriate runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download clangFormat
+        run: |
+          sudo apt update
+          sudo apt install -y clang-format 
+
+      - name: Verify Clang Format Installation
+        run: clang-format --version
+
+
+      - name: Check code formatting with Clang Format
+        id: clang-format-check
+        run: |
+          if clang-format --style file --dry-run --Werror src/*.cpp src/*.h; then
+            echo "Code formatting check passed."
+          else
+            echo "Code formatting check failed."
+            exit 1
+          fi
