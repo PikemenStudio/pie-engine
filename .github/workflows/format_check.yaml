@@ -15,18 +15,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      name: Install Clang Format
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  install-clang-format:
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Download Clang and LLVM Source Code
         run: wget https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.2/clang+llvm-18.1.2.src.tar.xz
 
