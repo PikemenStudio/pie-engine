@@ -15,8 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Clang Format
-        run: sudo apt-get install -y clang-format && clang-format --version
+      - name: Download Clang Format
+        run: wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+
+      - name: Extract Clang Format
+        run: tar -xvf clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+
+      - name: Move Clang Format Binary
+        run: sudo mv clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-20.04/bin/clang-format /usr/local/bin/
+
+      - name: Verify Clang Format Installation
+        run: clang-format --version
 
       - name: Check code formatting with Clang Format
         id: clang-format-check
