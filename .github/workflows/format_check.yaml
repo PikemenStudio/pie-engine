@@ -27,8 +27,10 @@ jobs:
       - name: Check code formatting with Clang Format
         id: clang-format-check
         run: |
-          if clang-format --style file --dry-run --Werror src/*.cpp src/*.h; then
-            echo "Code formatting check passed."
+          if ! output=$(clang-format --style=file --dry-run --Werror src/*.cpp src/*.h 2>&1); then
+            echo "::error::Code formatting check failed."
+            echo "$output"
+            exit 1
           else
             echo "Code formatting check failed."
             exit 1
