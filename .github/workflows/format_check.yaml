@@ -21,7 +21,7 @@ jobs:
       - name: Check code formatting with Clang Format
         id: clang-format-check
         run: |
-          if clang-format -style=file -output-replacements-xml src/*.cpp src/*.h; then
+          if clang-format -style=.clang-format -output-replacements-xml src/*.cpp src/*.h; then
             echo "Code formatting check passed."
           else
             echo "Code formatting check failed."
