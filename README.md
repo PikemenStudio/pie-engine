@@ -13,7 +13,7 @@
    ```
 4. Setup vcpkg
    ```
-   ./vcpkg/bootstrap-vcpkg.sh
+   ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
    ```
 ## Build Instructions
 ### Apple
