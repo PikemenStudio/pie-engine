@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(Engine VERSION 0.0.1 LANGUAGES C CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 find_package(GTest REQUIRED)
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
