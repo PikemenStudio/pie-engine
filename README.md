@@ -23,7 +23,7 @@ export VULKAN_SDK=~/VulkanSDK/1.3.268.1/macOS/
 ```
 Build project
 ```
-mkdir build && cd build && cmake ../ && make
+mkdir build || cd build && cmake ../ && make
 ```
 ### Windows
 Not tested yet
