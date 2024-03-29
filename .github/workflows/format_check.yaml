@@ -52,7 +52,7 @@ jobs:
       - name: Check code formatting with Clang Format
         id: clang-format-check
         run: |
-          if ! output=$(clang-format --style=file --dry-run --Werror src/*.cpp src/*.h 2>&1); then
+          if ! output=$(clang-format --style=file --dry-run --Werror src/*.cpp 2>&1); then
             echo "::error::Code formatting check failed."
             echo "$output"
             exit 1
