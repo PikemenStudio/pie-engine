@@ -22,6 +22,9 @@ jobs:
           sudo apt update
           sudo apt install vulkan-sdk
 
+      - name: Download dependencies
+        run: sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
       - name: build
         run: |
           git submodule update --init --recursive
