@@ -26,7 +26,10 @@ jobs:
         run: |
           git submodule update --init --recursive
           ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
-          mkdir build || cd build && cmake ../ && make
+          mkdir build
+          cd build
+          cmake ..
+          make
           
   clang-format-check:
     runs-on: ubuntu-latest  # Choose an appropriate runner
