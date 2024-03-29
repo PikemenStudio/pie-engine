@@ -37,6 +37,13 @@ if (APPLE)
     target_link_libraries(main PRIVATE $ENV{VULKAN_SDK}/lib/libvulkan.dylib)
 endif (APPLE)
 
+if (UNIX AND NOT APPLE)
+    message(STATUS "Vulkan_INCLUDE_DIRS: ${Vulkan_INCLUDE_DIRS}")
+    message(STATUS "Vulkan_LIBRARIES: ${Vulkan_LIBRARIES}")
+    find_package(Vulkan REQUIRED)
+    target_link_libraries(YourExecutable PRIVATE Vulkan::Vulkan)
+endif (UNIX AND NOT APPLE)
+
 # glfw
 #target_link_libraries(test_exe PUBLIC glfw)
 target_link_libraries(main PUBLIC glfw)
