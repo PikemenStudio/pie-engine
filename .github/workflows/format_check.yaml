@@ -57,6 +57,6 @@ jobs:
             echo "$output"
             exit 1
           else
-            echo "Code formatting check failed."
-            exit 1
+            echo "Code formatting check complete."
+            exit 0
           fi
