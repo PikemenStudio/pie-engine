@@ -2,7 +2,7 @@
 ## Description
 
 ## Prerequisites
-1. Download SDK for your system from https://vulkan.lunarg.com/sdk/home
+1. Download SDK for your system from https://vulkan.lunarg.com/sdk/home or use default package manager on Linux Systems
 2. Clone repo by
    ```
    git clone git@github.com:PikemenStudio/pie-engine.git && cd pie-engine
