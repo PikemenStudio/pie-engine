@@ -39,7 +39,7 @@ and run
 ```
 mkdir build || cd build && cmake ../ && make
 ```
-Instructions how to add package you can find on Vulkan SDK page
+Instructions how to add other package version you can find on Vulkan SDK page
 
 Otherwize create an issue
 ## Contributing
