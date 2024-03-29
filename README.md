@@ -27,4 +27,12 @@ mkdir build || cd build && cmake ../ && make
 ```
 ### Windows
 Not tested yet
+## Contributing
+1. Create new branch from main with name "[breaf] description" (like "[sound] sound module")
+2. Work in it :)
+3. Create pull request to merge updates to main with COMMIT SQUASH
+4. Check for all actions (format, tidy, tests)
+5. Wait for merging
+6. Sleep well
+
 ## Usage
