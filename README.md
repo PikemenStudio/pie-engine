@@ -28,7 +28,14 @@ mkdir build || cd build && cmake ../ && make
 ### Windows
 Not tested yet
 ### Linux
-Use default package manager to download SDK and run
+Use default package manager to download SDK
+```
+wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.280-jammy.list https://packages.lunarg.com/vulkan/1.3.280/lunarg-vulkan-1.3.280-jammy.list
+sudo apt update
+sudo apt install vulkan-sdk
+```
+and run
 ```
 mkdir build || cd build && cmake ../ && make
 ```
