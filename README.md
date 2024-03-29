@@ -27,6 +27,14 @@ mkdir build || cd build && cmake ../ && make
 ```
 ### Windows
 Not tested yet
+### Linux
+Use default package manager to download SDK and run
+```
+mkdir build || cd build && cmake ../ && make
+```
+Instructions how to add package you can find on Vulkan SDK page
+
+Otherwize create an issue
 ## Contributing
 1. Create new branch from main with name "[breaf] description" (like "[sound] sound module")
 2. Work in it :)
