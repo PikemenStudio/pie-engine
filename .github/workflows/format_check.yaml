@@ -37,7 +37,7 @@ jobs:
       - uses: actions/upload-artifact@master
         with:
           name: build-cache
-          path: build
+          path: build/*
 
   clang-tidy-check:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/download-artifact@master
         with:
           name: build-cache
-          path: build
+          path: build/*
       - name: download clang-tidy
         run: sudo apt install clang-tidy
       - name: checker
