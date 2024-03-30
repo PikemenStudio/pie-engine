@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: download clang-tidy
         run: sudo apt install clang-tidy
+      - name: checker
+        run: ls -a && ls build -a
       - name: run clang-tidy
         run: clang-tidy -p build --format-style file src/*.cpp src/*.h
         
