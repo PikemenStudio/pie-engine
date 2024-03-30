@@ -34,10 +34,19 @@ jobs:
           cmake ..
           make
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: build-cache
+          path: build
+
   clang-tidy-check:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: build-cache
+          path: build
       - name: download clang-tidy
         run: sudo apt install clang-tidy
       - name: checker
