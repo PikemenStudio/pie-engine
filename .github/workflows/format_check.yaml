@@ -33,6 +33,15 @@ jobs:
           cd build
           cmake ..
           make
+
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download clang-tidy
+        run: sudo apt install clang-tidy
+      - name: run clang-tidy
+        run: clang-tidy -p build --format-style file src/*.cpp src/*.h
+        
           
   clang-format-check:
     runs-on: ubuntu-latest  # Choose an appropriate runner
