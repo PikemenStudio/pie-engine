@@ -18,6 +18,8 @@ add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${CO
 target_link_libraries(main PRIVATE windows)
 include_directories(src/modules/windows/adapters)
 
+find_package(loguru CONFIG REQUIRED)
+target_link_libraries(main PRIVATE loguru)
 
 #add_subdirectory(tests)
 

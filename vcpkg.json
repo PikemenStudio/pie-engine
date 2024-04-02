@@ -7,6 +7,7 @@
       "vulkan-headers",
       "glfw3",
       "glm",
-      "boost-process"
+      "boost-process",
+      "loguru"
     ]
 }   

@@ -13,3 +13,9 @@ add_library(windows ${SOURCE_ALL} ${HEADER_ALL})
 # link libraries
 # glm
 target_link_libraries(windows PUBLIC glm::glm)
+
+find_package(loguru CONFIG REQUIRED)
+target_link_libraries(windows PRIVATE loguru)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(windows PRIVATE glfw)

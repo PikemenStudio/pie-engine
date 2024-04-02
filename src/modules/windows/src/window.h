@@ -2,10 +2,11 @@
 // Created by FullHat on 30/03/2024.
 //
 
-#ifndef ENGINE_WINDOW_H
-#define ENGINE_WINDOW_H
+#ifndef ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
+#define ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
 
 #include "glm/glm.hpp"
+#include "GLFW/glfw3.h"
 #include <string>
 
 namespace windows {
@@ -29,13 +30,19 @@ public:
     bool IsResizable { true };
   };
 
-  void test() {}
+  operator std::shared_ptr<GLFWwindow>() const;
+
+protected:
+  // Build glfw object
+  void buildWindow();
 
   // Members
 protected:
   WindowProps Props;
+
+  std::shared_ptr<GLFWwindow> GlfwWindow;
 };
 
 } // namespace windows
 
-#endif // ENGINE_WINDOW_H
+#endif // ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H

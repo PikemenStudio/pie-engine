@@ -14,17 +14,8 @@ concept WindowAdapterMethods = requires(T t) {
   { t.test() } -> std::same_as<void>;
 };
 
-class GlfwWindow {
-public:
-  struct InitParams {
-    bool A;
-  };
-
-  void test() {}
-};
-
-template <WindowAdapterMethods T = GlfwWindow,
-          typename InitParams = GlfwWindow::InitParams>
+template <WindowAdapterMethods T = windows::Window,
+          typename InitParams = windows::Window::WindowProps>
 class WindowAdapter : public Adapter<T, InitParams> {
 public:
   WindowAdapter(InitParams Params){Adapter<T, InitParams>::Obj = std::make_unique<T>(Params);}
