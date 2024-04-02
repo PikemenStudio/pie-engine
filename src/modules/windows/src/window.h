@@ -7,6 +7,7 @@
 
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
+#include <memory>
 #include <string>
 
 namespace windows {
@@ -29,6 +30,8 @@ public:
     // Used only if Mode == WINDOWED
     bool IsResizable{true};
   };
+
+  void test() {}
 
   operator std::shared_ptr<GLFWwindow>() const;
 

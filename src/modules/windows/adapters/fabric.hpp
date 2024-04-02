@@ -9,17 +9,18 @@
 #include "../src/window.h"
 #include <memory>
 
-template <typename T>
-concept WindowAdapterMethods = requires(T t) {
-  { t.test() } -> std::same_as<void>;
+class WindowAdapter : public Adapter<windows::Window, windows::Window::WindowProps> {
+  using InitParams = windows::Window::WindowProps;
+  using Target = windows::Window;
+public:
+  WindowAdapter(InitParams Params){Obj = std::make_unique<Target>(Params);}
+
+  void test() { Obj->test(); }
 };
 
-template <WindowAdapterMethods T = windows::Window,
-          typename InitParams = windows::Window::WindowProps>
-class WindowAdapter : public Adapter<T, InitParams> {
-public:
-  WindowAdapter(InitParams Params){Adapter<T, InitParams>::Obj = std::make_unique<T>(Params);}
-  IMPL_FUNC(void, test)
+class A {
+
+std::unique_ptr<WindowAdapter> AA;
 };
 
 #endif // ENGINE_SRC_MODULES_WINDOWS_ADAPTERS_FABRIC_HPP

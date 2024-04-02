@@ -8,6 +8,7 @@
 #include <string>
 #include <vulkan/vulkan.hpp>
 
+
 namespace vk_core {
 
 class VkInstance {
