@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # add window module
 add_subdirectory(src/modules/windows/src)
+add_subdirectory(src/modules/vk_core/src)
 set(CONNECTORS ${CONNECTORS} src/modules/windows/adapters/fabric.hpp)
 
 add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${CONNECTORS})
