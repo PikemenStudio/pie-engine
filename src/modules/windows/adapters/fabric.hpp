@@ -18,9 +18,4 @@ public:
   void test() { Obj->test(); }
 };
 
-class A {
-
-std::unique_ptr<WindowAdapter> AA;
-};
-
 #endif // ENGINE_SRC_MODULES_WINDOWS_ADAPTERS_FABRIC_HPP
