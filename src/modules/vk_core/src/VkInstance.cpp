@@ -17,16 +17,16 @@ VkInstance::VkInstance(VkInstance::VkInstanceProps Props) {
       .apiVersion = Version
   };
 
-  std::vector<const char*> extensions(Props., GlfwExtensions + GlfwExtensionCount);
-  if (m_version >= VK_MAKE_API_VERSION(0, 1, 3, 216)) {
-    extensions.push_back("VK_KHR_portability_enumeration");
-  }
-  extensions.push_back("VK_EXT_debug_utils");
-
-  LOG("Extensions to be requested:");
-
-  for (const char* extensionName : extensions) {
-    LOG("\t\"", extensionName, "\"");
-  }
+//  std::vector<const char*> extensions(Props., GlfwExtensions + GlfwExtensionCount);
+//  if (m_version >= VK_MAKE_API_VERSION(0, 1, 3, 216)) {
+//    extensions.push_back("VK_KHR_portability_enumeration");
+//  }
+//  extensions.push_back("VK_EXT_debug_utils");
+//
+//  LOG("Extensions to be requested:");
+//
+//  for (const char* extensionName : extensions) {
+//    LOG("\t\"", extensionName, "\"");
+//  }
 }
 } // namespace vk_core

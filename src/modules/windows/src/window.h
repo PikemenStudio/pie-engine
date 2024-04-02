@@ -5,8 +5,8 @@
 #ifndef ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
 #define ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
 
-#include "glm/glm.hpp"
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
 #include <string>
 
 namespace windows {
@@ -21,13 +21,13 @@ public:
 public:
   // Member structs
   struct WindowProps {
-    glm::vec2 Size {200, 200};
+    glm::vec2 Size{200, 200};
     std::string Title;
 
     enum WindowMode { WINDOWED, BORDERLESS, FULLSCREEN } Mode = WINDOWED;
 
     // Used only if Mode == WINDOWED
-    bool IsResizable { true };
+    bool IsResizable{true};
   };
 
   operator std::shared_ptr<GLFWwindow>() const;

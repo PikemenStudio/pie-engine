@@ -18,13 +18,11 @@ public:
 
   struct VkInstanceProps {
     struct Version {
-        uint32_t Major;
-        uint32_t Minor;
-        uint32_t Patch;
+      uint32_t Major;
+      uint32_t Minor;
+      uint32_t Patch;
 
-        uint32_t toVkVersion() {
-          return VK_MAKE_VERSION(Major, Minor, Patch);
-        }
+      uint32_t toVkVersion() { return VK_MAKE_VERSION(Major, Minor, Patch); }
     };
 
     std::string AppName;
@@ -33,7 +31,7 @@ public:
     Version EngineVersion;
 
     // Window dependency
-    std::vector<char*> RequestedWindowExtensions;
+    std::vector<char *> RequestedWindowExtensions;
   };
 
 protected:
