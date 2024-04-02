@@ -3,12 +3,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 # source files
-set(SOURCE_ALL src/window.cpp)
-set(HEADER_ALL src/window.h connectors/fabric.hpp)
+set(SOURCE_ALL window.cpp)
+set(HEADER_ALL window.h)
 
 find_package(glm CONFIG REQUIRED)
-
-include_directories(../connectors)
 
 add_library(windows ${SOURCE_ALL} ${HEADER_ALL})
 

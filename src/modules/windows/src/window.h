@@ -29,6 +29,8 @@ public:
     bool IsResizable { true };
   };
 
+  void test() {}
+
   // Members
 protected:
   WindowProps Props;

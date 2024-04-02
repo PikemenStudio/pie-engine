@@ -8,17 +8,15 @@ project(Engine VERSION 0.0.1 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_subdirectory(src/modules/vk_core)
-add_subdirectory(src/modules/windows)
+# add window module
+add_subdirectory(src/modules/windows/src)
+set(CONNECTORS ${CONNECTORS} src/modules/windows/adapters/fabric.hpp)
 
-add_executable(main src/main.cpp)
+add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${CONNECTORS})
 
 # link module
-target_link_libraries(main PRIVATE vk_core)
-include_directories(src/modules/vk_core/src)
-
 target_link_libraries(main PRIVATE windows)
-include_directories(src/modules/windows/src)
+include_directories(src/modules/windows/adapters)
 
 
 #add_subdirectory(tests)
