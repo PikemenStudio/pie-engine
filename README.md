@@ -45,7 +45,7 @@ Otherwize create an issue
 ## Contributing
 1. Create new branch from main with any name
 2. Work in it :)
-3. Create pull request to merge updates to main with SQUASH COMMITS option and the name of the commit according rule: "[breaf] description" (like "[sound] fix sound; implement spaceship")
+3. Create pull request to merge updates to main with SQUASH COMMITS option and the name of the commit according rule: "[brief] description" (like "[sound] fix sound; implement spaceship")
 4. Check for all actions (format, tidy, tests)
 5. Wait for merging
 6. Sleep well
