@@ -2,8 +2,8 @@
 // Created by FullHat on 30/03/2024.
 //
 
-#ifndef ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
-#define ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
+#ifndef ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_HPP
+#define ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_HPP
 
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
@@ -35,6 +35,8 @@ public:
 
   operator std::shared_ptr<GLFWwindow>() const;
 
+  std::vector<const char *> getRequiredExtensions() const;
+
 protected:
   // Build glfw object
   void buildWindow();
@@ -48,4 +50,4 @@ protected:
 
 } // namespace windows
 
-#endif // ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_H
+#endif // ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_HPP

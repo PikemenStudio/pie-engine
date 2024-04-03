@@ -20,6 +20,9 @@ add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${CO
 target_link_libraries(main PRIVATE windows)
 include_directories(src/modules/windows/adapters)
 
+target_link_libraries(main PRIVATE vk_core)
+include_directories(src/modules/vk_core/adapters)
+
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)
 

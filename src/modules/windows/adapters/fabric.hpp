@@ -6,7 +6,7 @@
 #define ENGINE_SRC_MODULES_WINDOWS_ADAPTERS_FABRIC_HPP
 
 #include "../../../adapters_interfaces/fabric_adapter.hpp"
-#include "../src/window.h"
+#include "../src/window.hpp"
 #include <memory>
 
 class WindowAdapter : public Adapter<windows::Window, windows::Window::WindowProps> {
@@ -15,7 +15,7 @@ class WindowAdapter : public Adapter<windows::Window, windows::Window::WindowPro
 public:
   WindowAdapter(InitParams Params){Obj = std::make_unique<Target>(Params);}
 
-  void test() { Obj->test(); }
+  std::vector<const char *> getRequiredExtensions() const { return Obj->getRequiredExtensions(); }
 };
 
 #endif // ENGINE_SRC_MODULES_WINDOWS_ADAPTERS_FABRIC_HPP

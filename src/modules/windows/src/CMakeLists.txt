@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # source files
 set(SOURCE_ALL window.cpp)
-set(HEADER_ALL window.h)
+set(HEADER_ALL window.hpp)
 
 find_package(glm CONFIG REQUIRED)
 

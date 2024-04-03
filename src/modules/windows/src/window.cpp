@@ -2,7 +2,7 @@
 // Created by FullHat on 30/03/2024.
 //
 
-#include "window.h"
+#include "window.hpp"
 
 namespace windows {
 Window::Window(Window::WindowProps Props) {}
@@ -23,5 +23,10 @@ void Window::buildWindow() {
         glfwDestroyWindow(WindowObj);
         glfwTerminate();
       });
+}
+std::vector<const char *> Window::getRequiredExtensions() const {
+  uint32_t Size;
+  const auto *Extensions = glfwGetRequiredInstanceExtensions(&Size);
+  return {Extensions, Extensions + Size};
 }
 } // namespace windows
