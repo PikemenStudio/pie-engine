@@ -121,22 +121,28 @@ VkBool32 VkInstance::DebugMessenger::debugCallback(
     VkDebugUtilsMessageTypeFlagsEXT MessageType,
     const VkDebugUtilsMessengerCallbackDataEXT *PCallbackData,
     void *PUserData) {
-    LOG_F(WARNING, "Validation layer: %s", PCallbackData->pMessage);
-    return VK_FALSE;
+  LOG_F(WARNING, "Validation layer: %s", PCallbackData->pMessage);
+  return VK_FALSE;
 }
 VkInstance::DebugMessenger::DebugMessenger(vk::Instance &Instance)
     : Instance(Instance) {
   Loader = vk::DispatchLoaderDynamic(Instance, vkGetInstanceProcAddr);
 
-  vk::DebugUtilsMessengerCreateInfoEXT CreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
-      .flags = vk::DebugUtilsMessengerCreateFlagsEXT(),
-      .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-      .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-      .pfnUserCallback = DebugMessenger::debugCallback,
-      .pUserData = nullptr
-  };
+  vk::DebugUtilsMessengerCreateInfoEXT CreateInfo =
+      vk::DebugUtilsMessengerCreateInfoEXT{
+          .flags = vk::DebugUtilsMessengerCreateFlagsEXT(),
+          .messageSeverity =
+              vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+              vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+              vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+          .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+                         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+                         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+          .pfnUserCallback = DebugMessenger::debugCallback,
+          .pUserData = nullptr};
 
-  Messenger = Instance.createDebugUtilsMessengerEXT(CreateInfo, nullptr, Loader);
+  Messenger =
+      Instance.createDebugUtilsMessengerEXT(CreateInfo, nullptr, Loader);
 }
 VkInstance::DebugMessenger::~DebugMessenger() {
   if (Instance == nullptr) {
