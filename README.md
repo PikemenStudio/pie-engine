@@ -35,7 +35,7 @@ sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.280-jammy.list https://p
 sudo apt update
 sudo apt install vulkan-sdk
 ```
-and run
+and after fixing several errors (somewhere here or after next step you'll get 'package not found' error) run
 ```
 mkdir build || cd build && cmake ../ && make
 ```
