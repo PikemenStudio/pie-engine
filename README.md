@@ -43,9 +43,9 @@ Instructions how to add other package version you can find on Vulkan SDK page
 
 Otherwize create an issue
 ## Contributing
-1. Create new branch from main with name "[breaf] description" (like "[sound] sound module")
+1. Create new branch from main with any name
 2. Work in it :)
-3. Create pull request to merge updates to main with SQUASH COMMITS option
+3. Create pull request to merge updates to main with SQUASH COMMITS option and the name of the commit according rule: "[breaf] description" (like "[sound] sound module"). Pls add something like fix-sound-implement-spaceship
 4. Check for all actions (format, tidy, tests)
 5. Wait for merging
 6. Sleep well
