@@ -41,4 +41,15 @@ VkPhysicalDevice::getNativePhysicalDevices() const {
   });
   return Devices;
 }
+VkPhysicalDevice::~VkPhysicalDevice() {}
+void VkPhysicalDevice::swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2) {
+  std::swap(Pd1.Instance, Pd2.Instance);
+}
+VkPhysicalDevice::VkPhysicalDevice(VkPhysicalDevice &&PdToMove) {
+  swap(*this, PdToMove);
+}
+VkPhysicalDevice &VkPhysicalDevice::operator=(VkPhysicalDevice &&PdToMove) {
+  swap(*this, PdToMove);
+  return *this;
+}
 } // namespace vk_core

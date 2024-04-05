@@ -17,11 +17,19 @@ public:
   VkPhysicalDevice(VkPhysicalDeviceProps Props);
   ~VkPhysicalDevice();
 
+  VkPhysicalDevice(const VkPhysicalDevice &PdToCopy) = delete;
+  VkPhysicalDevice(VkPhysicalDevice &&PdToMove);
+  VkPhysicalDevice &operator=(const VkPhysicalDevice &PdToCopy) = delete;
+  VkPhysicalDevice &operator=(VkPhysicalDevice &&PdToMove);
+
   struct VkPhysicalDeviceProps {
     std::shared_ptr<VkInstance> Instance;
   };
 
   std::vector<vk::PhysicalDevice> getNativePhysicalDevices() const;
+
+protected:
+  static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);
 
 protected:
   std::shared_ptr<VkInstance> Instance;

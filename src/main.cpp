@@ -7,8 +7,8 @@
 #include "modules/vk_core/adapters/fabric.hpp"
 #include "modules/windows/adapters/fabric.hpp"
 
-int main(int argc, char *argv[]) {
-  loguru::init(argc, argv);
+int main(int Argc, char *Argv[]) {
+  loguru::init(Argc, Argv);
   loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
 
   WindowAdapter WindowAdapter(windows::Window::WindowProps{
@@ -18,12 +18,18 @@ int main(int argc, char *argv[]) {
       .IsResizable = true,
   });
 
-  GraphicApiAdapter Adapter(vk_core::VkInstance::VkInstanceProps{
+  auto InstanceProps = vk_core::VkInstance::VkInstanceProps{
       .AppName = "Test",
       .EngineName = "Test",
       .AppVersion = {.Major = 1, .Minor = 0, .Patch = 0},
       .EngineVersion = {.Major = 1, .Minor = 0, .Patch = 0},
       .RequestedWindowExtensions = WindowAdapter.getRequiredExtensions(),
+  };
+
+  GraphicApiAdapter Adapter(vk_core::GraphicEngine::GraphicEngineProps{
+      .Window = std::move(WindowAdapter),
+      .VkInstanceProps = InstanceProps,
+      .VkPhysicalDeviceProps = {},
   });
 
   std::cout << "Hello world" << std::endl;

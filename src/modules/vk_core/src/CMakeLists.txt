@@ -3,8 +3,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 # source files
-set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp)
-set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp)
+set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
+        GraphicEngine.cpp)
+set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
+        GraphicEngine.cpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)

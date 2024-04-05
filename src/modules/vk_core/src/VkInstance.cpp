@@ -63,9 +63,10 @@ VkInstance::VkInstance(VkInstance::VkInstanceProps Props) {
   }
 
   if (Debug) {
-    DebugMessengerInstance.emplace(NativeVkInstance);
+    DebugMessengerInstance.emplace(&NativeVkInstance);
   }
 }
+
 bool VkInstance::isApiSupportExtensions(
     const std::vector<const char *> &ExtensionNames) const {
   std::vector<vk::ExtensionProperties> SupportedExtensions =
@@ -86,6 +87,7 @@ bool VkInstance::isApiSupportExtensions(
 
   return true;
 }
+
 bool VkInstance::isApiSupportLayers(
     const std::vector<const char *> &LayerNames) const {
   std::vector<vk::LayerProperties> SupportedLayers =
@@ -105,7 +107,9 @@ bool VkInstance::isApiSupportLayers(
 
   return true;
 }
+
 VkInstance::~VkInstance() {
+  LOG_F(INFO, "Destroying Vulkan instance");
   if (DebugMessengerInstance.has_value()) {
     DebugMessengerInstance.reset();
   }
@@ -116,17 +120,45 @@ VkInstance::~VkInstance() {
     LOG_F(INFO, "Vulkan instance destroyed");
   }
 }
+
+VkInstance &VkInstance::operator=(VkInstance &&InstanceToMove) {
+  swap(InstanceToMove, *this);
+  return *this;
+}
+
+void VkInstance::swap(VkInstance &I1, VkInstance &I2) {
+  VkInstance::DebugMessenger::swap(I1.DebugMessengerInstance,
+                                   I2.DebugMessengerInstance);
+
+  std::swap(I1.NativeVkInstance, I2.NativeVkInstance);
+  std::swap(I1.Version, I2.Version);
+  std::swap(I1.Extensions, I2.Extensions);
+  std::swap(I1.Debug, I2.Debug);
+
+  if (I1.DebugMessengerInstance.has_value()) {
+    I1.DebugMessengerInstance.value().Instance = &I1.NativeVkInstance;
+  }
+  if (I2.DebugMessengerInstance.has_value()) {
+    I2.DebugMessengerInstance.value().Instance = &I2.NativeVkInstance;
+  }
+}
+
+VkInstance::VkInstance(VkInstance &&InstanceToMove) {
+  swap(InstanceToMove, *this);
+}
+
 VkBool32 VkInstance::DebugMessenger::debugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT MessageType,
+    [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity,
+    [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT MessageType,
     const VkDebugUtilsMessengerCallbackDataEXT *PCallbackData,
-    void *PUserData) {
+    [[maybe_unused]] void *PUserData) {
   LOG_F(WARNING, "Validation layer: %s", PCallbackData->pMessage);
   return VK_FALSE;
 }
-VkInstance::DebugMessenger::DebugMessenger(vk::Instance &Instance)
+
+VkInstance::DebugMessenger::DebugMessenger(vk::Instance *Instance)
     : Instance(Instance) {
-  Loader = vk::DispatchLoaderDynamic(Instance, vkGetInstanceProcAddr);
+  Loader = vk::DispatchLoaderDynamic(*Instance, vkGetInstanceProcAddr);
 
   vk::DebugUtilsMessengerCreateInfoEXT CreateInfo =
       vk::DebugUtilsMessengerCreateInfoEXT{
@@ -142,13 +174,40 @@ VkInstance::DebugMessenger::DebugMessenger(vk::Instance &Instance)
           .pUserData = nullptr};
 
   Messenger =
-      Instance.createDebugUtilsMessengerEXT(CreateInfo, nullptr, Loader);
+      Instance->createDebugUtilsMessengerEXT(CreateInfo, nullptr, Loader);
+  LOG_F(INFO, "Debug messenger created");
 }
+
 VkInstance::DebugMessenger::~DebugMessenger() {
+  LOG_F(INFO, "Destroying debug messenger");
   if (Instance == nullptr) {
-    LOG_F(ERROR, "Instance destroyed before DebugMessenger");
+    LOG_F(INFO, "Instance is null, maybe it is just empty object");
     return;
   }
-  Instance.destroyDebugUtilsMessengerEXT(Messenger, nullptr, Loader);
+  Instance->destroyDebugUtilsMessengerEXT(Messenger, nullptr, Loader);
+}
+
+VkInstance::DebugMessenger::DebugMessenger(DebugMessenger &&MessengerToMove)
+    : Instance(MessengerToMove.Instance) {
+  Messenger = std::move(MessengerToMove.Messenger);
+  Loader = std::move(MessengerToMove.Loader);
+}
+
+void vk_core::VkInstance::DebugMessenger::swap(
+    std::optional<DebugMessenger> &M1, std::optional<DebugMessenger> &M2) {
+  if (M1.has_value() && M2.has_value()) {
+    std::swap(M1.value().Messenger, M2.value().Messenger);
+    std::swap(M1.value().Loader, M2.value().Loader);
+    // std::swap(M1.value().Instance, M2.value().Instance);
+  } else if (M1.has_value()) {
+    M2.emplace(std::move(M1.value()));
+    M1.value().Instance = nullptr;
+    M1.reset();
+  } else if (M2.has_value()) {
+    M1.emplace(std::move(M2.value()));
+    M1.value().Instance = nullptr;
+    M2.reset();
+  }
 }
 } // namespace vk_core
+  // namespace vk_core
