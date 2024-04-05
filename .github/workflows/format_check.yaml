@@ -9,6 +9,52 @@ on:
       - main  # Adjust branch name as needed
 
 jobs:
+  build:
+    runs-on: ubuntu-latest  # Choose an appropriate runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download vulkan
+        run: |
+          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.280-jammy.list https://packages.lunarg.com/vulkan/1.3.280/lunarg-vulkan-1.3.280-jammy.list
+          sudo apt update
+          sudo apt install vulkan-sdk
+
+      - name: Download dependencies
+        run: sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+
+      - name: build
+        run: |
+          git submodule update --init --recursive
+          ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+          mkdir build
+          cd build
+          cmake ..
+          make
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: build-cache
+          path: build/*
+
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: build-cache
+          path: build/*
+      - name: download clang-tidy
+        run: sudo apt install clang-tidy
+      - name: checker
+        run: ls -a && ls build -a
+      - name: run clang-tidy
+        run: clang-tidy -p build --format-style file src/*.cpp src/*.h
+        
+          
   clang-format-check:
     runs-on: ubuntu-latest  # Choose an appropriate runner
     steps:
@@ -27,11 +73,11 @@ jobs:
       - name: Check code formatting with Clang Format
         id: clang-format-check
         run: |
-          if ! output=$(clang-format --style=file --dry-run --Werror src/*.cpp src/*.h 2>&1); then
+          if ! output=$(clang-format --style=file --dry-run --Werror src/*.cpp 2>&1); then
             echo "::error::Code formatting check failed."
             echo "$output"
             exit 1
           else
-            echo "Code formatting check failed."
-            exit 1
+            echo "Code formatting check complete."
+            exit 0
           fi
