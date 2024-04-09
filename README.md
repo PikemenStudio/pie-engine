@@ -43,11 +43,18 @@ Instructions how to add other package version you can find on Vulkan SDK page
 
 Otherwize create an issue
 ## Contributing
+
+### Basic process
 1. Create new branch from main with any name
 2. Work in it :)
 3. Create pull request to merge updates to main with SQUASH COMMITS option and the name of the commit according rule: "[brief] description" (like "[sound] fix sound; implement spaceship")
 4. Check for all actions (format, tidy, tests)
 5. Wait for merging
 6. Sleep well
+
+### Modules
+Every module is a folder with two subfolders: `facade` and `src`.
+- `facade`: headers (and ONLY HEADERS) which are needed for the user of this module. No implementations of any functions should be here, only declarations. This is needed to have the ability to change the implementation as much as possible without changing the facade.
+- `src`: implementations of the functions (functions in broad sense) declared in `facade`. `facade` SHOULD NOT depend on `src` (don't include any headers from `src` in `facade`), `src` should depend on `facade`.
 
 ## Usage
