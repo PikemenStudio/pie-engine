@@ -4,6 +4,7 @@ out
 build
 
 cmake-build-debug
+CMakeLists.txt.user
 
 # CLion
 .idea
