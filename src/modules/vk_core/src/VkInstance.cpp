@@ -185,6 +185,7 @@ VkInstance::DebugMessenger::~DebugMessenger() {
     return;
   }
   Instance->destroyDebugUtilsMessengerEXT(Messenger, nullptr, Loader);
+  LOG_F(INFO, "Debug messenger destroyed");
 }
 
 VkInstance::DebugMessenger::DebugMessenger(DebugMessenger &&MessengerToMove)

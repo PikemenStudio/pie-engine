@@ -4,7 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 # source files
 set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
-        GraphicEngine.cpp)
+        GraphicEngine.cpp
+        facade.cpp)
 set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
         GraphicEngine.cpp)
 

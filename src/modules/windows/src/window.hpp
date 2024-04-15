@@ -5,6 +5,7 @@
 #ifndef ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_HPP
 #define ENGINE_SRC_MODULES_WINDOWS_SRC_WINDOW_HPP
 
+#define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include <memory>
@@ -36,6 +37,8 @@ public:
   operator std::shared_ptr<GLFWwindow>() const;
 
   std::vector<const char *> getRequiredExtensions() const;
+
+  GLFWwindow* getNativeWindow() const { return GlfwWindow.get(); }
 
 protected:
   // Build glfw object

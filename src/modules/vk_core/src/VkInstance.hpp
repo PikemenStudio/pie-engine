@@ -40,7 +40,7 @@ public:
     std::vector<const char *> RequestedWindowExtensions;
   };
 
-  operator vk::Instance() { return NativeVkInstance; }
+  operator vk::Instance&() { return NativeVkInstance; }
 
 protected:
   bool
