@@ -11,13 +11,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # add window module
 add_subdirectory(src/modules/windows/src)
 add_subdirectory(src/modules/vk_core/src)
-set(CONNECTORS ${CONNECTORS} src/modules/windows/adapters/fabric.hpp
-                             src/modules/vk_core/adapters/fabric.hpp)
+add_subdirectory(src/modules/sound/src)
+
+set(CONNECTORS ${CONNECTORS}
+        src/modules/windows/adapters/fabric.hpp
+        src/modules/vk_core/adapters/fabric.hpp
+        src/modules/sound/facade/SoundSystem.hpp
+        src/modules/sound/facade/types.hpp)
 
 add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${CONNECTORS})
 
-# link module
-target_link_libraries(main PRIVATE windows)
+# link modules
+target_link_libraries(main PRIVATE windows sound)
 include_directories(src/modules/windows/adapters)
 
 find_package(loguru CONFIG REQUIRED)
