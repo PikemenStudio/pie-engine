@@ -1,10 +1,13 @@
 #include "../facades/facade.hpp"
 #include "GraphicEngine.hpp"
 
+template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
+    window_api_impls::WindowApiFacadeGlfwImpl>;
+
 using namespace graphic_api_impls;
 
-template <WindowApiImpl WindowImpl>
-using VkImpl = GraphicApiFacadeVulkanImpl<WindowImpl>;
+//template <WindowApiImpl WindowImpl>
+//using VkImpl = GraphicApiFacadeVulkanImpl<WindowImpl>;
 
 template <WindowApiImpl WindowImpl>
 using DataType = vk_core::GraphicEngine<WindowImpl>;
@@ -105,19 +108,19 @@ toModuleType(GraphicFacadeStructs::DeviceChoosePolicy Policy) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 template <WindowApiImpl WindowImpl>
-VkImpl<WindowImpl>::GraphicApiFacadeVulkanImpl(
+GraphicApiFacadeVulkanImpl<WindowImpl>::GraphicApiFacadeVulkanImpl(
     GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props) {
   Data = new DataType<WindowImpl>(toModuleType(std::move(Props)));
 }
 
 template <WindowApiImpl WindowImpl>
-VkImpl<WindowImpl>::~GraphicApiFacadeVulkanImpl() {
+GraphicApiFacadeVulkanImpl<WindowImpl>::~GraphicApiFacadeVulkanImpl() {
   delete static_cast<DataTypePtr<WindowImpl>>(Data);
 }
 
 template <WindowApiImpl WindowImpl>
 std::vector<GraphicFacadeStructs::PhysicalDeviceData>
-VkImpl<WindowImpl>::getLocalPhysicalDevices() const {
+GraphicApiFacadeVulkanImpl<WindowImpl>::getLocalPhysicalDevices() const {
   std::vector<GraphicFacadeStructs::PhysicalDeviceData> Result;
   for (const auto &Device :
        static_cast<DataTypePtr<WindowImpl>>(Data)->getLocalPhysicalDevices()) {
@@ -134,7 +137,7 @@ VkImpl<WindowImpl>::getLocalPhysicalDevices() const {
 }
 
 template <WindowApiImpl WindowImpl>
-void VkImpl<WindowImpl>::chooseGpu(
+void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
     const GraphicFacadeStructs::PhysicalDeviceData &DeviceData) {
   vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps Device{
       .Name = DeviceData.Name,
@@ -148,12 +151,9 @@ void VkImpl<WindowImpl>::chooseGpu(
 }
 
 template <WindowApiImpl WindowImpl>
-void VkImpl<WindowImpl>::chooseGpu(
+void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
     const GraphicFacadeStructs::DeviceChoosePolicy Policy,
     bool ChooseAnyWayIfFailed) {
   static_cast<DataTypePtr<WindowImpl>>(Data)->chooseLocalPhysicalDevice(
       toModuleType<WindowImpl>(Policy), ChooseAnyWayIfFailed);
 }
-
-template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
-    window_api_impls::WindowApiFacadeGlfwImpl>;
