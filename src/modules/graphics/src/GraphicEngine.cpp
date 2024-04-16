@@ -5,6 +5,10 @@
 #include "GraphicEngine.hpp"
 #include "loguru/loguru.hpp"
 
+// Include only if glfw implementation required
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 namespace vk_core {
 template <WindowApiImpl WindowImpl>
 void GraphicEngine<WindowImpl>::setupInstance(
@@ -144,13 +148,14 @@ void GraphicEngine<WindowImpl>::querySwapChainSupport() {
     throw std::runtime_error("Physical device or surface is not initialized");
   }
 
-  const auto Device = static_cast<vk::PhysicalDevice>(*NativeComponents.PhysicalDevice);
+  const auto Device =
+      static_cast<vk::PhysicalDevice>(*NativeComponents.PhysicalDevice);
   const auto Surface = NativeComponents.Surface.value();
 
-  NativeComponents.SwapChainSupport = SwapChainSupportDetails {
-    .Capabilities = Device.getSurfaceCapabilitiesKHR(Surface),
-    .Formats = Device.getSurfaceFormatsKHR(Surface),
-    .PresentModes = Device.getSurfacePresentModesKHR(Surface),
+  NativeComponents.SwapChainSupport = SwapChainSupportDetails{
+      .Capabilities = Device.getSurfaceCapabilitiesKHR(Surface),
+      .Formats = Device.getSurfaceFormatsKHR(Surface),
+      .PresentModes = Device.getSurfacePresentModesKHR(Surface),
   };
 }
 

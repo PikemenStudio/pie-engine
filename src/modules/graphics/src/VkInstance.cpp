@@ -210,5 +210,5 @@ void vk_core::VkInstance::DebugMessenger::swap(
     M2.reset();
   }
 }
-} // namespace vk_core
-  // namespace vk_core
+} // namespace graphics
+  // namespace graphics

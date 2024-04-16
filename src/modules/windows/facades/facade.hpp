@@ -5,9 +5,9 @@
 #ifndef ENGINE_SRC_MODULES_WINDOWS_FACADES_FACADE_HPP
 #define ENGINE_SRC_MODULES_WINDOWS_FACADES_FACADE_HPP
 
-#include "../../../adapters_interfaces/fabric_adapter.hpp"
-#include "../src/window.hpp"
+#include <glm/glm.hpp>
 #include <memory>
+#include <string>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Define all structures to be used in the facades

@@ -5,7 +5,6 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 
-#include "../../../adapters_interfaces/fabric_adapter.hpp"
 #include "../src/GraphicEngine.hpp"
 #include <any>
 #include <concepts>
@@ -36,8 +35,8 @@ struct GraphicFacadeStructs {
   template <WindowApiImpl WindowImpl> struct GraphicEngineProps {
     WindowApiFacade<WindowImpl> Window;
 
-    InstanceProps VkInstanceProps;
-    PhysicalDeviceProps VkPhysicalDeviceProps;
+    InstanceProps InstanceProps;
+    PhysicalDeviceProps PhysicalDeviceProps;
   };
 
   struct PhysicalDeviceData {

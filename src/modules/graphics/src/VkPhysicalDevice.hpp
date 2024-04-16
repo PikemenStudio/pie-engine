@@ -115,6 +115,6 @@ protected:
   static inline constinit bool Debug = true;
 };
 
-} // namespace vk_core
+} // namespace graphics
 
 #endif // ENGINE_SRC_MODULES_VK_CORE_SRC_VKPHYSICALDEVICE_HPP

@@ -10,19 +10,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # add window module
 add_subdirectory(src/modules/windows/src)
-add_subdirectory(src/modules/vk_core/src)
+add_subdirectory(src/modules/graphics/src)
 set(ADAPTERS ${ADAPTERS} src/modules/windows/facades/facade.hpp
-        src/modules/vk_core/facades/facade.hpp
+        src/modules/graphics/facades/facade.hpp
 )
 
-add_executable(main src/main.cpp src/adapters_interfaces/fabric_adapter.hpp ${ADAPTERS})
+add_executable(main src/main.cpp ${ADAPTERS})
 
 # link module
 target_link_libraries(main PRIVATE windows)
 include_directories(src/modules/windows/facades)
 
 target_link_libraries(main PRIVATE vk_core)
-include_directories(src/modules/vk_core/facades)
+include_directories(src/modules/graphics/facades)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)

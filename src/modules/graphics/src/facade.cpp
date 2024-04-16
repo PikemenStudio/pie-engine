@@ -22,22 +22,22 @@ toModuleType(GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props) {
       .Window = std::move(Props.Window),
       .VkInstanceProps =
           {
-              .AppName = std::move(Props.VkInstanceProps.AppName),
-              .EngineName = std::move(Props.VkInstanceProps.EngineName),
+              .AppName = std::move(Props.InstanceProps.AppName),
+              .EngineName = std::move(Props.InstanceProps.EngineName),
               .AppVersion =
                   {
-                      .Major = Props.VkInstanceProps.AppVersion.Major,
-                      .Minor = Props.VkInstanceProps.AppVersion.Minor,
-                      .Patch = Props.VkInstanceProps.AppVersion.Patch,
+                      .Major = Props.InstanceProps.AppVersion.Major,
+                      .Minor = Props.InstanceProps.AppVersion.Minor,
+                      .Patch = Props.InstanceProps.AppVersion.Patch,
                   },
               .EngineVersion =
                   {
-                      .Major = Props.VkInstanceProps.EngineVersion.Major,
-                      .Minor = Props.VkInstanceProps.EngineVersion.Minor,
-                      .Patch = Props.VkInstanceProps.EngineVersion.Patch,
+                      .Major = Props.InstanceProps.EngineVersion.Major,
+                      .Minor = Props.InstanceProps.EngineVersion.Minor,
+                      .Patch = Props.InstanceProps.EngineVersion.Patch,
                   },
               .RequestedWindowExtensions =
-                  std::move(Props.VkInstanceProps.RequestedWindowExtensions),
+                  std::move(Props.InstanceProps.RequestedWindowExtensions),
           },
       .VkPhysicalDeviceProps = {
           // Just empty :)

@@ -85,6 +85,6 @@ protected:
   vk::Instance NativeVkInstance = nullptr;
 };
 
-} // namespace vk_core
+} // namespace graphics
 
 #endif // ENGINE_SRC_MODULES_VK_CORE_SRC_VKINSTANCE_HPP

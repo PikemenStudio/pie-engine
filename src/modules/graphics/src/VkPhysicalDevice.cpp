@@ -226,4 +226,4 @@ void VkPhysicalDevice::setupQueues() {
     LOG_F(WARNING, "Present queue is not initialized");
   }
 }
-} // namespace vk_core
+} // namespace graphics
