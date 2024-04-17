@@ -119,11 +119,11 @@ GRAPHIC_API_IMPL(Vulkan)
 // Facade for the GraphicApi
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <WindowApiImpl WindowImpl,
-          GraphicApiImpl<WindowImpl> Impl =
-              graphic_api_impls::GraphicApiFacadeVulkanImpl<WindowImpl>>
+template <WindowApiImpl WindowImpl>
 class GraphicApiFacade {
 public:
+  using Impl = graphic_api_impls::GraphicApiFacadeVulkanImpl<WindowImpl>;
+
   GraphicApiFacade(GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props)
       : ImplInstance(std::move(Props)) {}
 
@@ -134,6 +134,6 @@ public:
 [[maybe_unused]]
 typedef graphic_api_impls::GraphicApiFacadeVulkanImpl<
     window_api_impls::WindowApiFacadeGlfwImpl>
-    VkTemplateInstantiation;
+    VkTemplateInstantiation; // нигде не используется
 
 #endif // ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP

@@ -10,6 +10,7 @@
 #include "glm/glm.hpp"
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace windows {
 

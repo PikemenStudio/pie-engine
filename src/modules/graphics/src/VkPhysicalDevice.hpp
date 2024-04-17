@@ -5,6 +5,8 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_SRC_VKPHYSICALDEVICE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_SRC_VKPHYSICALDEVICE_HPP
 
+#include <memory>
+
 #include "VkInstance.hpp"
 #include "vulkan/vulkan.hpp"
 

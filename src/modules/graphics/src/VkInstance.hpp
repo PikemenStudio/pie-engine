@@ -6,6 +6,7 @@
 #define ENGINE_SRC_MODULES_VK_CORE_SRC_VKINSTANCE_HPP
 
 #include <string>
+#include <optional>
 #include <vulkan/vulkan.hpp>
 
 namespace vk_core {
