@@ -1,13 +1,7 @@
 #include "../facades/facade.hpp"
 #include "GraphicEngine.hpp"
 
-template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
-    window_api_impls::WindowApiFacadeGlfwImpl>;
-
 using namespace graphic_api_impls;
-
-//template <WindowApiImpl WindowImpl>
-//using VkImpl = GraphicApiFacadeVulkanImpl<WindowImpl>;
 
 template <WindowApiImpl WindowImpl>
 using DataType = vk_core::GraphicEngine<WindowImpl>;
@@ -157,3 +151,7 @@ void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
   static_cast<DataTypePtr<WindowImpl>>(Data)->chooseLocalPhysicalDevice(
       toModuleType<WindowImpl>(Policy), ChooseAnyWayIfFailed);
 }
+
+// Explicitly instantiate class
+template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
+    window_api_impls::WindowApiFacadeGlfwImpl>;

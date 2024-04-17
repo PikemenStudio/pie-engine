@@ -16,7 +16,8 @@ using DataTypePtr = DataType *;
 // Convertors
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-windows::Window::WindowProps toModuleType(WindowFacadeStructs::WindowProps &&Props) {
+windows::Window::WindowProps
+toModuleType(WindowFacadeStructs::WindowProps &&Props) {
   windows::Window::WindowProps ModuleProps{
       .Size = Props.Size,
       .Title = std::move(Props.Title),
@@ -40,7 +41,7 @@ GlfwImpl::~WindowApiFacadeGlfwImpl() {
   Data = nullptr;
 }
 
-void* GlfwImpl::getNativeType() const {
+void *GlfwImpl::getNativeType() const {
   return static_cast<DataTypePtr>(Data)->getNativeWindow();
 }
 

@@ -8,10 +8,12 @@
 #include <set>
 
 namespace vk_core {
+
 VkPhysicalDevice::VkPhysicalDevice(
     VkPhysicalDevice::VkPhysicalDeviceProps Props) {
   Instance = Props.Instance;
 }
+
 std::vector<vk::PhysicalDevice>
 VkPhysicalDevice::getNativePhysicalDevices() const {
   if (Instance == nullptr) {
@@ -44,17 +46,21 @@ VkPhysicalDevice::getNativePhysicalDevices() const {
       });
   return Devices;
 }
+
 VkPhysicalDevice::~VkPhysicalDevice() { this->LogicalDevice->destroy(); }
 void VkPhysicalDevice::swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2) {
   std::swap(Pd1.Instance, Pd2.Instance);
 }
+
 VkPhysicalDevice::VkPhysicalDevice(VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
 }
+
 VkPhysicalDevice &VkPhysicalDevice::operator=(VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
   return *this;
 }
+
 std::vector<VkPhysicalDevice::PhysicalDeviceLocalProps>
 VkPhysicalDevice::getLocalPhysicalDevices() const {
   if (Instance == nullptr) {
@@ -97,6 +103,7 @@ VkPhysicalDevice::getLocalPhysicalDevices() const {
 
   return LocalDevices;
 }
+
 void VkPhysicalDevice::findQueueIndexesAndSetup() {
   LOG_F(INFO, "Finding queue indexes");
   if (!PhysicalDevice.has_value()) {
@@ -127,6 +134,7 @@ void VkPhysicalDevice::findQueueIndexesAndSetup() {
     throw std::runtime_error("Can't find queue indexes");
   }
 }
+
 void VkPhysicalDevice::chooseDeviceAndSetup(
     std::function<bool(const vk::PhysicalDevice &)> Predicate,
     bool ChooseAnyWayIfFailed) {
@@ -153,6 +161,7 @@ void VkPhysicalDevice::chooseDeviceAndSetup(
     throw std::runtime_error("Can't setup device with required predicate");
   }
 }
+
 void VkPhysicalDevice::setupLogicalDevice() {
   LOG_F(INFO, "Setting up logical device");
   if (!PhysicalDevice.has_value()) {
@@ -226,4 +235,4 @@ void VkPhysicalDevice::setupQueues() {
     LOG_F(WARNING, "Present queue is not initialized");
   }
 }
-} // namespace graphics
+} // namespace vk_core

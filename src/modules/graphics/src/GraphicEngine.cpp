@@ -142,8 +142,7 @@ void GraphicEngine<
 
 template <WindowApiImpl WindowImpl>
 void GraphicEngine<WindowImpl>::querySwapChainSupport() {
-  if (NativeComponents.PhysicalDevice == nullptr ||
-      !NativeComponents.Surface) {
+  if (NativeComponents.PhysicalDevice == nullptr || !NativeComponents.Surface) {
     LOG_F(ERROR, "Physical device or surface is not initialized");
     throw std::runtime_error("Physical device or surface is not initialized");
   }
