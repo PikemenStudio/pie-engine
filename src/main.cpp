@@ -4,7 +4,7 @@
 //
 #include <loguru.hpp>
 
-#include "modules/vk_core/facades/facade.hpp"
+#include "modules/graphics/facades/facade.hpp"
 #include "modules/windows/facades/facade.hpp"
 
 int main(int Argc, char *Argv[]) {
@@ -23,22 +23,26 @@ int main(int Argc, char *Argv[]) {
       .EngineName = "Test",
       .AppVersion = {.Major = 1, .Minor = 0, .Patch = 0},
       .EngineVersion = {.Major = 1, .Minor = 0, .Patch = 0},
-      .RequestedWindowExtensions = WindowAdapter.ImplInstance.getRequiredExtensions(),
+      .RequestedWindowExtensions =
+          WindowAdapter.ImplInstance.getRequiredExtensions(),
   };
 
-  auto a = GraphicFacadeStructs::GraphicEngineProps<window_api_impls::WindowApiFacadeGlfwImpl>{
+  auto a = GraphicFacadeStructs::GraphicEngineProps<
+      window_api_impls::WindowApiFacadeGlfwImpl>{
       .Window = std::move(WindowAdapter),
-      .VkInstanceProps = InstanceProps,
-      .VkPhysicalDeviceProps = {},
+      .InstanceProps = InstanceProps,
+      .PhysicalDeviceProps = {},
   };
 
-  GraphicApiFacade<window_api_impls::WindowApiFacadeGlfwImpl> Adapter(std::move(a));
+  GraphicApiFacade<window_api_impls::WindowApiFacadeGlfwImpl> Adapter(
+      std::move(a));
 
   std::cout << "Found " << Adapter.ImplInstance.getLocalPhysicalDevices().size()
             << " devices" << std::endl;
 
   // Choose default gpu
-  Adapter.ImplInstance.chooseGpu(GraphicFacadeStructs::DeviceChoosePolicy::BEST, true);
+  Adapter.ImplInstance.chooseGpu(GraphicFacadeStructs::DeviceChoosePolicy::BEST,
+                                 true);
 
   std::cout << "Hello world" << std::endl;
   return 0;
