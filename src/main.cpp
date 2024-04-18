@@ -10,5 +10,6 @@
 int main(int Argc, char *Argv[]) {
   loguru::init(Argc, Argv);
   loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
+  
   return 0;
 }
