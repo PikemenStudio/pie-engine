@@ -184,8 +184,11 @@ void VkPhysicalDevice::setupLogicalDevice() {
     QueueCreateInfos.push_back(QueueCreateInfo);
   }
 
-  std::vector<const char *> EnabledExtensions = {
-      VK_KHR_SWAPCHAIN_EXTENSION_NAME, "VK_KHR_portability_subset"};
+  std::vector<const char *> EnabledExtensions = {"VK_KHR_portability_subset"};
+
+  if (this->Instance->isPortabilityRequired()) {
+    EnabledExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+  }
 
   std::vector<const char *> EnabledLayers;
   if (VkPhysicalDevice::Debug) {

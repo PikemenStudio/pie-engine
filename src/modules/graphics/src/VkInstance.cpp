@@ -146,6 +146,9 @@ void VkInstance::swap(VkInstance &I1, VkInstance &I2) {
 VkInstance::VkInstance(VkInstance &&InstanceToMove) {
   swap(InstanceToMove, *this);
 }
+bool VkInstance::isPortabilityRequired() const {
+  return Version >= VK_MAKE_API_VERSION(0, 1, 3, 216);
+}
 
 VkBool32 VkInstance::DebugMessenger::debugCallback(
     [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity,

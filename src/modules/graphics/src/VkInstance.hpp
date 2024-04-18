@@ -43,6 +43,8 @@ public:
 
   operator vk::Instance&() { return NativeVkInstance; }
 
+  bool isPortabilityRequired() const;
+
 protected:
   bool
   isApiSupportExtensions(const std::vector<const char *> &ExtensionNames) const;
