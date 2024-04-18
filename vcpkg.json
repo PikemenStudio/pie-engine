@@ -8,6 +8,8 @@
       "glfw3",
       "glm",
       "boost-process",
-      "loguru"
+      "loguru",
+      "openal-soft",
+      "libsndfile"
     ]
 }   
