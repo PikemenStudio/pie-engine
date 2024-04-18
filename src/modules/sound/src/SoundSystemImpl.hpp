@@ -5,7 +5,7 @@
 #ifndef ENGINE_SOUNDSYSTEMIMPL_HPP
 #define ENGINE_SOUNDSYSTEMIMPL_HPP
 
-#include "../facade/types.hpp"
+#include "../facade/facade.hpp"
 
 #include <al.h>
 #include <alc.h>
@@ -18,10 +18,10 @@ public:
   SoundSystemImpl();
   ~SoundSystemImpl();
 
-  SoundID loadSound(const std::string& FileName);
-  SoundSourceID createSoundSource(const SoundSourceParams& Params);
-  void playSoundSource(SoundSourceID SrcID);
-  bool isPlaying(SoundSourceID SrcID);
+  SoundStructs::SoundID loadSound(const std::string& FileName);
+  SoundStructs::SoundSourceID createSoundSource(const SoundStructs::SoundSourceParams& Params);
+  void playSoundSource(SoundStructs::SoundSourceID SrcID);
+  bool isPlaying(SoundStructs::SoundSourceID SrcID);
 
 private:
   static bool IsInstanceAlreadyCreated;

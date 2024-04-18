@@ -44,7 +44,7 @@ SoundSystemImpl::~SoundSystemImpl() {
   alcCloseDevice(OpenALDevice);
 }
 
-SoundID SoundSystemImpl::loadSound(const std::string &FileName) {
+SoundStructs::SoundID SoundSystemImpl::loadSound(const std::string &FileName) {
   LOG_F(INFO, "Loading file: %s", FileName.c_str());
 
   SF_INFO Info;
@@ -78,8 +78,9 @@ SoundID SoundSystemImpl::loadSound(const std::string &FileName) {
   return Buffer;
 }
 
-SoundSourceID SoundSystemImpl::createSoundSource(const SoundSourceParams& Params)
-{
+SoundStructs::SoundSourceID SoundSystemImpl::createSoundSource(
+    const SoundStructs::SoundSourceParams& Params
+) {
   LOG_F(INFO, "Creating sound source");
 
   ALuint Source;
@@ -96,13 +97,13 @@ SoundSourceID SoundSystemImpl::createSoundSource(const SoundSourceParams& Params
   return Source;
 }
 
-void SoundSystemImpl::playSoundSource(SoundSourceID SrcID)
+void SoundSystemImpl::playSoundSource(SoundStructs::SoundSourceID SrcID)
 {
   LOG_F(INFO, "Start playing sound source");
   alSourcePlay(SrcID);
 }
 
-bool SoundSystemImpl::isPlaying(SoundSourceID SrcID) {
+bool SoundSystemImpl::isPlaying(SoundStructs::SoundSourceID SrcID) {
   ALint State = AL_NONE;
   alGetSourcei(SrcID, AL_SOURCE_STATE, &State);
   return State == AL_PLAYING;
