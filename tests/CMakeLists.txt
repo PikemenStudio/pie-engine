@@ -16,6 +16,6 @@ add_test(test_all test_list_all_devices_exe)
 target_link_libraries(test_all PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
 target_link_libraries(test_all PRIVATE windows)
-target_link_libraries(test_all PRIVATE vk_core)
+target_link_libraries(test_all PRIVATE graphics)
 
 include_directories(../src/modules)
