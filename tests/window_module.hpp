@@ -6,7 +6,7 @@
 #define ENGINE_TESTS_WINDOW_MODULE_HPP
 
 #include <gtest/gtest.h>
-#include <graphics/facades/facade.hpp>
+#include <windows/facades/facade.hpp>
 
 class GlfwTest : public ::testing::Test {
 protected:

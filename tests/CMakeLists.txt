@@ -9,7 +9,8 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 add_executable(test_all "test_all.cpp"
-        window_module.hpp)
+        window_module.hpp
+        graphic_module.hpp)
 add_test(test_all test_list_all_devices_exe)
 
 target_link_libraries(test_all PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)

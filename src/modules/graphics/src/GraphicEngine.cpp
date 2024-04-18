@@ -86,7 +86,7 @@ void GraphicEngine<WindowImpl>::chooseLocalPhysicalDevice(
 
 template <WindowApiImpl WindowImpl>
 void GraphicEngine<WindowImpl>::chooseLocalPhysicalDevice(
-    const DeviceChoosePolicy Policy, bool ChooseAnyWayIfFailed) {
+    const DeviceChoosePolicy Policy) {
   LOG_F(INFO, "Choosing local physical device");
 
   if (NativeComponents.PhysicalDevice == nullptr) {
@@ -97,16 +97,14 @@ void GraphicEngine<WindowImpl>::chooseLocalPhysicalDevice(
   switch (Policy) {
   case DeviceChoosePolicy::FIRST:
     this->NativeComponents.PhysicalDevice->chooseDeviceAndSetup(
-        [](const vk::PhysicalDevice &ArgDevice) -> bool { return true; },
-        ChooseAnyWayIfFailed);
+        [](const vk::PhysicalDevice &ArgDevice) -> bool { return true; });
     break;
   case DeviceChoosePolicy::BEST:
     this->NativeComponents.PhysicalDevice->chooseDeviceAndSetup(
         [](const vk::PhysicalDevice &ArgDevice) -> bool {
           const auto Properties = ArgDevice.getProperties();
           return Properties.deviceType == vk::PhysicalDeviceType::eDiscreteGpu;
-        },
-        ChooseAnyWayIfFailed);
+        });
     break;
   }
 

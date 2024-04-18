@@ -146,10 +146,9 @@ void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
 
 template <WindowApiImpl WindowImpl>
 void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
-    const GraphicFacadeStructs::DeviceChoosePolicy Policy,
-    bool ChooseAnyWayIfFailed) {
+    const GraphicFacadeStructs::DeviceChoosePolicy Policy) {
   static_cast<DataTypePtr<WindowImpl>>(Data)->chooseLocalPhysicalDevice(
-      toModuleType<WindowImpl>(Policy), ChooseAnyWayIfFailed);
+      toModuleType<WindowImpl>(Policy));
 }
 
 // Explicitly instantiate class

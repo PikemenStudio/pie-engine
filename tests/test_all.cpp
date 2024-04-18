@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "window_module.hpp"
+#include "graphic_module.hpp"
 
 // Entry point for running tests
 int main(int argc, char **argv) {

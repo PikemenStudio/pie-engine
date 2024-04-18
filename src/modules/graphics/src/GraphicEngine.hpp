@@ -42,8 +42,7 @@ public:
   // Call with default choose policy
   // If ChooseAnyWayIfFailed is true, then the function will try to choose any
   // in the BEST policy ONLY
-  void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy,
-                                 bool ChooseAnyWayIfFailed = false);
+  void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
   void initWindowSurface();
 

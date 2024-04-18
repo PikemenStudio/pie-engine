@@ -83,8 +83,7 @@ public:
   std::vector<PhysicalDeviceLocalProps> getLocalPhysicalDevices() const;
 
   void chooseDeviceAndSetup(
-      std::function<bool(const vk::PhysicalDevice &)> Predicate,
-      bool ChooseAnyWayIfFailed = false);
+      std::function<bool(const vk::PhysicalDevice &)> Predicate);
 
   void findQueueIndexesAndSetup();
 

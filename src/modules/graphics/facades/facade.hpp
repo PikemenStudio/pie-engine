@@ -76,8 +76,7 @@ concept GraphicApiImpl = requires(T Obj) {
     Obj.chooseGpu(std::declval<GraphicFacadeStructs::PhysicalDeviceData>())
   } -> std::same_as<void>;
   {
-    Obj.chooseGpu(std::declval<GraphicFacadeStructs::DeviceChoosePolicy>(),
-                  std::declval<bool>())
+    Obj.chooseGpu(std::declval<GraphicFacadeStructs::DeviceChoosePolicy>())
   } -> std::same_as<void>;
 };
 
@@ -101,8 +100,7 @@ concept GraphicApiImpl = requires(T Obj) {
     chooseGpu(const GraphicFacadeStructs::PhysicalDeviceData &DeviceData);     \
                                                                                \
     void                                                                       \
-    chooseGpu(const GraphicFacadeStructs::DeviceChoosePolicy ChoosePolicy,     \
-              const bool TryChooseAnyIfFailed);                                \
+    chooseGpu(const GraphicFacadeStructs::DeviceChoosePolicy ChoosePolicy);    \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \
@@ -119,8 +117,7 @@ GRAPHIC_API_IMPL(Vulkan)
 // Facade for the GraphicApi
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <WindowApiImpl WindowImpl>
-class GraphicApiFacade {
+template <WindowApiImpl WindowImpl> class GraphicApiFacade {
 public:
   using Impl = graphic_api_impls::GraphicApiFacadeVulkanImpl<WindowImpl>;
 
@@ -131,8 +128,7 @@ public:
   [[maybe_unused]] Impl ImplInstance;
 };
 
-[[maybe_unused]]
-typedef graphic_api_impls::GraphicApiFacadeVulkanImpl<
+[[maybe_unused]] typedef graphic_api_impls::GraphicApiFacadeVulkanImpl<
     window_api_impls::WindowApiFacadeGlfwImpl>
     VkTemplateInstantiation; // нигде не используется
 

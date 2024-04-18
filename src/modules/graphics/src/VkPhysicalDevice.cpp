@@ -136,8 +136,7 @@ void VkPhysicalDevice::findQueueIndexesAndSetup() {
 }
 
 void VkPhysicalDevice::chooseDeviceAndSetup(
-    std::function<bool(const vk::PhysicalDevice &)> Predicate,
-    bool ChooseAnyWayIfFailed) {
+    std::function<bool(const vk::PhysicalDevice &)> Predicate) {
   std::vector<vk::PhysicalDevice> AvailableDevices =
       static_cast<vk::Instance &>(*Instance.get()).enumeratePhysicalDevices();
 
@@ -151,7 +150,7 @@ void VkPhysicalDevice::chooseDeviceAndSetup(
       });
 
   if (!PhysicalDevice.has_value()) {
-    if (ChooseAnyWayIfFailed && AvailableDevices.size() > 0) {
+    if (AvailableDevices.size() > 0) {
       PhysicalDevice = AvailableDevices[0];
       LOG_F(INFO, "Physical device chosen %s",
             std::string(PhysicalDevice->getProperties().deviceName).c_str());
