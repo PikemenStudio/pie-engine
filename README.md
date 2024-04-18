@@ -50,4 +50,89 @@ Otherwize create an issue
 5. Wait for merging
 6. Sleep well
 
+### Facade's architecture
+
+1. All facade structs: any struct that is used in the facade (params, return values, etc.)
+Can be moved to separate file
+```c++
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Define all structures to be used in the facades
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// maybe should be namespace
+struct SomeFacadeStructs {
+  // any structs or enums
+  
+  // Also they can be templates, if they depend on implementation
+  // e.g. they hold module reference (dependency)
+};
+```
+2. Concept for template, that defines template type for module implementation
+```c++
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Concept to get errors earlier if the Impl is not valid
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template <typename T, typename Dependency/*, here may be more dependencies*/>
+concept SomeModuleImpl = requires(T Obj) {
+  // Must be constructible with that type
+  std::is_constructible_v<T, SomeFacadeStructs::SomeProps<Dependency/*, all dependencies*/> &&>;
+  // Must have method void test(int)
+  {
+    Obj.test(int)
+  } -> std::same_as<void>;
+};
+```
+3. Blueprint (macro) for facade implementation, MUST be consistent with the concept
+```c++
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Blueprint for the SomeApi Implementation, add functions here
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#define SOME_API_IMPL(name)                                                     \
+  template <Dependency DependencyImpl> class GraphicApiFacade##name##Impl {     \
+  public:                                                                       \
+    SomeApiFacade##name##Impl(const SomeApiFacade##name##Impl &&) =             \
+        delete;                                                                 \
+    SomeApiFacade##name##Impl(SomeFacadeStructs::SomeProps<DependencyImpl> &&); \
+    ~SomeApiFacade##name##Impl();                                               \
+                                                                                \
+    void test(int a);                                                           \
+  protected:                                                                    \
+    void *Data; // Any type, only implementation from .cpp knows how to work with it
+```
+4. Module implementation declaration
+```c++
+namespace some_api_impls {
+SOME_API_IMPL(Some)
+} // namespace some_api_impls
+```
+5. Facade class
+```c++
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Facade for the GraphicApi
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+template <Dependency DepencencyImpl> class SomeApiFacade {
+public:
+  using Impl = some_api_impls::SomeApiFacadeVulkanImpl<DepencencyImpl>;
+
+  SomeApiFacade(SomeFacadeStructs::SomeEngineProps<DepencencyImpl> &&Props)
+      : ImplInstance(std::move(Props)) {}
+
+public:
+  [[maybe_unused]] Impl ImplInstance;
+};
+```
+Use `ImplInstance` to work with all facade methods, facade is just a fabric and additional facade, that give opportunity to work with several implementations (switch them) easily
+6. In src folder of module you can find .cpp (or should create it), that implements (define) all methods from blueprint
+
+> If you want to work with different dependencies in different way (e.g. library require native type from depencency library) you can use template specialization
+
+> Note: You MUST add explicit instantiation of the template class in the **end** of the .cpp file
+> ```c++
+> template class some_api_impls::SomeApiFacadeSomeImpl<
+>    depencency_api_impls::DepencencyApiFacadeSomeDepencencyImpl>;
+> ```
+
+> Usage: Do you want to use module in the module of yours? Include facade header, add dependencies of that module as templates to your module class (blueprint) (and to concept) and provide that types to facade. That's all, you will get one big module with a lot of dependencies in templates and user will have opportunity to control them in one place
+
 ## Usage
