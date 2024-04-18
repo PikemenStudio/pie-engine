@@ -13,8 +13,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # compile tests
 add_subdirectory(src/modules/windows/src)
 add_subdirectory(src/modules/graphics/src)
-set(ADAPTERS ${ADAPTERS} src/modules/windows/facades/facade.hpp
+add_subdirectory(src/modules/sound/src)
+set(ADAPTERS ${ADAPTERS}
+        src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
+        src/modules/sound/facade/SoundSystem.hpp
 )
 
 add_subdirectory(tests)
@@ -25,8 +28,11 @@ add_executable(main src/main.cpp ${ADAPTERS})
 target_link_libraries(main PRIVATE windows)
 include_directories(src/modules/windows/facades)
 
-target_link_libraries(main PRIVATE vk_core)
+target_link_libraries(main PRIVATE graphics)
 include_directories(src/modules/graphics/facades)
+
+target_link_libraries(main PRIVATE sound)
+include_directories(src/modules/sound/facade)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)
