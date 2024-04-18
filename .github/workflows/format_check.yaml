@@ -33,7 +33,6 @@ jobs:
           cd build
           cmake ..
           make
-        
           
   clang-format-check:
     runs-on: ubuntu-latest  # Choose an appropriate runner
