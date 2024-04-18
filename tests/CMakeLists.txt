@@ -8,22 +8,14 @@ find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-add_executable(test_list_all_devices_exe "test_list_all_devices.cpp")
-add_test(test_list_all_devices test_list_all_devices_exe)
+add_executable(test_all "test_all.cpp"
+        window_module.hpp
+        graphic_module.hpp)
+add_test(test_all test_list_all_devices_exe)
 
-target_link_libraries(test_list_all_devices_exe PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+target_link_libraries(test_all PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
 
-# vulkan
-if (win32)
-    link_directories($ENV{VULKAN_SDK}/Lib)
-    link_libraries(Vulkan-1)
-endif (win32)
+target_link_libraries(test_all PRIVATE windows)
+target_link_libraries(test_all PRIVATE graphics)
 
-if (APPLE)
-    target_link_libraries(test_list_all_devices_exe PRIVATE $ENV{VULKAN_SDK}/lib/libvulkan.dylib)
-endif (APPLE)
-
-if (UNIX AND NOT APPLE)
-    find_package(Vulkan REQUIRED)
-    link_libraries(Vulkan::Vulkan)
-endif (UNIX AND NOT APPLE)
+include_directories(../src/modules)

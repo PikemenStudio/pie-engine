@@ -5,6 +5,7 @@ build
 
 cmake-build-debug
 CMakeLists.txt.user
+cmake-build-debug-event-trace
 
 # CLion
 .idea
