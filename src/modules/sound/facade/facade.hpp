@@ -46,20 +46,40 @@ concept SoundModuleImpl = requires(T Obj) {
   } -> std::same_as<bool>;
 };
 
-class SoundSystemImpl;
-class SoundSystem {
+#define SOUND_IMPL(name) \
+class Sound##name##Data; \
+class Sound##name##Impl { \
+public: \
+  Sound##name##Impl(const Sound##name##Impl&) = delete; \
+  Sound##name##Impl(); \
+  ~Sound##name##Impl(); \
+\
+  SoundStructs::SoundID loadSound(const std::string& FileName); \
+  SoundStructs::SoundSourceID createSoundSource(const SoundStructs::SoundSourceParams& Params); \
+  void playSoundSource(SoundStructs::SoundSourceID SrcID); \
+  bool isPlaying(SoundStructs::SoundSourceID SrcID); \
+\
+private: \
+  std::unique_ptr<Sound##name##Data> Data;\
+};
+
+namespace sound_impls
+{
+SOUND_IMPL(AL)
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Facade for Sound
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class SoundFacade {
 public:
-  SoundSystem(const SoundSystem&) = delete;
-  SoundSystem();
-  ~SoundSystem(); // Is needed for incomplete type SoundSystemImpl to compile (don't know why)
+  using Impl = sound_impls::SoundALImpl;
 
-  SoundStructs::SoundID loadSound(const std::string& FileName);
-  SoundStructs::SoundSourceID createSoundSource(const SoundStructs::SoundSourceParams& Params);
-  void playSoundSource(SoundStructs::SoundSourceID SrcID);
-  bool isPlaying(SoundStructs::SoundSourceID SrcID);
+  SoundFacade() // Maybe need to pass Props here
+  {}
 
-private:
-  std::unique_ptr<SoundSystemImpl> Impl;
+public:
+  [[maybe_unused]] Impl ImplInstance;
 };
 
 #endif // ENGINE_FACADE_HPP
