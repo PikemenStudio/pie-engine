@@ -32,7 +32,7 @@ protected:
     auto FacadeProps = GraphicFacadeStructs::GraphicEngineProps<
         window_api_impls::WindowApiFacadeGlfwImpl>{
         .Window = std::move(*WindowAdapterInstance),
-        .InstanceProps = InstanceProps,
+        .InstancePropsInstance = InstanceProps,
         .PhysicalDeviceProps = {},
     };
 

@@ -35,7 +35,7 @@ struct GraphicFacadeStructs {
   template <WindowApiImpl WindowImpl> struct GraphicEngineProps {
     WindowApiFacade<WindowImpl> Window;
 
-    InstanceProps InstanceProps;
+    InstanceProps InstancePropsInstance;
     PhysicalDeviceProps PhysicalDeviceProps;
   };
 

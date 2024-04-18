@@ -9,7 +9,9 @@
 
 int main(int Argc, char *Argv[]) {
   loguru::init(Argc, Argv);
+  // clang-format off
   loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
-  
+  // clang-format on
+
   return 0;
 }
