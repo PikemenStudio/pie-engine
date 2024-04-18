@@ -4,16 +4,20 @@ cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(CMAKE_CXX_STANDARD 20)
 
+option(TESTS "Build tests (tests will compile modules)" OFF)
+
 project(Engine VERSION 0.0.1 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# add window module
+# compile tests
 add_subdirectory(src/modules/windows/src)
 add_subdirectory(src/modules/graphics/src)
 set(ADAPTERS ${ADAPTERS} src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
 )
+
+add_subdirectory(tests)
 
 add_executable(main src/main.cpp ${ADAPTERS})
 
@@ -26,6 +30,9 @@ include_directories(src/modules/graphics/facades)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)
+
+find_package(glm CONFIG REQUIRED)
+target_link_libraries(main PRIVATE glm::glm)
 
 #add_subdirectory(tests)
 

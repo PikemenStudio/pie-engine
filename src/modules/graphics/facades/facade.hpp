@@ -5,7 +5,7 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 
-#include "../src/GraphicEngine.hpp"
+#include "../../windows/facades/facade.hpp"
 #include <any>
 #include <concepts>
 
