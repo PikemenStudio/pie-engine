@@ -33,7 +33,7 @@ protected:
         window_api_impls::WindowApiFacadeGlfwImpl>{
         .Window = std::move(*WindowAdapterInstance),
         .InstancePropsInstance = InstanceProps,
-        .PhysicalDeviceProps = {},
+        .PhysicalDevicePropsInstance = {},
     };
 
     ASSERT_NO_THROW(

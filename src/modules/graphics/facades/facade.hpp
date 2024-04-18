@@ -36,7 +36,7 @@ struct GraphicFacadeStructs {
     WindowApiFacade<WindowImpl> Window;
 
     InstanceProps InstancePropsInstance;
-    PhysicalDeviceProps PhysicalDeviceProps;
+    PhysicalDeviceProps PhysicalDevicePropsInstance;
   };
 
   struct PhysicalDeviceData {
