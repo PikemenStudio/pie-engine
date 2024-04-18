@@ -12,23 +12,23 @@ set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 
-add_library(vk_core ${SOURCE_ALL} ${HEADER_ALL})
+add_library(graphics ${SOURCE_ALL} ${HEADER_ALL})
 
 # link libraries
 # vulkan
 if (win32)
-    target_link_directories(vk_core PRIVATE $ENV{VULKAN_SDK}/Lib)
-    target_link_libraries(vk_core PRIVATE Vulkan-1)
+    target_link_directories(graphics PRIVATE $ENV{VULKAN_SDK}/Lib)
+    target_link_libraries(graphics PRIVATE Vulkan-1)
 endif (win32)
 
 if (APPLE)
-    target_link_libraries(vk_core PRIVATE $ENV{VULKAN_SDK}/lib/libvulkan.dylib)
+    target_link_libraries(graphics PRIVATE $ENV{VULKAN_SDK}/lib/libvulkan.dylib)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
     find_package(Vulkan REQUIRED)
-    target_link_libraries(vk_core PRIVATE Vulkan::Vulkan)
+    target_link_libraries(graphics PRIVATE Vulkan::Vulkan)
 endif (UNIX AND NOT APPLE)
 
 # glfw
-target_link_libraries(vk_core PUBLIC glfw)
+target_link_libraries(graphics PUBLIC glfw)
