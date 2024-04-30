@@ -3,8 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 # source files
-set(SOURCE_ALL SoundSystem.cpp SoundSystemImpl.cpp)
-set(HEADER_ALL SoundSystemImpl.hpp)
+set(SOURCE_ALL SoundSystemImpl.cpp)
+#set(HEADER_ALL SoundSystemImpl.hpp)
 
 add_library(sound ${SOURCE_ALL} ${HEADER_ALL})
 
