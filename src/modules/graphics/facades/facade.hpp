@@ -90,8 +90,8 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
   { Dep.Window };
 };
 
-#define GRAPHIC_API_IMPL(name, DependencyStructConcept)                           \
-  template <DependencyStructConcept Dep> class GraphicApiFacade##name##Impl {        \
+#define GRAPHIC_API_IMPL(name, DependencyStructConcept)                        \
+  template <DependencyStructConcept Dep> class GraphicApiFacade##name##Impl {  \
   public:                                                                      \
     GraphicApiFacade##name##Impl(const GraphicApiFacade##name##Impl &&) =      \
         delete;                                                                \

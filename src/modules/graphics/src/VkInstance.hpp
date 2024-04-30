@@ -5,8 +5,8 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_SRC_VKINSTANCE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_SRC_VKINSTANCE_HPP
 
-#include <string>
 #include <optional>
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace vk_core {
@@ -41,7 +41,7 @@ public:
     std::vector<const char *> RequestedWindowExtensions;
   };
 
-  operator vk::Instance&() { return NativeVkInstance; }
+  operator vk::Instance &() { return NativeVkInstance; }
 
   bool isPortabilityRequired() const;
 
@@ -64,12 +64,11 @@ protected:
     static void swap(std::optional<DebugMessenger> &M1,
                      std::optional<DebugMessenger> &M2);
 
-    static VKAPI_ATTR VkBool32 VKAPI_CALL
-    debugCallback(
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT MessageSeverity,
         [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT MessageType,
-                  const VkDebugUtilsMessengerCallbackDataEXT *PCallbackData,
-                  void *PUserData);
+        const VkDebugUtilsMessengerCallbackDataEXT *PCallbackData,
+        void *PUserData);
 
     vk::DebugUtilsMessengerEXT Messenger;
     vk::DispatchLoaderDynamic Loader;
@@ -88,6 +87,6 @@ protected:
   vk::Instance NativeVkInstance = nullptr;
 };
 
-} // namespace graphics
+} // namespace vk_core
 
 #endif // ENGINE_SRC_MODULES_VK_CORE_SRC_VKINSTANCE_HPP

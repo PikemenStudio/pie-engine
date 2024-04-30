@@ -10,17 +10,15 @@
 
 #include "types.hpp"
 
-struct SoundStructs
-{
+struct SoundStructs {
   using SoundID = unsigned int;
   using SoundSourceID = unsigned int;
 
-  struct SoundSourceParams
-  {
-    float Pitch {};
-    float Gain {};
-    float PosX {}, PosY {}, PosZ {};
-    float VelX {}, VelY {}, VelZ {};
+  struct SoundSourceParams {
+    float Pitch{};
+    float Gain{};
+    float PosX{}, PosY{}, PosZ{};
+    float VelX{}, VelY{}, VelZ{};
     bool Looping = false;
     SoundID SndID;
   };
@@ -33,10 +31,11 @@ template <typename T>
 concept SoundModuleImpl = requires(T Obj) {
   // Must have method void test(int)
   {
-    Obj.loadSound(std::declval<const std::string&>())
+    Obj.loadSound(std::declval<const std::string &>())
   } -> std::same_as<SoundStructs::SoundID>;
   {
-    Obj.createSoundSource(std::declval<const SoundStructs::SoundSourceParams&>())
+    Obj.createSoundSource(
+        std::declval<const SoundStructs::SoundSourceParams &>())
   } -> std::same_as<SoundStructs::SoundSourceID>;
   {
     Obj.playSoundSource(std::declval<SoundStructs::SoundSourceID>())
@@ -46,27 +45,27 @@ concept SoundModuleImpl = requires(T Obj) {
   } -> std::same_as<bool>;
 };
 
-#define SOUND_IMPL(name) \
-class Sound##name##Data; \
-class Sound##name##Impl { \
-public: \
-  Sound##name##Impl(const Sound##name##Impl&) = delete; \
-  Sound##name##Impl(); \
-  ~Sound##name##Impl(); \
-\
-  SoundStructs::SoundID loadSound(const std::string& FileName); \
-  SoundStructs::SoundSourceID createSoundSource(const SoundStructs::SoundSourceParams& Params); \
-  void playSoundSource(SoundStructs::SoundSourceID SrcID); \
-  bool isPlaying(SoundStructs::SoundSourceID SrcID); \
-\
-private: \
-  std::unique_ptr<Sound##name##Data> Data;\
-};
+#define SOUND_IMPL(name)                                                       \
+  class Sound##name##Data;                                                     \
+  class Sound##name##Impl {                                                    \
+  public:                                                                      \
+    Sound##name##Impl(const Sound##name##Impl &) = delete;                     \
+    Sound##name##Impl();                                                       \
+    ~Sound##name##Impl();                                                      \
+                                                                               \
+    SoundStructs::SoundID loadSound(const std::string &FileName);              \
+    SoundStructs::SoundSourceID                                                \
+    createSoundSource(const SoundStructs::SoundSourceParams &Params);          \
+    void playSoundSource(SoundStructs::SoundSourceID SrcID);                   \
+    bool isPlaying(SoundStructs::SoundSourceID SrcID);                         \
+                                                                               \
+  private:                                                                     \
+    std::unique_ptr<Sound##name##Data> Data;                                   \
+  };
 
-namespace sound_impls
-{
+namespace sound_impls {
 SOUND_IMPL(AL)
-}
+} // namespace sound_impls
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Facade for Sound

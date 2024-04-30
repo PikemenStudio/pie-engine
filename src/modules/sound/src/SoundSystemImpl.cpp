@@ -13,27 +13,25 @@
 #include <string>
 #include <vector>
 
-namespace sound_impls
-{
+namespace sound_impls {
 
-class SoundALData
-{
+class SoundALData {
 public:
-  ALCdevice* OpenALDevice = nullptr;
-  ALCcontext* OpenALContext = nullptr;
+  ALCdevice *OpenALDevice = nullptr;
+  ALCcontext *OpenALContext = nullptr;
   std::vector<ALuint> Buffers;
   std::vector<ALuint> Sources;
 };
 
-//bool SoundALImpl::IsInstanceAlreadyCreated = false;
+// bool SoundALImpl::IsInstanceAlreadyCreated = false;
 
 SoundALImpl::SoundALImpl() : Data(new sound_impls::SoundALData) {
   LOG_F(INFO, "Creating sound system");
 
-//  if (!IsInstanceAlreadyCreated)
-//    IsInstanceAlreadyCreated = true;
-//  else
-//    throw std::runtime_error("Cannot have another sound system");
+  //  if (!IsInstanceAlreadyCreated)
+  //    IsInstanceAlreadyCreated = true;
+  //  else
+  //    throw std::runtime_error("Cannot have another sound system");
 
   LOG_F(INFO, "Opening an OpenAL device");
   Data->OpenALDevice = alcOpenDevice(nullptr);
@@ -64,17 +62,18 @@ SoundStructs::SoundID SoundALImpl::loadSound(const std::string &FileName) {
   LOG_F(INFO, "Loading file: %s", FileName.c_str());
 
   SF_INFO Info;
-  SNDFILE* File = sf_open(FileName.c_str(), SFM_READ, &Info);
-  if (!File)
-  {
+  SNDFILE *File = sf_open(FileName.c_str(), SFM_READ, &Info);
+  if (!File) {
     throw std::runtime_error("Failed to open file");
   }
 
   std::vector<uint16_t> SoundData;
   std::array<int16_t, 4096> ReadBuf;
   size_t ReadSize;
-  while ((ReadSize = sf_read_short(File, ReadBuf.data(), ReadBuf.size())) != 0) {
-    SoundData.insert(SoundData.end(), ReadBuf.begin(), ReadBuf.begin() + ReadSize);
+  while ((ReadSize = sf_read_short(File, ReadBuf.data(), ReadBuf.size())) !=
+         0) {
+    SoundData.insert(SoundData.end(), ReadBuf.begin(),
+                     ReadBuf.begin() + ReadSize);
   }
 
   sf_close(File);
@@ -83,9 +82,8 @@ SoundStructs::SoundID SoundALImpl::loadSound(const std::string &FileName) {
   alGenBuffers(1, &Buffer);
   this->Data->Buffers.push_back(Buffer);
 
-  ALenum Format = Info.channels == 1? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-  if (Format == AL_FORMAT_STEREO16 || Format == AL_FORMAT_STEREO8)
-  {
+  ALenum Format = Info.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+  if (Format == AL_FORMAT_STEREO16 || Format == AL_FORMAT_STEREO8) {
     LOG_F(INFO, "Cannot put sound in space: stereo format");
   }
 
@@ -95,9 +93,8 @@ SoundStructs::SoundID SoundALImpl::loadSound(const std::string &FileName) {
   return Buffer;
 }
 
-SoundStructs::SoundSourceID SoundALImpl::createSoundSource(
-    const SoundStructs::SoundSourceParams& Params
-) {
+SoundStructs::SoundSourceID
+SoundALImpl::createSoundSource(const SoundStructs::SoundSourceParams &Params) {
   LOG_F(INFO, "Creating sound source");
 
   ALuint Source;
@@ -114,8 +111,7 @@ SoundStructs::SoundSourceID SoundALImpl::createSoundSource(
   return Source;
 }
 
-void SoundALImpl::playSoundSource(SoundStructs::SoundSourceID SrcID)
-{
+void SoundALImpl::playSoundSource(SoundStructs::SoundSourceID SrcID) {
   LOG_F(INFO, "Start playing sound source");
   alSourcePlay(SrcID);
 }

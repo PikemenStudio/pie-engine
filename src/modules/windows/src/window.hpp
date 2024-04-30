@@ -39,7 +39,7 @@ public:
 
   std::vector<const char *> getRequiredExtensions() const;
 
-  GLFWwindow* getNativeWindow() const { return GlfwWindow.get(); }
+  GLFWwindow *getNativeWindow() const { return GlfwWindow.get(); }
 
 protected:
   // Build glfw object
