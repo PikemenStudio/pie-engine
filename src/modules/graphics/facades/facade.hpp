@@ -32,8 +32,8 @@ struct GraphicFacadeStructs {
 
   struct PhysicalDeviceProps {};
 
-  template <WindowApiImpl WindowImpl> struct GraphicEngineProps {
-    WindowApiFacade<WindowImpl> Window;
+  template <typename DependencyStructT> struct GraphicEngineProps {
+    DependencyStructT Dependencies;
 
     InstanceProps InstancePropsInstance;
     PhysicalDeviceProps PhysicalDevicePropsInstance;
@@ -65,10 +65,10 @@ struct GraphicFacadeStructs {
 // Concept to get errors earlier if the Impl is not valid
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <typename T, typename WindowImpl>
+template <typename T, typename DependencyStructT>
 concept GraphicApiImpl = requires(T Obj) {
   std::is_constructible_v<
-      T, GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&>;
+      T, GraphicFacadeStructs::GraphicEngineProps<DependencyStructT> &&>;
   {
     Obj.getLocalPhysicalDevices()
   } -> std::same_as<std::vector<GraphicFacadeStructs::PhysicalDeviceData>>;
@@ -84,13 +84,19 @@ concept GraphicApiImpl = requires(T Obj) {
 // Blueprint for the GraphicApi Implementation, add functions here
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#define GRAPHIC_API_IMPL(name)                                                 \
-  template <WindowApiImpl WindowImpl> class GraphicApiFacade##name##Impl {     \
+// Define all concepts with implementation dependencies
+template <typename DependencyStructT>
+concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
+  { Dep.Window };
+};
+
+#define GRAPHIC_API_IMPL(name, DependencyStructConcept)                           \
+  template <DependencyStructConcept Dep> class GraphicApiFacade##name##Impl {        \
   public:                                                                      \
     GraphicApiFacade##name##Impl(const GraphicApiFacade##name##Impl &&) =      \
         delete;                                                                \
     GraphicApiFacade##name##Impl(                                              \
-        GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&);              \
+        GraphicFacadeStructs::GraphicEngineProps<Dep> &&);                     \
     ~GraphicApiFacade##name##Impl();                                           \
                                                                                \
     std::vector<GraphicFacadeStructs::PhysicalDeviceData>                      \
@@ -110,26 +116,26 @@ concept GraphicApiImpl = requires(T Obj) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 namespace graphic_api_impls {
-GRAPHIC_API_IMPL(Vulkan)
+template <WindowApiImpl WindowT> struct VulkanDependencies {
+  using WindowType = WindowT;
+  WindowApiFacade<WindowT> Window;
+};
+GRAPHIC_API_IMPL(Vulkan, VulkanDependenciesConcept)
 } // namespace graphic_api_impls
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Facade for the GraphicApi
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <WindowApiImpl WindowImpl> class GraphicApiFacade {
+template <typename DependencyStructT, GraphicApiImpl<DependencyStructT> Impl>
+class GraphicApiFacade {
 public:
-  using Impl = graphic_api_impls::GraphicApiFacadeVulkanImpl<WindowImpl>;
-
-  GraphicApiFacade(GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props)
+  GraphicApiFacade(
+      GraphicFacadeStructs::GraphicEngineProps<DependencyStructT> &&Props)
       : ImplInstance(std::move(Props)) {}
 
 public:
   [[maybe_unused]] Impl ImplInstance;
 };
-
-[[maybe_unused]] typedef graphic_api_impls::GraphicApiFacadeVulkanImpl<
-    window_api_impls::WindowApiFacadeGlfwImpl>
-    VkTemplateInstantiation; // нигде не используется
 
 #endif // ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP

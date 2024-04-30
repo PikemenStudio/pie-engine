@@ -7,7 +7,6 @@
       "vulkan-headers",
       "glfw3",
       "glm",
-      "boost-process",
       "loguru",
       "openal-soft",
       "libsndfile"

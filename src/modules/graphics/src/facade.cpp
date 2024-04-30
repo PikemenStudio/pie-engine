@@ -12,36 +12,6 @@ template <WindowApiImpl WindowImpl> using DataTypePtr = DataType<WindowImpl> *;
 // Convertors
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <WindowApiImpl WindowImpl>
-vk_core::GraphicEngine<WindowImpl>::GraphicEngineProps
-toModuleType(GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props) {
-  typename vk_core::GraphicEngine<WindowImpl>::GraphicEngineProps ModuleProps{
-      .Window = std::move(Props.Window),
-      .VkInstanceProps =
-          {
-              .AppName = std::move(Props.InstancePropsInstance.AppName),
-              .EngineName = std::move(Props.InstancePropsInstance.EngineName),
-              .AppVersion =
-                  {
-                      .Major = Props.InstancePropsInstance.AppVersion.Major,
-                      .Minor = Props.InstancePropsInstance.AppVersion.Minor,
-                      .Patch = Props.InstancePropsInstance.AppVersion.Patch,
-                  },
-              .EngineVersion =
-                  {
-                      .Major = Props.InstancePropsInstance.EngineVersion.Major,
-                      .Minor = Props.InstancePropsInstance.EngineVersion.Minor,
-                      .Patch = Props.InstancePropsInstance.EngineVersion.Patch,
-                  },
-              .RequestedWindowExtensions =
-                  std::move(Props.InstancePropsInstance.RequestedWindowExtensions),
-          },
-      .VkPhysicalDeviceProps = {
-          // Just empty :)
-      }};
-  return ModuleProps;
-}
-
 GraphicFacadeStructs::PhysicalDeviceData::TypeEnum toExternalType(
     vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum Type) {
   switch (Type) {
@@ -84,16 +54,19 @@ toModuleType(GraphicFacadeStructs::PhysicalDeviceData::TypeEnum Type) {
   }
 }
 
-template <WindowApiImpl WindowImpl>
-vk_core::GraphicEngine<WindowImpl>::DeviceChoosePolicy
+template <VulkanDependenciesConcept Dep>
+vk_core::GraphicEngine<typename Dep::WindowType>::DeviceChoosePolicy
 toModuleType(GraphicFacadeStructs::DeviceChoosePolicy Policy) {
   switch (Policy) {
   case GraphicFacadeStructs::DeviceChoosePolicy::FIRST:
-    return vk_core::GraphicEngine<WindowImpl>::DeviceChoosePolicy::FIRST;
+    return vk_core::GraphicEngine<
+        typename Dep::WindowType>::DeviceChoosePolicy::FIRST;
   case GraphicFacadeStructs::DeviceChoosePolicy::BEST:
-    return vk_core::GraphicEngine<WindowImpl>::DeviceChoosePolicy::BEST;
+    return vk_core::GraphicEngine<
+        typename Dep::WindowType>::DeviceChoosePolicy::BEST;
   default:
-    return vk_core::GraphicEngine<WindowImpl>::DeviceChoosePolicy::FIRST;
+    return vk_core::GraphicEngine<
+        typename Dep::WindowType>::DeviceChoosePolicy::FIRST;
   }
 }
 
@@ -101,23 +74,56 @@ toModuleType(GraphicFacadeStructs::DeviceChoosePolicy Policy) {
 // Implementations
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-template <WindowApiImpl WindowImpl>
-GraphicApiFacadeVulkanImpl<WindowImpl>::GraphicApiFacadeVulkanImpl(
-    GraphicFacadeStructs::GraphicEngineProps<WindowImpl> &&Props) {
-  Data = new DataType<WindowImpl>(toModuleType(std::move(Props)));
+template <VulkanDependenciesConcept Dep>
+GraphicApiFacadeVulkanImpl<Dep>::GraphicApiFacadeVulkanImpl(
+    GraphicFacadeStructs::GraphicEngineProps<Dep> &&Props) {
+
+  // Convert
+  // From GraphicFacadeStructs::GraphicEngineProps<Dep> &&Props
+  // To   vk_core::GraphicEngine<Dep::WindowType>::GraphicEngineProps
+  typename vk_core::GraphicEngine<
+      typename Dep::WindowType>::GraphicEngineProps ModuleProps{
+      .Window = std::move(Props.Dependencies.Window),
+      .VkInstanceProps =
+          {
+              .AppName = std::move(Props.InstancePropsInstance.AppName),
+              .EngineName = std::move(Props.InstancePropsInstance.EngineName),
+              .AppVersion =
+                  {
+                      .Major = Props.InstancePropsInstance.AppVersion.Major,
+                      .Minor = Props.InstancePropsInstance.AppVersion.Minor,
+                      .Patch = Props.InstancePropsInstance.AppVersion.Patch,
+                  },
+              .EngineVersion =
+                  {
+                      .Major = Props.InstancePropsInstance.EngineVersion.Major,
+                      .Minor = Props.InstancePropsInstance.EngineVersion.Minor,
+                      .Patch = Props.InstancePropsInstance.EngineVersion.Patch,
+                  },
+              .RequestedWindowExtensions = std::move(
+                  Props.InstancePropsInstance.RequestedWindowExtensions),
+          },
+      .VkPhysicalDeviceProps = {
+          // Just empty :)
+      }};
+
+  // And pass to the module
+  Data = new vk_core::GraphicEngine<typename Dep::WindowType>(
+      std::move(ModuleProps));
 }
 
-template <WindowApiImpl WindowImpl>
-GraphicApiFacadeVulkanImpl<WindowImpl>::~GraphicApiFacadeVulkanImpl() {
-  delete static_cast<DataTypePtr<WindowImpl>>(Data);
+template <VulkanDependenciesConcept Dep>
+GraphicApiFacadeVulkanImpl<Dep>::~GraphicApiFacadeVulkanImpl() {
+  delete static_cast<DataTypePtr<typename Dep::WindowType> *>(Data);
 }
 
-template <WindowApiImpl WindowImpl>
+template <VulkanDependenciesConcept Dep>
 std::vector<GraphicFacadeStructs::PhysicalDeviceData>
-GraphicApiFacadeVulkanImpl<WindowImpl>::getLocalPhysicalDevices() const {
+GraphicApiFacadeVulkanImpl<Dep>::getLocalPhysicalDevices() const {
   std::vector<GraphicFacadeStructs::PhysicalDeviceData> Result;
   for (const auto &Device :
-       static_cast<DataTypePtr<WindowImpl>>(Data)->getLocalPhysicalDevices()) {
+       static_cast<DataTypePtr<typename Dep::WindowType>>(Data)
+           ->getLocalPhysicalDevices()) {
     Result.push_back(GraphicFacadeStructs::PhysicalDeviceData{
         .Name = Device.Name,
         .ApiVersion = Device.ApiVersion,
@@ -130,8 +136,8 @@ GraphicApiFacadeVulkanImpl<WindowImpl>::getLocalPhysicalDevices() const {
   return Result;
 }
 
-template <WindowApiImpl WindowImpl>
-void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
+template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::PhysicalDeviceData &DeviceData) {
   vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps Device{
       .Name = DeviceData.Name,
@@ -141,16 +147,18 @@ void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
       .DeviceId = DeviceData.DeviceId,
       .Type = toModuleType(DeviceData.Type),
   };
-  static_cast<DataTypePtr<WindowImpl>>(Data)->chooseLocalPhysicalDevice(Device);
+  static_cast<DataTypePtr<typename Dep::WindowType>>(Data)
+      ->chooseLocalPhysicalDevice(Device);
 }
 
-template <WindowApiImpl WindowImpl>
-void GraphicApiFacadeVulkanImpl<WindowImpl>::chooseGpu(
+template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::DeviceChoosePolicy Policy) {
-  static_cast<DataTypePtr<WindowImpl>>(Data)->chooseLocalPhysicalDevice(
-      toModuleType<WindowImpl>(Policy));
+  static_cast<DataTypePtr<typename Dep::WindowType>>(Data)
+      ->chooseLocalPhysicalDevice(toModuleType<Dep>(Policy));
 }
 
 // Explicitly instantiate class
 template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
-    window_api_impls::WindowApiFacadeGlfwImpl>;
+    graphic_api_impls::VulkanDependencies<
+        window_api_impls::WindowApiFacadeGlfwImpl>>;
