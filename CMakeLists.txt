@@ -17,7 +17,7 @@ add_subdirectory(src/modules/sound/src)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
-        src/modules/sound/facade/SoundSystem.hpp
+        src/modules/sound/facade/facade.hpp
 )
 
 add_subdirectory(tests)
