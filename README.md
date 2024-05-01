@@ -22,7 +22,7 @@ Run
 bash ./scripts/macos_install.sh
 ```
 
-**If you will use other terminal or app to build project, export variables globally**
+**If you will use other terminal or app to build project, export variables globally (check for them at the end of the script)**
 
 Build project and fix errors by downloading missing packages using brew if any
 ```
