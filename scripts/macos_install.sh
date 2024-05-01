@@ -1,4 +1,4 @@
-VULKAN_PATH=~/VulkanSDK/1.3.275.0/macOS/
+VULKAN_PATH=~/VulkanSDK/$(ls -tr ~/VulkanSDK | tail -n 1)/macOS/
 
 echo \[1/5\] Init files
 git submodule update --init --recursive
