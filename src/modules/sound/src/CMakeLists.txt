@@ -10,7 +10,18 @@ add_library(sound ${SOURCE_ALL} ${HEADER_ALL})
 
 # link libraries
 # I need OpenAL
-find_package(OpenAL REQUIRED)
-find_package(SndFile CONFIG REQUIRED)
-find_package(loguru CONFIG REQUIRED)
-target_link_libraries(sound PUBLIC OpenAL::OpenAL SndFile::sndfile loguru)
+if (UNIX AND NOT APPLE)
+    find_package(OpenAL REQUIRED)
+    find_package(SndFile CONFIG REQUIRED)
+    find_package(loguru CONFIG REQUIRED)
+    target_link_libraries(sound PUBLIC OpenAL::OpenAL SndFile::sndfile loguru)
+endif(UNIX AND NOT APPLE)
+
+if (APPLE)
+    find_package(SndFile CONFIG REQUIRED)
+    find_package(loguru CONFIG REQUIRED)
+
+    message("OpenAL-Soft path: ${OPENAL_PATH}")
+    target_link_libraries(sound PUBLIC ${OPENAL_PATH}/lib/libopenal.dylib SndFile::sndfile loguru)
+    target_include_directories(sound PUBLIC ${OPENAL_PATH}/include/AL)
+endif(APPLE)
