@@ -17,16 +17,12 @@
    ```
 ## Build Instructions
 ### Apple
-Set VULKAN_SDK env for your system:
-```sh
-export VULKAN_SDK=~/VulkanSDK/1.3.268.1/macOS/
+Run
 ```
-If you use sound module based on openal, you should install it using brew
-```sh
-brew install openal-soft
-cd /usr/local/Cellar/openal-soft
-export OPENAL_DIR=/usr/local/Cellar/openal-soft/ pwd
+bash ./scripts/macos_install.sh
 ```
+
+**If you will use other terminal or app to build project, export variables globally**
 
 Build project and fix errors by downloading missing packages using brew if any
 ```
