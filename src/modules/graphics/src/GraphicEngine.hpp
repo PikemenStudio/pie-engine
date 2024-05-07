@@ -8,6 +8,7 @@
 #include "../../windows/facades/facade.hpp"
 #include "VkInstance.hpp"
 #include "VkPhysicalDevice.hpp"
+#include "VkPipeline.h"
 #include "loguru/loguru.hpp"
 
 namespace vk_core {
@@ -23,17 +24,17 @@ public:
     WindowApiFacade<WindowImpl> Window;
 
     vk_core::VkInstance::VkInstanceProps VkInstanceProps;
-    vk_core::VkPhysicalDevice::VkPhysicalDeviceProps VkPhysicalDeviceProps;
+    vk_core::VkPhysicalDevice<WindowImpl>::VkPhysicalDeviceProps VkPhysicalDeviceProps;
   };
 
   void setupInstance(VkInstance::VkInstanceProps Props);
-  void setupPhysicalDevice(VkPhysicalDevice::VkPhysicalDeviceProps Props);
+  void setupPhysicalDevice(VkPhysicalDevice<WindowImpl>::VkPhysicalDeviceProps Props);
 
-  std::vector<VkPhysicalDevice::PhysicalDeviceLocalProps>
+  std::vector<typename VkPhysicalDevice<WindowImpl>::PhysicalDeviceLocalProps>
   getLocalPhysicalDevices() const;
 
   void chooseLocalPhysicalDevice(
-      const VkPhysicalDevice::PhysicalDeviceLocalProps &Device);
+      const VkPhysicalDevice<WindowImpl>::PhysicalDeviceLocalProps &Device);
 
   enum class DeviceChoosePolicy : uint_fast8_t {
     FIRST,
@@ -44,13 +45,9 @@ public:
   // in the BEST policy ONLY
   void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
-  void initWindowSurface();
-
-  void querySwapChainSupport();
-
 private:
   struct AdaptersStruct {
-    WindowApiFacade<WindowImpl> Window;
+    std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
   };
 
   struct SwapChainSupportDetails {
@@ -63,11 +60,7 @@ private:
     std::optional<AdaptersStruct> Adapters;
 
     std::shared_ptr<vk_core::VkInstance> Instance;
-    std::shared_ptr<vk_core::VkPhysicalDevice> PhysicalDevice;
-
-    std::optional<vk::SurfaceKHR> Surface;
-
-    std::optional<SwapChainSupportDetails> SwapChainSupport;
+    std::shared_ptr<vk_core::VkPhysicalDevice<WindowImpl>> PhysicalDevice;
   } NativeComponents;
 };
 

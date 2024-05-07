@@ -69,9 +69,12 @@ TEST_F(VkTest, GraphicGetters) {
 }
 
 TEST_F(VkTest, GraphicSetupEngine) {
-  ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu(
-      GraphicFacadeStructs::DeviceChoosePolicy::BEST));
+  GraphicAdapterInstance->ImplInstance.chooseGpu(
+      GraphicFacadeStructs::DeviceChoosePolicy::BEST);
+  //ASSERT_NO_THROW();
+}
 
+TEST_F(VkTest, ChooseDefaultGpu) {
   ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu({}));
 }
 

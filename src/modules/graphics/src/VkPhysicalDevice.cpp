@@ -4,18 +4,21 @@
 
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "VkPhysicalDevice.hpp"
+#define LOGURU_WITH_STREAMS 1
 #include "loguru/loguru.hpp"
 #include <set>
 
 namespace vk_core {
 
-VkPhysicalDevice::VkPhysicalDevice(
+template <WindowApiImpl WindowImpl>
+VkPhysicalDevice<WindowImpl>::VkPhysicalDevice(
     VkPhysicalDevice::VkPhysicalDeviceProps Props) {
   Instance = Props.Instance;
 }
 
+template <WindowApiImpl WindowImpl>
 std::vector<vk::PhysicalDevice>
-VkPhysicalDevice::getNativePhysicalDevices() const {
+VkPhysicalDevice<WindowImpl>::getNativePhysicalDevices() const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -47,22 +50,33 @@ VkPhysicalDevice::getNativePhysicalDevices() const {
   return Devices;
 }
 
-VkPhysicalDevice::~VkPhysicalDevice() { this->LogicalDevice->destroy(); }
-void VkPhysicalDevice::swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2) {
+template <WindowApiImpl WindowImpl>
+VkPhysicalDevice<WindowImpl>::~VkPhysicalDevice() {
+  this->Pipeline.reset();
+  this->LogicalDevice->destroy();
+}
+
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::swap(VkPhysicalDevice &Pd1,
+                                        VkPhysicalDevice &Pd2) {
   std::swap(Pd1.Instance, Pd2.Instance);
 }
 
-VkPhysicalDevice::VkPhysicalDevice(VkPhysicalDevice &&PdToMove) {
+template <WindowApiImpl WindowImpl>
+VkPhysicalDevice<WindowImpl>::VkPhysicalDevice(VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
 }
 
-VkPhysicalDevice &VkPhysicalDevice::operator=(VkPhysicalDevice &&PdToMove) {
+template <WindowApiImpl WindowImpl>
+VkPhysicalDevice<WindowImpl> &
+VkPhysicalDevice<WindowImpl>::operator=(VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
   return *this;
 }
 
-std::vector<VkPhysicalDevice::PhysicalDeviceLocalProps>
-VkPhysicalDevice::getLocalPhysicalDevices() const {
+template <WindowApiImpl WindowImpl>
+std::vector<typename VkPhysicalDevice<WindowImpl>::PhysicalDeviceLocalProps>
+VkPhysicalDevice<WindowImpl>::getLocalPhysicalDevices() const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -104,7 +118,8 @@ VkPhysicalDevice::getLocalPhysicalDevices() const {
   return LocalDevices;
 }
 
-void VkPhysicalDevice::findQueueIndexesAndSetup() {
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::findQueueIndexesAndSetup() {
   LOG_F(INFO, "Finding queue indexes");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -135,7 +150,8 @@ void VkPhysicalDevice::findQueueIndexesAndSetup() {
   }
 }
 
-void VkPhysicalDevice::chooseDeviceAndSetup(
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::chooseDeviceAndSetup(
     std::function<bool(const vk::PhysicalDevice &)> Predicate) {
   std::vector<vk::PhysicalDevice> AvailableDevices =
       static_cast<vk::Instance &>(*Instance.get()).enumeratePhysicalDevices();
@@ -161,7 +177,8 @@ void VkPhysicalDevice::chooseDeviceAndSetup(
   }
 }
 
-void VkPhysicalDevice::setupLogicalDevice() {
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::setupLogicalDevice() {
   LOG_F(INFO, "Setting up logical device");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -216,7 +233,9 @@ void VkPhysicalDevice::setupLogicalDevice() {
     throw;
   }
 }
-void VkPhysicalDevice::setupQueues() {
+
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::setupQueues() {
   if (!LogicalDevice.has_value()) {
     LOG_F(ERROR, "Logical device is not initialized");
     throw std::runtime_error("Logical device is not initialized");
@@ -238,4 +257,34 @@ void VkPhysicalDevice::setupQueues() {
     LOG_F(WARNING, "Present queue is not initialized");
   }
 }
+
+template <WindowApiImpl WindowImpl>
+void VkPhysicalDevice<WindowImpl>::setupPipeline(
+    const VkPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
+  std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
+  if (QueueIndexesInstance.Graphics.has_value()) {
+    FamilyIndexes[vk::QueueFlagBits::eGraphics] =
+        QueueIndexesInstance.Graphics.value();
+  }
+      if (QueueIndexesInstance.Present.has_value()) {
+      FamilyIndexes[vk::QueueFlagBits::eCompute] =
+              QueueIndexesInstance.Present.value();
+      }
+      if (QueueIndexesInstance.Transfer.has_value()) {
+      FamilyIndexes[vk::QueueFlagBits::eTransfer] =
+              QueueIndexesInstance.Transfer.value();
+      }
+
+  typename vk_core::VkPipeline<WindowImpl>::VkPipelineProps Props{
+      .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
+      .Instance = this->Instance,
+      .Facades = {.Window = PipelineInitData.Window},
+      .FamilyIndexes = std::move(FamilyIndexes)};
+  this->Pipeline =
+      std::make_unique<vk_core::VkPipeline<WindowImpl>>(std::move(Props));
+}
+
+template class vk_core::VkPhysicalDevice<
+    window_api_impls::WindowApiFacadeGlfwImpl>;
+
 } // namespace vk_core

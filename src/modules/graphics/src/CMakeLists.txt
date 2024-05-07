@@ -5,14 +5,19 @@ set(CMAKE_CXX_STANDARD 20)
 # source files
 set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
         GraphicEngine.cpp
-        facade.cpp)
+        facade.cpp
+        VkPipeline.cpp
+        VkPipeline.h)
 set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
         GraphicEngine.cpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(loguru CONFIG REQUIRED)
 
 add_library(graphics ${SOURCE_ALL} ${HEADER_ALL})
+
+target_link_libraries(graphics PRIVATE loguru)
 
 # link libraries
 # vulkan

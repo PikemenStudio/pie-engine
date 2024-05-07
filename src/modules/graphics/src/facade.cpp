@@ -12,48 +12,6 @@ template <WindowApiImpl WindowImpl> using DataTypePtr = DataType<WindowImpl> *;
 // Convertors
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-GraphicFacadeStructs::PhysicalDeviceData::TypeEnum toExternalType(
-    vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum Type) {
-  switch (Type) {
-  case vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::OTHER:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::OTHER;
-  case vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-      INTEGRATED_GPU:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::INTEGRATED_GPU;
-  case vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-      DISCRETE_GPU:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::DISCRETE_GPU;
-  case vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-      VIRTUAL_GPU:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::VIRTUAL_GPU;
-  case vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::CPU:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::CPU;
-  default:
-    return GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::OTHER;
-  }
-}
-
-vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum
-toModuleType(GraphicFacadeStructs::PhysicalDeviceData::TypeEnum Type) {
-  switch (Type) {
-  case GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::OTHER:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::OTHER;
-  case GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::INTEGRATED_GPU:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-        INTEGRATED_GPU;
-  case GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::DISCRETE_GPU:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-        DISCRETE_GPU;
-  case GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::VIRTUAL_GPU:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::
-        VIRTUAL_GPU;
-  case GraphicFacadeStructs::PhysicalDeviceData::TypeEnum::CPU:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::CPU;
-  default:
-    return vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps::TypeEnum::OTHER;
-  }
-}
-
 template <VulkanDependenciesConcept Dep>
 vk_core::GraphicEngine<typename Dep::WindowType>::DeviceChoosePolicy
 toModuleType(GraphicFacadeStructs::DeviceChoosePolicy Policy) {
@@ -130,7 +88,8 @@ GraphicApiFacadeVulkanImpl<Dep>::getLocalPhysicalDevices() const {
         .DriverVersion = Device.DriverVersion,
         .VendorId = Device.VendorId,
         .DeviceId = Device.DeviceId,
-        .Type = toExternalType(Device.Type),
+        .Type = static_cast<GraphicFacadeStructs::PhysicalDeviceData::TypeEnum>(
+            Device.Type),
     });
   }
   return Result;
@@ -139,13 +98,16 @@ GraphicApiFacadeVulkanImpl<Dep>::getLocalPhysicalDevices() const {
 template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::PhysicalDeviceData &DeviceData) {
-  vk_core::VkPhysicalDevice::PhysicalDeviceLocalProps Device{
+  typename vk_core::VkPhysicalDevice<
+      typename Dep::WindowType>::PhysicalDeviceLocalProps Device{
       .Name = DeviceData.Name,
       .ApiVersion = DeviceData.ApiVersion,
       .DriverVersion = DeviceData.DriverVersion,
       .VendorId = DeviceData.VendorId,
       .DeviceId = DeviceData.DeviceId,
-      .Type = toModuleType(DeviceData.Type),
+      .Type = static_cast<vk_core::VkPhysicalDevice<
+          typename Dep::WindowType>::PhysicalDeviceLocalProps::TypeEnum>(
+          DeviceData.Type),
   };
   static_cast<DataTypePtr<typename Dep::WindowType>>(Data)
       ->chooseLocalPhysicalDevice(Device);

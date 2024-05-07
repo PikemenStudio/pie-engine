@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <string>
+#define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 
 namespace vk_core {

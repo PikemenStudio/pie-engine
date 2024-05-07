@@ -8,10 +8,17 @@
 #include <memory>
 
 #include "VkInstance.hpp"
+#include "../../windows/facades/facade.hpp"
+#include "VkPipeline.h"
+#define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
+#include <map>
 
 namespace vk_core {
 
+template <WindowApiImpl WindowImpl> class VkPipeline;
+
+template <WindowApiImpl WindowImpl>
 class VkPhysicalDevice {
 public:
   struct VkPhysicalDeviceProps;
@@ -91,6 +98,13 @@ public:
 
   void setupQueues();
 
+  struct PipelineInitDataStruct {
+    std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
+    // It's strange, but we need pointer from GraphicEngine and can't just use this
+    std::shared_ptr<VkPhysicalDevice<WindowImpl>> ThisPhysicalDevice;
+  };
+  void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
+
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);
 
@@ -98,6 +112,7 @@ protected:
   std::shared_ptr<VkInstance> Instance;
   std::optional<vk::PhysicalDevice> PhysicalDevice;
   std::optional<vk::Device> LogicalDevice;
+  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl>> Pipeline;
 
   struct QueueIndexes {
     std::optional<uint32_t> Graphics;
