@@ -26,6 +26,11 @@ vk_core::VkPipeline<WindowImpl>::VkPipeline(VkPipeline::VkPipelineProps Props) {
 
 template <WindowApiImpl WindowImpl>
 vk_core::VkPipeline<WindowImpl>::~VkPipeline() {
+  for (auto &Frame : SwapChainBundle.value().Frames) {
+    static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+        .destroyImageView(Frame.ImageView);
+  }
+
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
       .destroySwapchainKHR(SwapChainBundle.value().Swapchain);
 
@@ -165,8 +170,10 @@ void vk_core::VkPipeline<WindowImpl>::logSwapChainInfo() {
   logImageBits(Support.Capabilities.supportedUsageFlags);
 
   for (vk::SurfaceFormatKHR supportedFormat : Support.Formats) {
-    LOG_F(INFO, "supported pixel format: %s", vk::to_string(supportedFormat.format).c_str());
-    LOG_F(INFO, "supported color space: %s", vk::to_string(supportedFormat.colorSpace).c_str());
+    LOG_F(INFO, "supported pixel format: %s",
+          vk::to_string(supportedFormat.format).c_str());
+    LOG_F(INFO, "supported color space: %s",
+          vk::to_string(supportedFormat.colorSpace).c_str());
   }
 
   for (vk::PresentModeKHR presentMode : Support.PresentModes) {
@@ -415,9 +422,44 @@ void vk_core::VkPipeline<WindowImpl>::createSwapChain() {
                              E.what());
   }
 
-  Bundle.Images =
-      static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
-          .getSwapchainImagesKHR(Bundle.Swapchain);
+  auto Images = static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
+                    .getSwapchainImagesKHR(Bundle.Swapchain);
+  auto &Frames = Bundle.Frames;
+  Frames.reserve(Images.size());
+  for (size_t I = 0; I < Images.size(); ++I) {
+    vk::ImageViewCreateInfo ViewCreateInfo{
+        .image = Images[I],
+        .viewType = vk::ImageViewType::e2D,
+        .format = Format.format,
+        .components =
+            {
+                .r = vk::ComponentSwizzle::eIdentity,
+                .g = vk::ComponentSwizzle::eIdentity,
+                .b = vk::ComponentSwizzle::eIdentity,
+                .a = vk::ComponentSwizzle::eIdentity,
+            },
+        .subresourceRange =
+            {
+                .aspectMask = vk::ImageAspectFlagBits::eColor,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+    };
+
+    try {
+      Frames.push_back(SwapChainFrameStruct{
+          .Image = Images[I],
+          .ImageView =
+              static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
+                  .createImageView(ViewCreateInfo),
+      });
+    } catch (vk::SystemError &E) {
+      throw std::runtime_error(std::string("Failed to create image view ") +
+                               E.what());
+    }
+  }
   this->SwapChainBundle = Bundle;
 }
 

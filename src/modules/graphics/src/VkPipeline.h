@@ -59,9 +59,14 @@ protected:
     std::vector<vk::PresentModeKHR> PresentModes;
   };
 
+  struct SwapChainFrameStruct {
+    vk::Image Image;
+    vk::ImageView ImageView;
+  };
+
   struct SwapChainBundleStruct {
     vk::SwapchainKHR Swapchain;
-    std::vector<vk::Image> Images;
+    std::vector<SwapChainFrameStruct> Frames;
     vk::Format Format;
     vk::Extent2D Extent;
   };
