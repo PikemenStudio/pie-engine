@@ -263,17 +263,23 @@ void VkPhysicalDevice<WindowImpl>::setupPipeline(
     const VkPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
   std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
   if (QueueIndexesInstance.Graphics.has_value()) {
+    LOG_F(INFO, "Graphics family index: %d",
+          QueueIndexesInstance.Graphics.value());
     FamilyIndexes[vk::QueueFlagBits::eGraphics] =
         QueueIndexesInstance.Graphics.value();
   }
-      if (QueueIndexesInstance.Present.has_value()) {
-      FamilyIndexes[vk::QueueFlagBits::eCompute] =
-              QueueIndexesInstance.Present.value();
-      }
-      if (QueueIndexesInstance.Transfer.has_value()) {
-      FamilyIndexes[vk::QueueFlagBits::eTransfer] =
-              QueueIndexesInstance.Transfer.value();
-      }
+  if (QueueIndexesInstance.Present.has_value()) {
+    LOG_F(INFO, "Present family index: %d",
+          QueueIndexesInstance.Present.value());
+    FamilyIndexes[vk::QueueFlagBits::eCompute] =
+        QueueIndexesInstance.Present.value();
+  }
+  if (QueueIndexesInstance.Transfer.has_value()) {
+    LOG_F(INFO, "Transfer family index: %d",
+          QueueIndexesInstance.Transfer.value());
+    FamilyIndexes[vk::QueueFlagBits::eTransfer] =
+        QueueIndexesInstance.Transfer.value();
+  }
 
   typename vk_core::VkPipeline<WindowImpl>::VkPipelineProps Props{
       .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
