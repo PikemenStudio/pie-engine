@@ -9,7 +9,6 @@ set(SOURCE_ALL SoundSystemImpl.cpp)
 add_library(sound ${SOURCE_ALL} ${HEADER_ALL})
 
 # link libraries
-# I need OpenAL
 if (UNIX AND NOT APPLE)
     find_package(OpenAL REQUIRED)
     find_package(SndFile CONFIG REQUIRED)

@@ -6,3 +6,5 @@ git submodule update --init --recursive
 export VULKAN_SDK=${VULKAN_PATH}
 
 sudo apt install libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+sudo apt install g++-10
+sudo apt install autoconf libtool
