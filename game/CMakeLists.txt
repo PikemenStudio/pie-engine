@@ -1,16 +1,13 @@
-cmake_minimum_required(VERSION 3.5.0)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 
-# Set global flags
+find_package(VulkanHeaders CONFIG)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
-if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_COMPILER g++-10)
-endif (UNIX AND NOT APPLE)
+add_executable(game_exe main.cpp)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../vcpkg/scripts/buildsystems/vcpkg.cmake)
-set(CMAKE_CXX_STANDARD 20)
+target_link_libraries(game_exe PRIVATE windows)
+target_link_libraries(game_exe PRIVATE graphics)
+target_link_libraries(game_exe PRIVATE sound)
 
-project(Game VERSION 0.0.1 LANGUAGES C CXX)
-
-add_executable(game main.cpp)
-
+include_directories(../src/modules)

@@ -25,6 +25,7 @@ set(ADAPTERS ${ADAPTERS}
 )
 
 add_subdirectory(tests)
+add_subdirectory(game)
 
 add_executable(main src/main.cpp ${ADAPTERS})
 
@@ -43,8 +44,6 @@ target_link_libraries(main PRIVATE loguru)
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(main PRIVATE glm::glm)
-
-#add_subdirectory(tests)
 
 # define path constants
 target_compile_definitions(main PRIVATE VULKAN_SDK_PATH="$ENV{VULKAN_SDK}" PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
