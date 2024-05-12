@@ -10,7 +10,8 @@
       "glm",
       "loguru",
       "openal-soft",
-      "libsndfile"
+      "libsndfile",
+      "libnoise"
     ],
     "overrides":
     [
