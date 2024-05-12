@@ -5,16 +5,20 @@
 #ifndef ENGINE_TESTS_GRAPHIC_MODULE_H
 #define ENGINE_TESTS_GRAPHIC_MODULE_H
 
+#include "../src/modules/shader_loader/facades/facade.hpp"
 #include <graphics/facades/facade.hpp>
 #include <gtest/gtest.h>
+#include <iostream>
 
 using WindowType = window_api_impls::WindowApiFacadeGlfwImpl;
+using ShaderLoaderType = shader_loader_impls::ShaderLoaderSimpleImpl;
 
-#define GraphicDependencies graphic_api_impls::VulkanDependencies<WindowType>
+#define GraphicDependencies                                                    \
+  graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType>
 
 class VkTest : public ::testing::Test {
 protected:
-  static void SetUpTestSuite() {
+  void SetUp() {
     WindowApiFacade<> *WindowAdapterInstance = nullptr;
     ASSERT_NO_THROW(WindowAdapterInstance =
                         new WindowApiFacade<>(WindowFacadeStructs::WindowProps{
@@ -24,6 +28,14 @@ protected:
                             .IsResizable = false,
                         }));
 
+    ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>
+        *ShaderLoaderInstance = nullptr;
+    ASSERT_NO_THROW(
+        ShaderLoaderInstance =
+            new ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>(
+                ShaderLoaderFacadeStructs::ShaderProps{.CacheFolder = {""},
+                                                       .CompilerPath = {""}}));
+
     auto InstanceProps = GraphicFacadeStructs::InstanceProps{
         .AppName = "Test",
         .EngineName = "Test",
@@ -32,19 +44,16 @@ protected:
         .RequestedWindowExtensions =
             // clang-format off
             WindowAdapterInstance->ImplInstance.getRequiredExtensions(),
-            // clang-format on
+        // clang-format on
     };
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependencies>{
-            .Dependencies = {std::move(*WindowAdapterInstance)},
+            .Dependencies = {std::move(*WindowAdapterInstance),
+                             std::move(*ShaderLoaderInstance)},
             .InstancePropsInstance = InstanceProps,
             .PhysicalDevicePropsInstance = {},
         };
-
-    GraphicDependencies *Dependencies = nullptr;
-    ASSERT_NO_THROW(Dependencies = new GraphicDependencies(
-                        {.Window = std::move(*WindowAdapterInstance)}));
 
     GraphicAdapterInstance = new GraphicApiFacade<
         GraphicDependencies,
@@ -54,9 +63,11 @@ protected:
     ASSERT_TRUE(GraphicAdapterInstance != nullptr);
   }
 
-  static void TearDownTestSuite() {}
+  void TearDown() {
+    delete GraphicAdapterInstance;
+  }
 
-  static inline GraphicApiFacade<
+  GraphicApiFacade<
       GraphicDependencies,
       graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependencies>>
       *GraphicAdapterInstance;
@@ -69,9 +80,8 @@ TEST_F(VkTest, GraphicGetters) {
 }
 
 TEST_F(VkTest, GraphicSetupEngine) {
-  GraphicAdapterInstance->ImplInstance.chooseGpu(
-      GraphicFacadeStructs::DeviceChoosePolicy::BEST);
-  //ASSERT_NO_THROW();
+  ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu(
+      GraphicFacadeStructs::DeviceChoosePolicy::BEST));
 }
 
 TEST_F(VkTest, ChooseDefaultGpu) {

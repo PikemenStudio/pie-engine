@@ -6,6 +6,7 @@
 
 #include "modules/graphics/facades/facade.hpp"
 #include "modules/windows/facades/facade.hpp"
+#include "modules/shader_loader/facades/facade.hpp"
 
 int main(int Argc, char *Argv[]) {
   loguru::init(Argc, Argv);

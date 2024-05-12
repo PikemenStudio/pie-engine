@@ -26,8 +26,12 @@ vk_core::VkPipeline<WindowImpl>::VkPipeline(VkPipeline::VkPipelineProps Props) {
 
 template <WindowApiImpl WindowImpl>
 vk_core::VkPipeline<WindowImpl>::~VkPipeline() {
+  if (this->NativeComponents.PhysicalDevice == nullptr) {
+    LOG_F(ERROR, "Device is null");
+  }
+
   for (auto &Frame : SwapChainBundle.value().Frames) {
-    static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyImageView(Frame.ImageView);
   }
 
@@ -415,17 +419,17 @@ void vk_core::VkPipeline<WindowImpl>::createSwapChain() {
   SwapChainBundleStruct Bundle;
   try {
     Bundle.Swapchain =
-        static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
             .createSwapchainKHR(CreateInfo);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to create swap chain ") +
                              E.what());
   }
 
-  auto Images = static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
-                    .getSwapchainImagesKHR(Bundle.Swapchain);
-  auto &Frames = Bundle.Frames;
-  Frames.reserve(Images.size());
+  auto Images =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .getSwapchainImagesKHR(Bundle.Swapchain);
+  Bundle.Frames.reserve(Images.size());
   for (size_t I = 0; I < Images.size(); ++I) {
     vk::ImageViewCreateInfo ViewCreateInfo{
         .image = Images[I],
@@ -449,10 +453,10 @@ void vk_core::VkPipeline<WindowImpl>::createSwapChain() {
     };
 
     try {
-      Frames.push_back(SwapChainFrameStruct{
+      Bundle.Frames.push_back(SwapChainFrameStruct{
           .Image = Images[I],
           .ImageView =
-              static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice)
+              static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
                   .createImageView(ViewCreateInfo),
       });
     } catch (vk::SystemError &E) {

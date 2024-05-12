@@ -51,6 +51,7 @@ GraphicEngine<WindowImpl>::~GraphicEngine() {
   NativeComponents.PhysicalDevice.reset();
   // NativeComponents.Pipeline.reset();
   NativeComponents.Instance.reset();
+  LOG_F(INFO, "Engine destroyed, ok");
 }
 
 template <WindowApiImpl WindowImpl>

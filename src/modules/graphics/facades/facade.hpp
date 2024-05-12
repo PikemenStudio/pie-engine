@@ -6,6 +6,7 @@
 #define ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 
 #include "../../windows/facades/facade.hpp"
+#include "../../shader_loader/facades/facade.hpp"
 #include <any>
 #include <concepts>
 
@@ -116,9 +117,12 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 namespace graphic_api_impls {
-template <WindowApiImpl WindowT> struct VulkanDependencies {
+template <WindowApiImpl WindowT, ShaderLoaderImpl ShaderLoaderT> struct VulkanDependencies {
   using WindowType = WindowT;
   WindowApiFacade<WindowT> Window;
+
+  using ShaderLoaderType = ShaderLoaderT;
+  ShaderLoaderFacade<ShaderLoaderT> ShaderLoader;
 };
 GRAPHIC_API_IMPL(Vulkan, VulkanDependenciesConcept)
 } // namespace graphic_api_impls

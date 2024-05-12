@@ -72,7 +72,7 @@ GraphicApiFacadeVulkanImpl<Dep>::GraphicApiFacadeVulkanImpl(
 
 template <VulkanDependenciesConcept Dep>
 GraphicApiFacadeVulkanImpl<Dep>::~GraphicApiFacadeVulkanImpl() {
-  delete static_cast<DataTypePtr<typename Dep::WindowType> *>(Data);
+  delete static_cast<DataTypePtr<typename Dep::WindowType>>(Data);
 }
 
 template <VulkanDependenciesConcept Dep>
@@ -123,4 +123,4 @@ void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
 // Explicitly instantiate class
 template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
     graphic_api_impls::VulkanDependencies<
-        window_api_impls::WindowApiFacadeGlfwImpl>>;
+        window_api_impls::WindowApiFacadeGlfwImpl, shader_loader_impls::ShaderLoaderSimpleImpl>>;

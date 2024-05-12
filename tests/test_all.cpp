@@ -7,6 +7,7 @@
 #include "window_module.hpp"
 #include "graphic_module.hpp"
 #include "sound_module.hpp"
+#include "shader_loader_module.h"
 
 // Entry point for running tests
 int main(int argc, char **argv) {
