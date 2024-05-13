@@ -1,17 +1,13 @@
-#include <iostream>
 //
-// Created by FullHat on 28/03/2024.
+// Created by FullHat on 13/05/2024.
 //
-#include <loguru.hpp>
 
-#include "modules/graphics/facades/facade.hpp"
-#include "modules/shader_loader/facades/facade.hpp"
-#include "modules/windows/facades/facade.hpp"
+#ifndef ENGINE_TESTS_RENDERABLE_SCENE_HPP
+#define ENGINE_TESTS_RENDERABLE_SCENE_HPP
 
 #include "../src/modules/graphics/facades/facade.hpp"
 #include "../src/modules/renderable_scene//facades/facade.hpp"
 #include "../src/modules/scene_manager/facades/facade.hpp"
-#include "glfw/glfw3.h"
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -45,30 +41,31 @@ using GraphicApiFacadeType = GraphicApiFacade<
     GraphicDependenciesType,
     graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependenciesType>>;
 
-class RenderableSceneTest {
+class RenderableSceneTest : public ::testing::Test {
 public:
-  void SetUp() {
+  void SetUp() override {
     // Setup Graphic
     std::shared_ptr<WindowApiFacade<>> WindowAdapterInstance;
-    WindowAdapterInstance = std::shared_ptr<WindowApiFacade<>>(
-        new WindowApiFacade<>(WindowFacadeStructs::WindowProps{
-            .Size = {800, 600},
-            .Title = "Test",
-            .Mode = WindowFacadeStructs::WindowProps::WINDOWED,
-            .IsResizable = false,
-        }));
+    ASSERT_NO_THROW(WindowAdapterInstance = std::shared_ptr<WindowApiFacade<>>(
+                        new WindowApiFacade<>(WindowFacadeStructs::WindowProps{
+                            .Size = {800, 600},
+                            .Title = "Test",
+                            .Mode = WindowFacadeStructs::WindowProps::WINDOWED,
+                            .IsResizable = false,
+                        })));
 
     std::shared_ptr<
         ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>>
         ShaderLoaderInstance;
-    ShaderLoaderInstance = std::shared_ptr<
-        ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>>(
-        new ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>(
-            ShaderLoaderFacadeStructs::ShaderProps{
-                .CompilerPath = {"/Users/fullhat/VulkanSDK/1.3.275.0/macOS/"
-                                 "bin/glslc"},
-                .CacheFolder = {"~/Documents/"},
-            }));
+    ASSERT_NO_THROW(
+        ShaderLoaderInstance = std::shared_ptr<
+            ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>>(
+            new ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>(
+                ShaderLoaderFacadeStructs::ShaderProps{
+                    .CompilerPath = {"/Users/fullhat/VulkanSDK/1.3.275.0/macOS/"
+                                     "bin/glslc"},
+                    .CacheFolder = {"~/Documents/"},
+                })));
 
     auto InstanceProps = GraphicFacadeStructs::InstanceProps{
         .AppName = "Test",
@@ -94,6 +91,8 @@ public:
                                  GraphicDependenciesType>>(
             std::move(FacadeProps)));
 
+    ASSERT_TRUE(GraphicAdapterInstance != nullptr);
+
     std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance =
         std::make_shared<SceneManagerFacadeType>(
             SceneManagerFacadeStructs::SceneManagerProps<
@@ -105,28 +104,19 @@ public:
             .Dependencies = {.SceneManager = SceneManagerInstance,
                              .Graphics = GraphicAdapterInstance,
                              .Window = WindowAdapterInstance}});
-
-    GraphicAdapterInstance->ImplInstance.chooseGpu({});
-
-    RenderableSceneInstance->ImplInstance.runMainCycle();
   }
 
-  void TearDown() {}
+  void TearDown() override {}
 
   std::shared_ptr<GraphicApiFacadeType> GraphicAdapterInstance;
 
   std::shared_ptr<RenderableSceneFacadeType> RenderableSceneInstance;
 };
 
-int main(int Argc, char *Argv[]) {
-  loguru::init(Argc, Argv);
-  // clang-format off
-  loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
-  // clang-format on
+TEST_F(RenderableSceneTest, TestRenderableScene) {
+  GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
-  RenderableSceneTest Test;
-  Test.SetUp();
-  Test.TearDown();
-
-  return 0;
+  RenderableSceneInstance->ImplInstance.runMainCycle();
 }
+
+#endif // ENGINE_TESTS_RENDERABLE_SCENE_HPP

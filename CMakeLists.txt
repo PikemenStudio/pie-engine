@@ -17,11 +17,15 @@ add_subdirectory(src/modules/windows/src)
 add_subdirectory(src/modules/graphics/src)
 add_subdirectory(src/modules/sound/src)
 add_subdirectory(src/modules/shader_loader/src)
+add_subdirectory(src/modules/renderable_scene/src)
+add_subdirectory(src/modules/scene_manager/src)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
         src/modules/sound/facade/facade.hpp
         src/modules/shader_loader/facades/facade.hpp
+        src/modules/renderable_scene/facades/facade.hpp
+        src/modules/scene_manager/facades/facade.hpp
 )
 
 add_subdirectory(tests)
@@ -40,6 +44,12 @@ include_directories(src/modules/sound/facade)
 
 target_link_libraries(main PRIVATE shader_loader)
 include_directories(src/modules/shader_loader/facades)
+
+target_link_libraries(main PRIVATE renderable_scene)
+include_directories(src/modules/renderable_scene/facades)
+
+target_link_libraries(main PRIVATE scene_manager)
+include_directories(src/modules/scene_manager/facades)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)

@@ -52,3 +52,19 @@ std::vector<const char *> GlfwImpl::getRequiredExtensions() const {
 std::pair<uint32_t, uint32_t> GlfwImpl::getSize() const {
   return static_cast<DataTypePtr>(Data)->getSize();
 }
+
+void GlfwImpl::prepare() { static_cast<DataTypePtr>(Data)->prepare(); }
+
+bool GlfwImpl::shouldClose() {
+  return static_cast<DataTypePtr>(Data)->shouldClose();
+}
+
+void GlfwImpl::update() { static_cast<DataTypePtr>(Data)->update(); }
+
+void GlfwImpl::swapBuffers() {
+  static_cast<DataTypePtr>(Data)->swapBuffers();
+}
+
+void GlfwImpl::setTitle(const std::string &Title) {
+  static_cast<DataTypePtr>(Data)->setTitle(Title);
+}

@@ -47,8 +47,8 @@ GraphicApiFacadeVulkanImpl<Dep>::GraphicApiFacadeVulkanImpl(
   typename vk_core::GraphicEngine<
       typename Dep::WindowType,
       typename Dep::ShaderLoaderType>::GraphicEngineProps ModuleProps{
-      .Window = std::move(Props.Dependencies.Window),
-      .ShaderLoader = std::move(Props.Dependencies.ShaderLoader),
+      .Window = Props.Dependencies.Window,
+      .ShaderLoader = Props.Dependencies.ShaderLoader,
       .VkInstanceProps =
           {
               .AppName = std::move(Props.InstancePropsInstance.AppName),

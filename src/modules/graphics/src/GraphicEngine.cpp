@@ -34,9 +34,7 @@ GraphicEngine<WindowImpl, ShaderImpl>::GraphicEngine(
   LOG_F(INFO, "Creating Graphic Engine");
 
   NativeComponents.Adapters.emplace(AdaptersStruct{
-      .Window = std::make_shared<WindowApiFacade<>>(std::move(Props.Window)),
-      .ShaderLoader = std::make_shared<ShaderLoaderFacade<ShaderImpl>>(
-          std::move(Props.ShaderLoader))});
+      .Window = Props.Window, .ShaderLoader = Props.ShaderLoader});
 
   setupInstance(VkInstance::VkInstanceProps(Props.VkInstanceProps));
 

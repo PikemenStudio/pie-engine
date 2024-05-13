@@ -36,6 +36,10 @@ concept WindowApiImpl = requires(T Obj) {
   { Obj.getNativeType() } -> std::same_as<void *>;
   { Obj.getRequiredExtensions() } -> std::same_as<std::vector<const char *>>;
   { Obj.getSize() } -> std::same_as<std::pair<uint32_t, uint32_t>>;
+  { Obj.prepare() } -> std::same_as<void>;
+  { Obj.shouldClose() } -> std::same_as<bool>;
+  { Obj.update() } -> std::same_as<void>;
+  { Obj.setTitle(std::declval<const std::string &>()) } -> std::same_as<void>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,6 +61,12 @@ concept WindowApiImpl = requires(T Obj) {
     std::pair<uint32_t, uint32_t> getSize() const;                             \
                                                                                \
     std::vector<const char *> getRequiredExtensions() const;                   \
+                                                                               \
+    void prepare();                                                            \
+    bool shouldClose();                                                        \
+    void update();                                                             \
+    void swapBuffers();                                                        \
+    void setTitle(const std::string &Title);                                   \
                                                                                \
   protected:                                                                   \
     void *Data = nullptr;                                                      \

@@ -36,4 +36,22 @@ std::vector<const char *> Window::getRequiredExtensions() const {
 std::pair<uint32_t, uint32_t> Window::getSize() const {
   return std::pair<uint32_t, uint32_t>(this->Props.Size.x, this->Props.Size.y);
 }
+
+void Window::prepare() {
+  glfwMakeContextCurrent(GlfwWindow.get());
+}
+
+bool Window::shouldClose() const {
+  return glfwWindowShouldClose(GlfwWindow.get());
+}
+
+void Window::update() {
+  glfwPollEvents();
+}
+
+void Window::swapBuffers() { glfwSwapBuffers(GlfwWindow.get()); }
+
+void Window::setTitle(const std::string &Title) {
+  glfwSetWindowTitle(GlfwWindow.get(), Title.c_str());
+}
 } // namespace windows

@@ -28,6 +28,11 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
                   .FragmentShaderPath =
                       "/Users/fullhat/Documents/GitHub/"
                       "pie-engine/tests/resources/test.frag"});
+  createFrameBuffers();
+  createCommandPool();
+  createCommandBuffers();
+  createSemaphores();
+  createFences();
   LOG_F(INFO, "Init pipeline, GOOD");
 }
 
@@ -36,6 +41,16 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
   if (this->NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(ERROR, "Device is null");
   }
+
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroySemaphore(this->ImageAvailableSemaphore);
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroySemaphore(this->RenderFinishedSemaphore);
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroyFence(this->InFlightFence);
+
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroyCommandPool(this->CommandPool);
 
   if (PipelineBundle.has_value()) {
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
@@ -49,6 +64,8 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
   for (auto &Frame : SwapChainBundle.value().Frames) {
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyImageView(Frame.ImageView);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyFramebuffer(Frame.FrameBuffer);
   }
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
@@ -748,6 +765,118 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createPipeline(
       .destroyShaderModule(FragmentShaderModule);
 
   LOG_F(INFO, "Pipeline created successfully");
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFrameBuffers() {
+  for (int I = 0; I < this->SwapChainBundle->Frames.size(); ++I) {
+    std::vector<vk::ImageView> Attachments = {
+        this->SwapChainBundle->Frames[I].ImageView,
+    };
+
+    vk::FramebufferCreateInfo FramebufferCreateInfo{
+        .flags = vk::FramebufferCreateFlags(),
+        .renderPass = this->PipelineBundle->RenderPass,
+        .attachmentCount = static_cast<uint32_t>(Attachments.size()),
+        .pAttachments = Attachments.data(),
+        .width = this->SwapChainBundle->Extent.width,
+        .height = this->SwapChainBundle->Extent.height,
+        .layers = 1,
+    };
+
+    try {
+      this->SwapChainBundle->Frames[I].FrameBuffer =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+              .createFramebuffer(FramebufferCreateInfo);
+    } catch (vk::SystemError &E) {
+      throw std::runtime_error(std::string("Failed to create framebuffer ") +
+                               E.what());
+    }
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createCommandPool() {
+  auto Indexes = this->NativeComponents.FamilyIndexes;
+
+  vk::CommandPoolCreateInfo CreateInfo{
+      .flags = vk::CommandPoolCreateFlags() |
+               vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+      .queueFamilyIndex = Indexes[vk::QueueFlagBits::eGraphics],
+  };
+
+  try {
+    this->CommandPool =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createCommandPool(CreateInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to create command pool ") +
+                             E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl,
+                         ShaderLoaderImplT>::createCommandBuffers() {
+  vk::CommandBufferAllocateInfo AllocateInfo{
+      .commandPool = this->CommandPool,
+      .level = vk::CommandBufferLevel::ePrimary,
+      .commandBufferCount =
+          static_cast<uint32_t>(this->SwapChainBundle->Frames.size()),
+  };
+
+  for (auto &Frame : this->SwapChainBundle->Frames) {
+    try {
+      Frame.CommandBuffer =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+              .allocateCommandBuffers(AllocateInfo)[0];
+    } catch (vk::SystemError &E) {
+      throw std::runtime_error(
+          std::string("Failed to allocate command buffers ") + E.what());
+    }
+  }
+
+  try {
+    this->MainCommandBuffer =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .allocateCommandBuffers(AllocateInfo)[0];
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to allocate main command buffer") + E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSemaphores() {
+  vk::SemaphoreCreateInfo CreateInfo{};
+
+  try {
+    this->ImageAvailableSemaphore =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createSemaphore(CreateInfo);
+    this->RenderFinishedSemaphore =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createSemaphore(CreateInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to create semaphores ") +
+                             E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
+  vk::FenceCreateInfo CreateInfo{.flags = vk::FenceCreateFlags() |
+                                          vk::FenceCreateFlagBits::eSignaled};
+
+  // for (auto &Frame : this->SwapChainBundle->Frames) {
+  try {
+    InFlightFence =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createFence(CreateInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to create fence ") + E.what());
+  }
+  //}
 }
 
 template class vk_core::VkPipeline<window_api_impls::WindowApiFacadeGlfwImpl,

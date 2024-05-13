@@ -23,8 +23,8 @@ public:
   ~GraphicEngine();
 
   struct GraphicEngineProps {
-    WindowApiFacade<WindowImpl> Window;
-    ShaderLoaderFacade<ShaderImpl> ShaderLoader;
+    std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
+    std::shared_ptr<ShaderLoaderFacade<ShaderImpl>> ShaderLoader;
 
     vk_core::VkInstance::VkInstanceProps VkInstanceProps;
     vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps

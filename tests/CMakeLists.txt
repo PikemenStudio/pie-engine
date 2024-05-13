@@ -12,7 +12,8 @@ add_executable(test_all "test_all.cpp"
         window_module.hpp
         graphic_module.hpp
         sound_module.hpp
-        shader_loader_module.h)
+        shader_loader_module.h
+        renderable_scene.hpp)
 
 add_test(test_all test_list_all_devices_exe)
 
@@ -22,5 +23,7 @@ target_link_libraries(test_all PRIVATE windows)
 target_link_libraries(test_all PRIVATE graphics)
 target_link_libraries(test_all PRIVATE sound)
 target_link_libraries(test_all PRIVATE shader_loader)
+target_link_libraries(test_all PRIVATE renderable_scene)
+target_link_libraries(test_all PRIVATE scene_manager)
 
 include_directories(../src/modules)

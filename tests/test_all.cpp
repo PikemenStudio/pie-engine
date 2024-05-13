@@ -4,10 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include "window_module.hpp"
 #include "graphic_module.hpp"
-#include "sound_module.hpp"
+#include "renderable_scene.hpp"
 #include "shader_loader_module.h"
+#include "sound_module.hpp"
+#include "window_module.hpp"
 
 // Entry point for running tests
 int main(int argc, char **argv) {

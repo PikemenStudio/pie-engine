@@ -94,6 +94,8 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
 #define GRAPHIC_API_IMPL(name, DependencyStructConcept)                        \
   template <DependencyStructConcept Dep> class GraphicApiFacade##name##Impl {  \
   public:                                                                      \
+    using DepType = Dep;                                                       \
+                                                                               \
     GraphicApiFacade##name##Impl(const GraphicApiFacade##name##Impl &&) =      \
         delete;                                                                \
     GraphicApiFacade##name##Impl(                                              \
@@ -120,10 +122,10 @@ namespace graphic_api_impls {
 template <WindowApiImpl WindowT, ShaderLoaderImpl ShaderLoaderT>
 struct VulkanDependencies {
   using WindowType = WindowT;
-  WindowApiFacade<WindowT> Window;
+  std::shared_ptr<WindowApiFacade<WindowT>> Window;
 
   using ShaderLoaderType = ShaderLoaderT;
-  ShaderLoaderFacade<ShaderLoaderT> ShaderLoader;
+  std::shared_ptr<ShaderLoaderFacade<ShaderLoaderT>> ShaderLoader;
 };
 GRAPHIC_API_IMPL(Vulkan, VulkanDependenciesConcept)
 } // namespace graphic_api_impls
@@ -135,6 +137,8 @@ GRAPHIC_API_IMPL(Vulkan, VulkanDependenciesConcept)
 template <typename DependencyStructT, GraphicApiImpl<DependencyStructT> Impl>
 class GraphicApiFacade {
 public:
+  using DepType = DependencyStructT;
+
   GraphicApiFacade(
       GraphicFacadeStructs::GraphicEngineProps<DependencyStructT> &&Props)
       : ImplInstance(std::move(Props)) {}

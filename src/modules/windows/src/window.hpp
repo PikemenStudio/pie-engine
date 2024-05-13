@@ -43,6 +43,12 @@ public:
 
   std::pair<uint32_t, uint32_t> getSize() const;
 
+  void prepare();
+  bool shouldClose() const;
+  void update();
+  void swapBuffers();
+  void setTitle(const std::string &Title);
+
 protected:
   // Build glfw object
   void buildWindow();

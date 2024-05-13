@@ -5,14 +5,14 @@
 #ifndef ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
 #define ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
 
-#include "../../windows/facades/facade.hpp"
 #include "../../shader_loader/facades/facade.hpp"
-#include "VkPhysicalDevice.hpp"
+#include "../../windows/facades/facade.hpp"
 #include "VkInstance.hpp"
+#include "VkPhysicalDevice.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace vk_core {
 
@@ -35,7 +35,8 @@ class VkPhysicalDevice;
  *  1) Initialize by constructor(Props) -> no return params, can throw exception
  *
  */
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT> class VkPipeline {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+class VkPipeline {
 public:
   struct FacadesStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
@@ -48,7 +49,9 @@ public:
   ~VkPipeline();
 
   struct VkPipelineProps {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> PhysicalDevice;
+    std::shared_ptr<
+        typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>>
+        PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
     FacadesStruct Facades;
     std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
@@ -64,6 +67,8 @@ protected:
   struct SwapChainFrameStruct {
     vk::Image Image;
     vk::ImageView ImageView;
+    vk::Framebuffer FrameBuffer;
+    vk::CommandBuffer CommandBuffer;
   };
 
   struct SwapChainBundleStruct {
@@ -75,7 +80,9 @@ protected:
   std::optional<SwapChainBundleStruct> SwapChainBundle;
 
   struct NativeComponentsStruct {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> PhysicalDevice;
+    std::shared_ptr<
+        typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>>
+        PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
 
     std::optional<FacadesStruct> Facades;
@@ -99,8 +106,14 @@ protected:
   };
   std::optional<GraphicsPipelineOutBundle> PipelineBundle;
 
-protected:
+  vk::CommandPool CommandPool = nullptr;
+  vk::CommandBuffer MainCommandBuffer = nullptr;
 
+  vk::Semaphore ImageAvailableSemaphore = nullptr;
+  vk::Semaphore RenderFinishedSemaphore = nullptr;
+  vk::Fence InFlightFence = nullptr;
+
+protected:
 protected:
   // SwapChain
   void initWindowSurface();
@@ -120,6 +133,13 @@ protected:
   vk::RenderPass createRenderPass() const;
 
   void createPipeline(GraphicsPipelineInBundle InBundle);
+
+  void createFrameBuffers();
+  void createCommandPool();
+  void createCommandBuffers();
+
+  void createSemaphores();
+  void createFences();
 };
 
 } // namespace vk_core
