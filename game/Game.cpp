@@ -41,7 +41,7 @@ void Game::run()
   sf::Sprite ScreenSprite(RenderTex.getTexture());
 
   Background BG(Width, Height);
-  Floor FloorObj(-1, 1, 0.01f);
+  Floor FloorObj(-5, 5, 0.01f);
   LightSource Lantern(0, 0);
 
   std::map<std::string, bool> Key2IsPressed;
@@ -90,6 +90,12 @@ void Game::run()
     sf::FloatRect WorldWindow;
     WorldWindow.width = WorldWindow.height = 2.0f;
     WorldWindow.left = (Lantern.getPosition().x - WorldWindow.width / 2);
+
+    if (WorldWindow.left < FloorObj.getStartX())
+      WorldWindow.left = FloorObj.getStartX();
+    else if (WorldWindow.left + WorldWindow.width > FloorObj.getEndX())
+      WorldWindow.left = FloorObj.getEndX() - WorldWindow.width;
+
     WorldWindow.top = 1.0f;
 
     Window->clear(sf::Color::Black);
@@ -98,8 +104,8 @@ void Game::run()
     Lantern.draw(RenderTex, WorldWindow);
     FloorObj.draw(RenderTex, WorldWindow);
 
-//    Window->draw(ScreenSprite, &LightingShader);
-    Window->draw(ScreenSprite);
+    Window->draw(ScreenSprite, &LightingShader);
+//    Window->draw(ScreenSprite);
     Window->display();
 
     FrameCount++;

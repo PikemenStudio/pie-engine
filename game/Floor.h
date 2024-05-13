@@ -18,6 +18,7 @@ public:
   void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow) const;
 
   float getStartX() const { return StartX; }
+  float getEndX() const { return StartX + (WorldCoordsY.size() - 1) * StepX; }
   float getStepX() const { return StepX; }
   const std::vector<float>& getCoords() const { return WorldCoordsY; }
 
