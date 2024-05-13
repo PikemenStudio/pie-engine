@@ -12,8 +12,8 @@
 
 #include <loguru.hpp>
 
-#include <iostream>
 #include <chrono>
+#include <iostream>
 
 Game::Game()
 {
@@ -29,9 +29,10 @@ Game::~Game() = default;
 
 void Game::run()
 {
-  const std::string FragmentShaderCode = loadTextFile("../../game/shaders/lighting_fragment_shader.glsl");
   sf::Shader LightingShader;
-  LightingShader.loadFromMemory(FragmentShaderCode, sf::Shader::Fragment);
+  LightingShader.loadFromFile("../../game/shaders/lighting_vertex_shader.glsl",
+                              "../../game/shaders/lighting_fragment_shader.glsl");
+  LightingShader.setUniform("texture", sf::Shader::CurrentTexture); // always use current texture
 
   sf::RenderTexture RenderTex;
   RenderTex.create(Width, Height);
@@ -72,8 +73,8 @@ void Game::run()
 //      }
 //    }
 
-//    Window->draw(ScreenSprite, &LightingShader);
-    Window->draw(ScreenSprite);
+    Window->draw(ScreenSprite, &LightingShader);
+//    Window->draw(ScreenSprite);
     Window->display();
 
     FrameCount++;
