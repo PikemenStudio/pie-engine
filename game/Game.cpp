@@ -18,7 +18,10 @@
 
 Game::Game()
 {
-  Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(Width, Height), Title);
+  Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
+                                              Title,
+                                              sf::Style::Fullscreen);
+  Window->setFramerateLimit(100);
 
   if (!sf::Shader::isAvailable())
   {
@@ -36,11 +39,11 @@ void Game::run()
   LightingShader.setUniform("texture", sf::Shader::CurrentTexture); // always use current texture
 
   sf::RenderTexture RenderTex;
-  RenderTex.create(Width, Height);
+  RenderTex.create(ScreenWidth, ScreenHeight);
   RenderTex.display();
   sf::Sprite ScreenSprite(RenderTex.getTexture());
 
-  Background BG(Width, Height);
+  Background BG(ScreenWidth, ScreenHeight);
   Floor FloorObj(-5, 5, 0.01f);
   LightSource Lantern(0, 0);
 
@@ -68,6 +71,8 @@ void Game::run()
           Key2IsPressed["left"] = true;
         else if (Event.key.code == sf::Keyboard::Right)
           Key2IsPressed["right"] = true;
+        else if (Event.key.code == sf::Keyboard::Escape)
+          Window->close();
       }
       else if (Event.type == sf::Event::KeyReleased)
       {

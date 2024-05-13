@@ -24,7 +24,6 @@ public:
 private:
   std::unique_ptr<sf::RenderWindow> Window;
 
-  float Width = 800, Height = 600;
   std::string Title = "Game";
 };
 

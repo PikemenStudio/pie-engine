@@ -12,8 +12,8 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Rect.hpp>
 
-constexpr int ScreenWidth = 800;
-constexpr int ScreenHeight = 600;
+constexpr int ScreenWidth = 1920;
+constexpr int ScreenHeight = 1080;
 constexpr int HalfScreenWidth = ScreenWidth / 2;
 constexpr int HalfScreenHeight = ScreenHeight / 2;
 
