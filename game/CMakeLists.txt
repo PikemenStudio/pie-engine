@@ -9,7 +9,13 @@ find_package(unofficial-noiseutils CONFIG REQUIRED)
 set(SFML_STATIC_LIBRARIES TRUE)
 find_package(SFML COMPONENTS graphics window system REQUIRED)
 
-add_executable(game_exe main.cpp)
+add_executable(game_exe main.cpp
+        Floor.cpp
+        Floor.h
+        utils.h
+        utils.cpp
+        Game.cpp
+        Game.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
