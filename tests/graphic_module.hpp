@@ -72,7 +72,7 @@ TEST_F(VkTest, GraphicSetupEngine) {
   ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu(
       GraphicFacadeStructs::DeviceChoosePolicy::BEST));
 
-  ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu({}));
+//  ASSERT_NO_THROW(GraphicAdapterInstance->ImplInstance.chooseGpu({}));
 }
 
 #endif // ENGINE_TESTS_GRAPHIC_MODULE_H

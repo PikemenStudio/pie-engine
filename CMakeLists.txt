@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5.0)
 # Set global flags
 
 if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_COMPILER g++-10)
+    set (CMAKE_CXX_COMPILER "/usr/bin/g++-10")
 endif (UNIX AND NOT APPLE)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

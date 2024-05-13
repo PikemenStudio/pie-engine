@@ -11,7 +11,8 @@
       "loguru",
       "openal-soft",
       "libsndfile",
-      "libnoise"
+      "libnoise",
+      "sfml"
     ],
     "overrides":
     [
