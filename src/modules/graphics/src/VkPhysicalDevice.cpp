@@ -249,16 +249,16 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupQueues() {
 
   if (QueueIndexesInstance.Graphics.has_value()) {
     LOG_F(INFO, "Setting up graphics queue");
-    GraphicsQueue =
-        LogicalDevice->getQueue(QueueIndexesInstance.Graphics.value(), 0);
+    GraphicsQueue = std::make_shared<vk::Queue>(
+        LogicalDevice->getQueue(QueueIndexesInstance.Graphics.value(), 0));
   } else {
     LOG_F(WARNING, "Graphics queue is not initialized");
   }
 
   if (QueueIndexesInstance.Present.has_value()) {
     LOG_F(INFO, "Setting up present queue");
-    PresentQueue =
-        LogicalDevice->getQueue(QueueIndexesInstance.Present.value(), 0);
+    PresentQueue = std::make_shared<vk::Queue>(
+        LogicalDevice->getQueue(QueueIndexesInstance.Present.value(), 0));
   } else {
     LOG_F(WARNING, "Present queue is not initialized");
   }
@@ -288,14 +288,27 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupPipeline(
   }
 
   typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipelineProps
-      Props{.PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
-            .Instance = this->Instance,
-            .Facades = {.Window = PipelineInitData.Window,
-                        .ShaderLoader = PipelineInitData.ShaderLoader},
-            .FamilyIndexes = std::move(FamilyIndexes)};
+      Props{
+          .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
+          .Instance = this->Instance,
+          .Facades = {.Window = PipelineInitData.Window,
+                      .ShaderLoader = PipelineInitData.ShaderLoader},
+          .FamilyIndexes = std::move(FamilyIndexes),
+          .GraphicsQueue = PipelineInitData.ThisPhysicalDevice->GraphicsQueue,
+          .PresentQueue = PipelineInitData.ThisPhysicalDevice->PresentQueue,
+      };
   this->Pipeline =
       std::make_unique<vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>>(
           std::move(Props));
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::render() {
+  if (this->Pipeline == nullptr) {
+    LOG_F(ERROR, "Pipeline is not initialized");
+    throw std::runtime_error("Pipeline is not initialized");
+  }
+  this->Pipeline->render();
 }
 
 template class vk_core::VkPhysicalDevice<

@@ -44,13 +44,14 @@ template <typename SceneManagerDepsT,
           WindowApiImpl WindowT>
 void RenderableScene<SceneManagerDepsT, SceneManagerT, GraphicsDepsT, GraphicsT,
                      WindowT>::runMainCycle() {
-  auto &Graphics = Data.Dependencies.Graphics;
+  auto &Graphics = Data.Dependencies.Graphics->ImplInstance;
 
   WindowT &Window = Data.Dependencies.Window->ImplInstance;
 
   Window.prepare();
   while (!Window.shouldClose()) {
     Window.update();
+    Graphics.render();
     Window.swapBuffers();
   }
 }

@@ -106,6 +106,8 @@ public:
   };
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
 
+  void render();
+
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);
 
@@ -126,8 +128,8 @@ protected:
     }
   } QueueIndexesInstance;
 
-  std::optional<vk::Queue> GraphicsQueue;
-  std::optional<vk::Queue> PresentQueue;
+  std::shared_ptr<vk::Queue> GraphicsQueue;
+  std::shared_ptr<vk::Queue> PresentQueue;
 
   static inline constinit bool Debug = true;
 };

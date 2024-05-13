@@ -55,7 +55,12 @@ public:
     std::shared_ptr<vk_core::VkInstance> Instance;
     FacadesStruct Facades;
     std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
+
+    std::shared_ptr<vk::Queue> GraphicsQueue;
+    std::shared_ptr<vk::Queue> PresentQueue;
   };
+
+  void render();
 
 protected:
   struct SwapChainSupportDetails {
@@ -91,6 +96,9 @@ protected:
     std::optional<vk::SurfaceKHR> Surface;
 
     std::optional<SwapChainSupportDetails> SwapChainSupport;
+
+    std::shared_ptr<vk::Queue> GraphicsQueue;
+    std::shared_ptr<vk::Queue> PresentQueue;
 
   } NativeComponents;
 
@@ -140,6 +148,8 @@ protected:
 
   void createSemaphores();
   void createFences();
+
+  void recordDrawCommands(uint32_t ImageIndex);
 };
 
 } // namespace vk_core

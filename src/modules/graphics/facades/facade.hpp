@@ -79,6 +79,7 @@ concept GraphicApiImpl = requires(T Obj) {
   {
     Obj.chooseGpu(std::declval<GraphicFacadeStructs::DeviceChoosePolicy>())
   } -> std::same_as<void>;
+  { Obj.render() } -> std::same_as<void>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,6 +111,8 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     void                                                                       \
     chooseGpu(const GraphicFacadeStructs::DeviceChoosePolicy ChoosePolicy);    \
+                                                                               \
+    void render();                                                             \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

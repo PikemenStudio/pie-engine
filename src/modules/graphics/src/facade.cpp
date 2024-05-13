@@ -137,6 +137,14 @@ void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
       ->chooseLocalPhysicalDevice(toModuleType<Dep>(Policy));
 }
 
+template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::render() {
+  static_cast<
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType>>(
+      Data)
+      ->render();
+}
+
 // Explicitly instantiate class
 template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
     graphic_api_impls::VulkanDependencies<

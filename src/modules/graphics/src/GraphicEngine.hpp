@@ -52,6 +52,8 @@ public:
   // in the BEST policy ONLY
   void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
+  void render();
+
 private:
   struct AdaptersStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;

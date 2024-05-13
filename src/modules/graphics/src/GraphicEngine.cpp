@@ -124,6 +124,13 @@ void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
   LOG_F(INFO, "Local physical device chosen");
 }
 
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
+void GraphicEngine<WindowImpl, ShaderImpl>::render() {
+  LOG_F(INFO, "Rendering");
+  NativeComponents.PhysicalDevice->render();
+  LOG_F(INFO, "Rendered");
+}
+
 template class vk_core::GraphicEngine<
     window_api_impls::WindowApiFacadeGlfwImpl,
     shader_loader_impls::ShaderLoaderSimpleImpl>;

@@ -20,6 +20,8 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
   this->NativeComponents.Facades = {.Window = Props.Facades.Window,
                                     .ShaderLoader = Props.Facades.ShaderLoader};
   this->NativeComponents.FamilyIndexes = std::move(Props.FamilyIndexes);
+  this->NativeComponents.GraphicsQueue = Props.GraphicsQueue;
+  this->NativeComponents.PresentQueue = Props.PresentQueue;
 
   initWindowSurface();
   createSwapChain();
@@ -877,6 +879,108 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
     throw std::runtime_error(std::string("Failed to create fence ") + E.what());
   }
   //}
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(
+    uint32_t ImageIndex) {
+  vk::CommandBufferBeginInfo BeginInfo;
+
+  try {
+    MainCommandBuffer.begin(BeginInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to begin recording main command buffer ") +
+        E.what());
+  }
+
+  vk::ClearValue ClearColor =
+      vk::ClearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f});
+  vk::RenderPassBeginInfo RenderPassInfo{
+      .renderPass = this->PipelineBundle->RenderPass,
+      .framebuffer = this->SwapChainBundle->Frames[ImageIndex].FrameBuffer,
+      .renderArea =
+          {
+              .offset = {0, 0},
+              .extent = this->SwapChainBundle->Extent,
+          },
+      .clearValueCount = 1,
+      .pClearValues = &ClearColor,
+  };
+
+  MainCommandBuffer.beginRenderPass(&RenderPassInfo,
+                                    vk::SubpassContents::eInline);
+  MainCommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                                 this->PipelineBundle->Pipeline);
+
+  MainCommandBuffer.draw(3, 1, 0, 0);
+
+  MainCommandBuffer.endRenderPass();
+
+  try {
+    MainCommandBuffer.end();
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to end recording main command buffer ") + E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
+  auto &Device =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
+
+  Device.waitForFences(1, &InFlightFence, VK_TRUE, UINT64_MAX);
+  Device.resetFences(1, &InFlightFence);
+
+  uint32_t ImageIndex;
+  try {
+    ImageIndex =
+        Device
+            .acquireNextImageKHR(this->SwapChainBundle->Swapchain, UINT64_MAX,
+                                 this->ImageAvailableSemaphore, nullptr)
+            .value;
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to acquire next image ") +
+                             E.what());
+  }
+
+  vk::CommandBuffer CommandBuffer =
+      SwapChainBundle->Frames[ImageIndex].CommandBuffer;
+  CommandBuffer.reset();
+
+  recordDrawCommands(ImageIndex);
+
+  vk::Semaphore WaitSemaphores[] = {ImageAvailableSemaphore};
+  vk::PipelineStageFlags WaitStages[] = {
+      vk::PipelineStageFlagBits::eColorAttachmentOutput};
+  vk::Semaphore SignalSemaphores[] = {RenderFinishedSemaphore};
+  vk::SubmitInfo SubmitInfo{
+      .waitSemaphoreCount = 1,
+      .pWaitSemaphores = &this->ImageAvailableSemaphore,
+      .pWaitDstStageMask = WaitStages,
+      .commandBufferCount = 1,
+      .pCommandBuffers = &this->MainCommandBuffer,
+      .signalSemaphoreCount = 1,
+      .pSignalSemaphores = SignalSemaphores,
+  };
+
+  try {
+    this->NativeComponents.GraphicsQueue->submit(SubmitInfo, InFlightFence);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to submit draw command ") +
+                             E.what());
+  }
+
+  vk::SwapchainKHR SwapChains[] = {this->SwapChainBundle->Swapchain};
+  vk::PresentInfoKHR PresentInfo{
+      .waitSemaphoreCount = 1,
+      .pWaitSemaphores = SignalSemaphores,
+      .swapchainCount = 1,
+      .pSwapchains = SwapChains,
+      .pImageIndices = &ImageIndex,
+  };
+  this->NativeComponents.PresentQueue->presentKHR(PresentInfo);
 }
 
 template class vk_core::VkPipeline<window_api_impls::WindowApiFacadeGlfwImpl,
