@@ -7,7 +7,7 @@ void main()
     // lookup the pixel in the texture
     vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
 
-    vec2 delta = vert_pos.xy - vec2(0, 0); // light source in (0, 0)
+    vec2 delta = vert_pos.xy - vec2(0.0, 0.0); // for now, the light source is always at the center
     float delta_len_squared = dot(delta, delta);
 //    float delta_len = length(delta);
 

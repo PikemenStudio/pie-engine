@@ -15,7 +15,7 @@ public:
   Floor(float StartX, float StepX, int PointsCount);
   Floor(float StartX, float EndX, float StepX);
 
-  void draw(sf::RenderTarget& Win) const;
+  void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow) const;
 
   float getStartX() const { return StartX; }
   float getStepX() const { return StepX; }

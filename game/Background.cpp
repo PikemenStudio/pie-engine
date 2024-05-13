@@ -10,7 +10,8 @@ Background::Background(float ScreenW, float ScreenH) : BackgrRect(sf::Vector2f(S
   BackgrRect.setFillColor(sf::Color::White);
 }
 
-void Background::draw(sf::RenderTarget &Win)
+void Background::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow)
 {
+  (void)WorldWindow;
   Win.draw(BackgrRect);
 }

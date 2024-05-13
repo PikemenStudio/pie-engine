@@ -13,7 +13,7 @@ class Background
 public:
   Background(float ScreenW, float ScreenH);
 
-  void draw(sf::RenderTarget& Win);
+  void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow);
 
 private:
   sf::RectangleShape BackgrRect;

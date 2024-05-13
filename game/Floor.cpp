@@ -28,11 +28,8 @@ Floor::Floor(float StartX, float EndX, float StepX)
 {
 }
 
-void Floor::draw(sf::RenderTarget& Win) const
+void Floor::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow) const
 {
-  auto Circle = sf::CircleShape(5);
-  Circle.setFillColor(sf::Color::Black);
-
   for (int I = 0; I < WorldCoordsY.size() - 1; I++)
   {
     float WorldX1 = StartX + I * StepX;
@@ -40,22 +37,19 @@ void Floor::draw(sf::RenderTarget& Win) const
     float WorldX2 = StartX + (I + 1) * StepX;
     float WorldY2 = WorldCoordsY[I + 1];
 
-    sf::Vector2f ScreenXY1 = worldCoordsToScreen(sf::Vector2f(WorldX1, WorldY1));
-    sf::Vector2f ScreenXY2 = worldCoordsToScreen(sf::Vector2f(WorldX2, WorldY2));
+    sf::Vector2f ScreenXY1 = worldCoordsToScreen(sf::Vector2f(WorldX1, WorldY1), WorldWindow);
+    sf::Vector2f ScreenXY2 = worldCoordsToScreen(sf::Vector2f(WorldX2, WorldY2), WorldWindow);
 
     sf::ConvexShape FloorPart;
-    // resize it to 5 points
     FloorPart.setPointCount(4);
 
-    // define the points
     FloorPart.setPoint(0, ScreenXY1);
     FloorPart.setPoint(1, ScreenXY2);
     FloorPart.setPoint(2, sf::Vector2f(ScreenXY2.x, 600));
     FloorPart.setPoint(3, sf::Vector2f(ScreenXY1.x, 600));
 
-    FloorPart.setFillColor(sf::Color::Black);
+    FloorPart.setFillColor(sf::Color(50, 50, 50));
 
     Win.draw(FloorPart);
   }
 }
-

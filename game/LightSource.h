@@ -15,7 +15,8 @@ public:
   LightSource(float X, float Y);
 
   sf::Vector2f getPosition() const { return WorldCoords; }
-  void draw(sf::RenderTarget& Win);
+  void setPosition(sf::Vector2f Pos) { WorldCoords = Pos; }
+  void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow);
 
 private:
   sf::Vector2f WorldCoords;

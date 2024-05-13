@@ -6,14 +6,18 @@
 
 #include <sstream>
 
-sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords)
+sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, sf::FloatRect WorldWindow)
 {
-  return sf::Vector2f((WorldCoords.x + 1) * 800 / 2, (1 - WorldCoords.y) * 600 / 2);
+  sf::Vector2f WindowCenter = sf::Vector2f(WorldWindow.left + WorldWindow.width/2,
+                                           WorldWindow.top - WorldWindow.height/2);
+  sf::Vector2f WindowCoords = WorldCoords - WindowCenter;
+  return sf::Vector2f((WindowCoords.x + 1) * ScreenWidth / 2, (1 - WindowCoords.y) * ScreenHeight / 2);
 }
 
 sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
 {
-  return sf::Vector2f((ScreenCoords.x - 400) / 400, -(ScreenCoords.y - 300) / 300);
+  return sf::Vector2f((ScreenCoords.x - HalfScreenWidth) / HalfScreenWidth,
+                      -(ScreenCoords.y - HalfScreenHeight) / HalfScreenHeight);
 }
 
 std::string loadTextFile(const std::string& Name)

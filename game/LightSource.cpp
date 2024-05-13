@@ -11,11 +11,15 @@ LightSource::LightSource(float X, float Y) : WorldCoords(X, Y)
 {
 }
 
-void LightSource::draw(sf::RenderTarget& Win)
+void LightSource::draw(sf::RenderTarget& Win,  sf::FloatRect WorldWindow)
 {
-  sf::CircleShape DummySource(5);
-  DummySource.setPosition(worldCoordsToScreen(WorldCoords));
-  DummySource.setFillColor(sf::Color::Cyan);
+  sf::CircleShape DummySource(25);
+
+  auto ScreenCoords = worldCoordsToScreen(WorldCoords, WorldWindow);
+  DummySource.setPosition(ScreenCoords - sf::Vector2f(25, 25));
+  DummySource.setFillColor(sf::Color::White);
+  DummySource.setOutlineThickness(5);
+  DummySource.setOutlineColor(sf::Color::Black);
 
   Win.draw(DummySource);
 }
