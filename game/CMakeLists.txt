@@ -15,7 +15,11 @@ add_executable(game_exe main.cpp
         utils.h
         utils.cpp
         Game.cpp
-        Game.h)
+        Game.h
+        LightSource.cpp
+        LightSource.h
+        Background.cpp
+        Background.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)

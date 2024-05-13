@@ -28,7 +28,7 @@ Floor::Floor(float StartX, float EndX, float StepX)
 {
 }
 
-void Floor::draw(sf::RenderWindow& Win) const
+void Floor::draw(sf::RenderTarget& Win) const
 {
   auto Circle = sf::CircleShape(5);
   Circle.setFillColor(sf::Color::Black);

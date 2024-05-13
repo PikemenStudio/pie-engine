@@ -2,6 +2,8 @@
 // Created by anton on 5/12/24.
 //
 
+#include <loguru.hpp>
+
 #include <sound/facade/facade.hpp>
 
 #include "Game.h"
@@ -25,8 +27,13 @@ void soundTest()
   }
 }
 
-int main()
+int main(int Argc, char** Argv)
 {
+  loguru::init(Argc, Argv);
+  // clang-format off
+  loguru::add_file("game.log", loguru::Append, loguru::Verbosity_MAX);
+  // clang-format on
+
   Game GameObj;
   GameObj.run();
 
