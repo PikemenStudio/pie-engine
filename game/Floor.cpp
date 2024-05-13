@@ -45,8 +45,8 @@ void Floor::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow) const
 
     FloorPart.setPoint(0, ScreenXY1);
     FloorPart.setPoint(1, ScreenXY2);
-    FloorPart.setPoint(2, sf::Vector2f(ScreenXY2.x, ScreenHeight - 1));
-    FloorPart.setPoint(3, sf::Vector2f(ScreenXY1.x, ScreenHeight - 1));
+    FloorPart.setPoint(2, sf::Vector2f(ScreenXY2.x, ScreenHeight));
+    FloorPart.setPoint(3, sf::Vector2f(ScreenXY1.x, ScreenHeight));
 
     FloorPart.setFillColor(sf::Color(50, 50, 50));
 

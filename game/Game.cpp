@@ -84,7 +84,7 @@ void Game::run()
     }
 
     // game logic
-    float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 3;
+    float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 1.0;
     sf::Vector2f LanternDxDy;
     if (Key2IsPressed["left"])  LanternDxDy.x -= LanternFrameSpeed;
     if (Key2IsPressed["right"]) LanternDxDy.x += LanternFrameSpeed;

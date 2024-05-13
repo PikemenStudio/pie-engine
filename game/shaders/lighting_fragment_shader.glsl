@@ -11,7 +11,7 @@ void main()
     float delta_len_squared = dot(delta, delta);
 //    float delta_len = length(delta);
 
-    float intensity = clamp(1.0 / (delta_len_squared + 2.0), 0.0, 1.0); // + 1.1 is important
+    float intensity = clamp(1.0 / (delta_len_squared + 1.1), 0.0, 1.0); // + 1.1 is important
 
     // multiply it by the color
     gl_FragColor = gl_Color * pixel * intensity;
