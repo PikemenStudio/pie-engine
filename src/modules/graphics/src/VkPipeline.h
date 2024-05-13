@@ -121,6 +121,8 @@ protected:
   vk::Semaphore RenderFinishedSemaphore = nullptr;
   vk::Fence InFlightFence = nullptr;
 
+  // int MaxFrameInFlight = 2, FrameNumber;
+
 protected:
 protected:
   // SwapChain

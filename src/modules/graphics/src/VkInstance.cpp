@@ -99,7 +99,24 @@ bool VkInstance::isApiSupportLayers(
                              return strcmp(SupportedLayer.layerName,
                                            RequiredLayerName) == 0;
                            });
+
     if (It == SupportedLayers.end()) {
+      if (std::strcmp(RequiredLayerName, "VK_LAYER_KHRONOS_validation") == 0) {
+        LOG_F(INFO, "Validation layer is requested, but not supported");
+        const auto *const DeprecatedLayer =
+            "VK_LAYER_LUNARG_standard_validation";
+        auto It = std::find_if(SupportedLayers.begin(), SupportedLayers.end(),
+                               [&](auto &SupportedLayer) {
+                                 return strcmp(SupportedLayer.layerName,
+                                               DeprecatedLayer) == 0;
+                               });
+        if (It != SupportedLayers.end()) {
+          LOG_F(INFO, "Using deprecated validation layer \"%s\"",
+                DeprecatedLayer);
+          continue;
+        }
+      }
+
       LOG_F(ERROR, "Layer \"%s\" is not supported", RequiredLayerName);
       return false;
     }
