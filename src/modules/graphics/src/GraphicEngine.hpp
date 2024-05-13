@@ -5,6 +5,7 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_SRC_GRAPHICENGINE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_SRC_GRAPHICENGINE_HPP
 
+#include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include "VkInstance.hpp"
 #include "VkPhysicalDevice.hpp"
@@ -13,7 +14,8 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl> class GraphicEngine {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
+class GraphicEngine {
 public:
   struct GraphicEngineProps;
 
@@ -22,19 +24,24 @@ public:
 
   struct GraphicEngineProps {
     WindowApiFacade<WindowImpl> Window;
+    ShaderLoaderFacade<ShaderImpl> ShaderLoader;
 
     vk_core::VkInstance::VkInstanceProps VkInstanceProps;
-    vk_core::VkPhysicalDevice<WindowImpl>::VkPhysicalDeviceProps VkPhysicalDeviceProps;
+    vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps
+        VkPhysicalDeviceProps;
   };
 
   void setupInstance(VkInstance::VkInstanceProps Props);
-  void setupPhysicalDevice(VkPhysicalDevice<WindowImpl>::VkPhysicalDeviceProps Props);
+  void setupPhysicalDevice(
+      VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps Props);
 
-  std::vector<typename VkPhysicalDevice<WindowImpl>::PhysicalDeviceLocalProps>
+  std::vector<typename VkPhysicalDevice<WindowImpl,
+                                        ShaderImpl>::PhysicalDeviceLocalProps>
   getLocalPhysicalDevices() const;
 
   void chooseLocalPhysicalDevice(
-      const VkPhysicalDevice<WindowImpl>::PhysicalDeviceLocalProps &Device);
+      const VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps
+          &Device);
 
   enum class DeviceChoosePolicy : uint_fast8_t {
     FIRST,
@@ -48,6 +55,7 @@ public:
 private:
   struct AdaptersStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
+    std::shared_ptr<ShaderLoaderFacade<ShaderImpl>> ShaderLoader;
   };
 
   struct SwapChainSupportDetails {
@@ -60,7 +68,8 @@ private:
     std::optional<AdaptersStruct> Adapters;
 
     std::shared_ptr<vk_core::VkInstance> Instance;
-    std::shared_ptr<vk_core::VkPhysicalDevice<WindowImpl>> PhysicalDevice;
+    std::shared_ptr<vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>>
+        PhysicalDevice;
   } NativeComponents;
 };
 

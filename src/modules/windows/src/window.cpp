@@ -32,4 +32,8 @@ std::vector<const char *> Window::getRequiredExtensions() const {
   const auto *Extensions = glfwGetRequiredInstanceExtensions(&Size);
   return {Extensions, Extensions + Size};
 }
+
+std::pair<uint32_t, uint32_t> Window::getSize() const {
+  return std::pair<uint32_t, uint32_t>(this->Props.Size.x, this->Props.Size.y);
+}
 } // namespace windows

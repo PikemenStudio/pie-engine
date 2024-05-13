@@ -54,7 +54,10 @@ concept ShaderLoaderImpl = requires(T ImplInstance) {
   class ShaderLoader##Name##Impl {                                             \
   public:                                                                      \
     ShaderLoader##Name##Impl(const ShaderLoader##Name##Impl &) = delete;       \
-    ShaderLoader##Name##Impl(ShaderLoader##Name##Impl &&) = default;           \
+    ShaderLoader##Name##Impl(ShaderLoader##Name##Impl &&Obj) {                    \
+      this->Data = nullptr;                                                    \
+      std::swap(this->Data, Obj.Data);                                         \
+    };                                                                         \
     ShaderLoader##Name##Impl &                                                 \
     operator=(const ShaderLoader##Name##Impl &) = delete;                      \
     ShaderLoader##Name##Impl &                                                 \

@@ -16,9 +16,9 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl> class VkPipeline;
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT> class VkPipeline;
 
-template <WindowApiImpl WindowImpl>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
 class VkPhysicalDevice {
 public:
   struct VkPhysicalDeviceProps;
@@ -100,8 +100,9 @@ public:
 
   struct PipelineInitDataStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
+    std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
     // It's strange, but we need pointer from GraphicEngine and can't just use this
-    std::shared_ptr<VkPhysicalDevice<WindowImpl>> ThisPhysicalDevice;
+    std::shared_ptr<VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> ThisPhysicalDevice;
   };
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
 
@@ -112,7 +113,7 @@ protected:
   std::shared_ptr<VkInstance> Instance;
   std::optional<vk::PhysicalDevice> PhysicalDevice;
   std::optional<vk::Device> LogicalDevice;
-  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl>> Pipeline;
+  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>> Pipeline;
 
   struct QueueIndexes {
     std::optional<uint32_t> Graphics;

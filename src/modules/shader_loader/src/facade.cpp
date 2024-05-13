@@ -34,7 +34,8 @@ shader_loader_impls::ShaderLoaderSimpleImpl::loadAndCompileShaders(
 
     std::stringstream ShaderData;
     ShaderData << ShaderFile.rdbuf();
-    LOG_F(INFO, "Shader loaded: %s", (ShaderData.str().substr(0, 20) + "...").c_str());
+    LOG_F(INFO, "Shader loaded: %s",
+          (ShaderData.str().substr(0, 20) + "...").c_str());
 
     // Compile shader
     std::string CompilerPath =
@@ -44,7 +45,7 @@ shader_loader_impls::ShaderLoaderSimpleImpl::loadAndCompileShaders(
         (*(static_cast<ShaderLoaderFacadeStructs::ShaderProps *>(Data)))
             .CacheFolder.value();
     std::string Command = CompilerPath + " " + Name.ShaderPath + " -o " +
-                          CachePath + Name.ShaderName + ".spv";
+                          Name.ShaderName + ".spv";
     LOG_F(INFO, "Compiling shader: %s", Command.c_str());
     auto Code = std::system(Command.c_str());
 
@@ -54,8 +55,10 @@ shader_loader_impls::ShaderLoaderSimpleImpl::loadAndCompileShaders(
     }
 
     std::ifstream ShaderResult(Name.ShaderName + ".spv");
+    std::stringstream ShaderResultData;
+    ShaderResultData << ShaderResult.rdbuf();
     Result.emplace_back(ShaderLoaderFacadeStructs::ShaderData{
-        .Name = Name.ShaderName, .Data = std::move(ShaderData)});
+        .Name = Name.ShaderName, .Data = std::move(ShaderResultData)});
   }
 
   return Result;

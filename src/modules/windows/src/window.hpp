@@ -41,6 +41,8 @@ public:
 
   GLFWwindow *getNativeWindow() const { return GlfwWindow.get(); }
 
+  std::pair<uint32_t, uint32_t> getSize() const;
+
 protected:
   // Build glfw object
   void buildWindow();

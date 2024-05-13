@@ -35,6 +35,7 @@ concept WindowApiImpl = requires(T Obj) {
   std::is_constructible_v<T, WindowFacadeStructs::WindowProps>;
   { Obj.getNativeType() } -> std::same_as<void *>;
   { Obj.getRequiredExtensions() } -> std::same_as<std::vector<const char *>>;
+  { Obj.getSize() } -> std::same_as<std::pair<uint32_t, uint32_t>>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,6 +54,7 @@ concept WindowApiImpl = requires(T Obj) {
     ~WindowApiFacade##name##Impl();                                            \
                                                                                \
     void *getNativeType() const;                                               \
+    std::pair<uint32_t, uint32_t> getSize() const;                             \
                                                                                \
     std::vector<const char *> getRequiredExtensions() const;                   \
                                                                                \

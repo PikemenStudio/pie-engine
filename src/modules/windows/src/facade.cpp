@@ -48,3 +48,7 @@ void *GlfwImpl::getNativeType() const {
 std::vector<const char *> GlfwImpl::getRequiredExtensions() const {
   return static_cast<DataTypePtr>(Data)->getRequiredExtensions();
 }
+
+std::pair<uint32_t, uint32_t> GlfwImpl::getSize() const {
+  return static_cast<DataTypePtr>(Data)->getSize();
+}

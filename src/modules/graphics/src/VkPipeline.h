@@ -6,6 +6,7 @@
 #define ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
 
 #include "../../windows/facades/facade.hpp"
+#include "../../shader_loader/facades/facade.hpp"
 #include "VkPhysicalDevice.hpp"
 #include "VkInstance.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -15,7 +16,7 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
 class VkPhysicalDevice;
 
 /*
@@ -34,10 +35,11 @@ class VkPhysicalDevice;
  *  1) Initialize by constructor(Props) -> no return params, can throw exception
  *
  */
-template <WindowApiImpl WindowImpl> class VkPipeline {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT> class VkPipeline {
 public:
   struct FacadesStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
+    std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
   };
 
   struct VkPipelineProps;
@@ -46,7 +48,7 @@ public:
   ~VkPipeline();
 
   struct VkPipelineProps {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl>> PhysicalDevice;
+    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
     FacadesStruct Facades;
     std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
@@ -73,7 +75,7 @@ protected:
   std::optional<SwapChainBundleStruct> SwapChainBundle;
 
   struct NativeComponentsStruct {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl>> PhysicalDevice;
+    std::shared_ptr<typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
 
     std::optional<FacadesStruct> Facades;
@@ -84,6 +86,18 @@ protected:
     std::optional<SwapChainSupportDetails> SwapChainSupport;
 
   } NativeComponents;
+
+  struct GraphicsPipelineInBundle {
+    std::string VertexShaderPath;
+    std::string FragmentShaderPath;
+  };
+
+  struct GraphicsPipelineOutBundle {
+    vk::Pipeline Pipeline;
+    vk::PipelineLayout Layout;
+    vk::RenderPass RenderPass;
+  };
+  std::optional<GraphicsPipelineOutBundle> PipelineBundle;
 
 protected:
 
@@ -100,6 +114,12 @@ protected:
   void logAlphaBits(vk::CompositeAlphaFlagsKHR Alpha);
   void logImageBits(vk::ImageUsageFlags ImageFlags);
   void createSwapChain();
+
+  vk::ShaderModule createShaderModule(std::string ShaderPath) const;
+  vk::PipelineLayout createPipelineLayout() const;
+  vk::RenderPass createRenderPass() const;
+
+  void createPipeline(GraphicsPipelineInBundle InBundle);
 };
 
 } // namespace vk_core

@@ -33,8 +33,8 @@ protected:
     ASSERT_NO_THROW(
         ShaderLoaderInstance =
             new ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>(
-                ShaderLoaderFacadeStructs::ShaderProps{.CacheFolder = {""},
-                                                       .CompilerPath = {""}}));
+                ShaderLoaderFacadeStructs::ShaderProps{.CacheFolder = {"~/Documents/"},
+                                                       .CompilerPath = {"/Users/fullhat/VulkanSDK/1.3.275.0/macOS/bin/glslc"}}));
 
     auto InstanceProps = GraphicFacadeStructs::InstanceProps{
         .AppName = "Test",
