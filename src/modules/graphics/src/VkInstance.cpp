@@ -33,7 +33,7 @@ VkInstance::VkInstance(VkInstance::VkInstanceProps Props) {
 
   std::vector<const char *> Layers;
   if (this->Debug) {
-    Layers.push_back("VK_LAYER_LUNARG_standard_validation");
+    Layers.push_back("VK_LAYER_KHRONOS_validation");
   }
 
   if (!isApiSupportExtensions(Extensions) || !isApiSupportLayers(Layers)) {
