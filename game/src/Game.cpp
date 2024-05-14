@@ -96,7 +96,7 @@ void Game::renderScene()
   Window->clear(sf::Color::Black);
 
   Backgr->draw(*RenderTex, *WorldWindowObj);
-  Lantern->draw(*RenderTex, *WorldWindowObj);
+//  Lantern->draw(*RenderTex, *WorldWindowObj);
   FloorObj->draw(*RenderTex, *WorldWindowObj);
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
@@ -119,21 +119,7 @@ void Game::run()
 
     handleUserInput();
 
-    // game logic
     processLogic(FrameDrawingTimeMs);
-
-    // drawing
-//    sf::FloatRect WorldWindow;
-//    WorldWindow.width = 3.0f;
-//    WorldWindow.height = 2.0f;
-//    WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
-//
-//    if (WorldWindow.left < FloorObj->getStartX())
-//      WorldWindow.left = FloorObj->getStartX();
-//    else if (WorldWindow.left + WorldWindow.width > FloorObj->getEndX())
-//      WorldWindow.left = FloorObj->getEndX() - WorldWindow.width;
-//
-//    WorldWindow.top = WorldWindow.height / 2;
 
     renderScene();
 
