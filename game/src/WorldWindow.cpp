@@ -16,12 +16,12 @@ WorldWindow::WorldWindow(sf::Vector2f Center, sf::Vector2f Size,
 void WorldWindow::updateByPlayerPos(sf::Vector2f Pos)
 {
   Center.x = Pos.x;
-  Center.y = Size.y / 2;
+  Center.y = 0.0f;
 
-  if (Center.x - Size.x < SceneBorderLeft)
-    Center.x = SceneBorderLeft + Size.x;
-  else if (Center.x + Size.x > SceneBorderRight)
-    Center.x = SceneBorderRight - Size.x;
+  if (Center.x - Size.x / 2 < SceneBorderLeft)
+    Center.x = SceneBorderLeft + Size.x / 2;
+  else if (Center.x + Size.x / 2 > SceneBorderRight)
+    Center.x = SceneBorderRight - Size.x / 2;
 //  WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
 //
 //  if (WorldWindow.left < FloorObj->getStartX())
