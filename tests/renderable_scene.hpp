@@ -57,13 +57,20 @@ public:
     std::shared_ptr<
         ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>>
         ShaderLoaderInstance;
+
+#ifdef __linux__
+    std::string ShaderCompilerPath = "/usr/bin/glslc";
+#else
+    std::string ShaderCompilerPath = "/Users/fullhat/VulkanSDK/1.3.275.0/macOS/"
+                                     "bin/glslc";
+#endif // __linux__
+
     ASSERT_NO_THROW(
         ShaderLoaderInstance = std::shared_ptr<
             ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>>(
             new ShaderLoaderFacade<shader_loader_impls::ShaderLoaderSimpleImpl>(
                 ShaderLoaderFacadeStructs::ShaderProps{
-                    .CompilerPath = {"/Users/fullhat/VulkanSDK/1.3.275.0/macOS/"
-                                     "bin/glslc"},
+                    .CompilerPath = {ShaderCompilerPath},
                     .CacheFolder = {"~/Documents/"},
                 })));
 

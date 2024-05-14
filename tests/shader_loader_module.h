@@ -12,10 +12,15 @@
 class ShaderLoaderTest : public ::testing::Test {
 protected:
   static void SetUpTestSuite() {
+#ifdef __linux__
+    std::string ShaderCompilerPath = "/usr/bin/glslc";
+#else
+    std::string ShaderCompilerPath = "/Users/fullhat/VulkanSDK/1.3.275.0/macOS/"
+                                     "bin/glslc";
+#endif // __linux__
+
     auto Props = ShaderLoaderFacadeStructs::ShaderProps{
-        .CompilerPath =
-            std::optional<std::string>{
-                "/Users/fullhat/VulkanSDK/1.3.275.0/macOS/bin/glslc"},
+        .CompilerPath = std::optional<std::string>{ShaderCompilerPath},
         .CacheFolder = std::optional<std::string>{"~/Documents"},
     };
 
@@ -35,10 +40,17 @@ protected:
 
 TEST_F(ShaderLoaderTest, LoadAndCompileShaders) {
   ShaderLoaderFacadeStructs::ShadersLocations Locations;
+
+#ifdef __linux__
+  std::string ShaderPath = "/home/anton/dev/engine/pie-engine/tests/resources/test.vert";
+#else
+  std::string ShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+                           "resources/test.vert";
+#endif
+
   Locations.Shaders.push_back({
       .ShaderName = "test",
-      .ShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
-                    "resources/test.vert",
+      .ShaderPath = ShaderPath,
   });
 
   auto Result = ShaderLoaderAdapterInstance->ImplInstance.loadAndCompileShaders(
