@@ -1,15 +1,19 @@
 varying vec4 vert_pos;
 
 uniform sampler2D texture;
+uniform vec2 world_window_center;
+uniform vec2 world_window_dimensions;
+uniform vec2 world_light_pos;
 
 void main()
 {
     // lookup the pixel in the texture
     vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
 
-    vec2 delta = vert_pos.xy - vec2(0.0, 0.0); // for now, the light source is always at the center
+    vec2 world_pos = vert_pos.xy * (world_window_dimensions / 2.0) + world_window_center;
+
+    vec2 delta = world_pos.xy - world_light_pos; // for now, the light source is always at the center
     float delta_len_squared = dot(delta, delta);
-//    float delta_len = length(delta);
 
     float intensity = clamp(1.0 / (delta_len_squared + 1.1), 0.0, 1.0); // + 1.1 is important
 

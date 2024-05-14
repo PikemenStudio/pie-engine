@@ -14,11 +14,11 @@ sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, sf::FloatRect 
   return sf::Vector2f((WindowCoords.x + 1) * ScreenWidth / 2, (1 - WindowCoords.y) * ScreenHeight / 2);
 }
 
-sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
-{
-  return sf::Vector2f((ScreenCoords.x - HalfScreenWidth) / HalfScreenWidth,
-                      -(ScreenCoords.y - HalfScreenHeight) / HalfScreenHeight);
-}
+//sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
+//{
+//  return sf::Vector2f((ScreenCoords.x - HalfScreenWidth) / HalfScreenWidth,
+//                      -(ScreenCoords.y - HalfScreenHeight) / HalfScreenHeight);
+//}
 
 std::string loadTextFile(const std::string& Name)
 {

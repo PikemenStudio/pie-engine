@@ -19,8 +19,8 @@
 Game::Game()
 {
   Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
-                                              Title,
-                                              sf::Style::Default);
+                                              Title);
+//                                              sf::Style::Fullscreen);
   Window->setFramerateLimit(100);
 
   if (!sf::Shader::isAvailable())
@@ -108,6 +108,15 @@ void Game::run()
     BG.draw(RenderTex, WorldWindow);
     Lantern.draw(RenderTex, WorldWindow);
     FloorObj.draw(RenderTex, WorldWindow);
+
+    auto WorldWinCenter = sf::Vector2f(WorldWindow.left, WorldWindow.top) +
+                                        sf::Vector2f(WorldWindow.width/2, -WorldWindow.height/2);
+
+    LightingShader.setUniform("world_window_center", WorldWinCenter);
+    LightingShader.setUniform(
+        "world_window_dimensions",
+        sf::Vector2f(WorldWindow.width, WorldWindow.height));
+    LightingShader.setUniform("world_light_pos", Lantern.getPosition());
 
     Window->draw(ScreenSprite, &LightingShader);
 //    Window->draw(ScreenSprite);
