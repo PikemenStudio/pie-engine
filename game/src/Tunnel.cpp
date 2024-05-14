@@ -8,6 +8,11 @@
 
 #include <noise/noise.h>
 
+static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float CurrX)
+{
+  return (std::clamp(NoiseGen.GetValue(CurrX, 0, 0), -1.0, 1.0) + 1) / 2;
+}
+
 Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
 {
   noise::module::Perlin NoiseGenFloor;
@@ -19,12 +24,17 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
   this->StepX = StepX;
   float CurrX = StartX;
 
+  float FloorTop = -0.5, FloorBottom = -0.95;
+  float CeilingTop = 0.95, CeilingBottom = -0.5;
+
   while (PointsCount--)
   {
-    float FloorY = (NoiseGenFloor.GetValue(CurrX, 0, 0) - 1) / 2;
+    float NoiseVal = getNoiseValFrom0To1(NoiseGenFloor, CurrX);
+    float FloorY = FloorBottom + NoiseVal * (FloorTop - FloorBottom);
     WorldCoordsYFloor.push_back(FloorY);
 
-    float CeilY = (NoiseGenCeiling.GetValue(CurrX, 0, 0) + 1) / 2;
+    NoiseVal = getNoiseValFrom0To1(NoiseGenCeiling, CurrX);
+    float CeilY = CeilingBottom + NoiseVal * (CeilingTop - CeilingBottom);
     WorldCoordsYCeiling.push_back(CeilY);
 
     CurrX += StepX;
