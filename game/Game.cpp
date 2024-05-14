@@ -93,7 +93,8 @@ void Game::run()
 
     // drawing
     sf::FloatRect WorldWindow;
-    WorldWindow.width = WorldWindow.height = 2.0f;
+    WorldWindow.width = 3.0f;
+    WorldWindow.height = 2.0f;
     WorldWindow.left = (Lantern.getPosition().x - WorldWindow.width / 2);
 
     if (WorldWindow.left < FloorObj.getStartX())
@@ -101,7 +102,7 @@ void Game::run()
     else if (WorldWindow.left + WorldWindow.width > FloorObj.getEndX())
       WorldWindow.left = FloorObj.getEndX() - WorldWindow.width;
 
-    WorldWindow.top = 1.0f;
+    WorldWindow.top = WorldWindow.height / 2;
 
     Window->clear(sf::Color::Black);
 

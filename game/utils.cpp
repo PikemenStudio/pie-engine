@@ -11,7 +11,9 @@ sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, sf::FloatRect 
   sf::Vector2f WindowCenter = sf::Vector2f(WorldWindow.left + WorldWindow.width/2,
                                            WorldWindow.top - WorldWindow.height/2);
   sf::Vector2f WindowCoords = WorldCoords - WindowCenter;
-  return sf::Vector2f((WindowCoords.x + 1) * ScreenWidth / 2, (1 - WindowCoords.y) * ScreenHeight / 2);
+
+  return sf::Vector2f((WindowCoords.x + WorldWindow.width/2) / WorldWindow.width * ScreenWidth,
+                      (WorldWindow.height/2 - WindowCoords.y) / WorldWindow.height * ScreenHeight);
 }
 
 //sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
