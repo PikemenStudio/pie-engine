@@ -10,17 +10,18 @@ set(SFML_WARNINGS_AS_ERRORS OFF)
 
 set(SFML_STATIC_LIBRARIES TRUE)
 
-add_executable(game_exe main.cpp
-        Floor.cpp
-        Floor.h
-        utils.h
-        utils.cpp
-        Game.cpp
-        Game.h
-        LightSource.cpp
-        LightSource.h
-        Background.cpp
-        Background.h)
+add_executable(game_exe
+        src/main.cpp
+        src/Floor.cpp
+        src/Floor.h
+        src/utils.h
+        src/utils.cpp
+        src/Game.cpp
+        src/Game.h
+        src/LightSource.cpp
+        src/LightSource.h
+        src/Background.cpp
+        src/Background.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
