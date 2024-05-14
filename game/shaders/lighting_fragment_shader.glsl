@@ -4,6 +4,7 @@ uniform sampler2D texture;
 uniform vec2 world_window_center;
 uniform vec2 world_window_dimensions;
 uniform vec2 world_light_pos;
+uniform float light_intensity;
 
 void main()
 {
@@ -16,7 +17,8 @@ void main()
     float delta_len_squared = dot(delta, delta);
 
 //    float intensity = clamp(1.0 / (delta_len_squared + 1.1), 0.0, 1.0); // + 1.1 is important
-    float intensity = clamp(0.5 / (delta_len_squared + 0.5), 0.0, 1.0); 
+//    float intensity = clamp(0.5 / (delta_len_squared + 0.5), 0.0, 1.0);
+    float intensity = clamp(light_intensity / (delta_len_squared + 0.5), 0.0, 1.0);
 
     // multiply it by the color
     gl_FragColor = gl_Color * pixel * intensity;

@@ -32,7 +32,7 @@ Game::Game()
   initKeyboard();
 
   // game objects
-  Lantern = std::make_unique<LightSource>(0, 0);
+  Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
   FloorObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f);
   WorldWindowObj = std::make_unique<WorldWindow>(
@@ -83,7 +83,7 @@ void Game::handleUserInput()
 
 void Game::processLogic(float FrameDrawingTimeMs)
 {
-  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 0.2;
+  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 0.6;
 
   sf::Vector2f LanternDxDy;
   if (Key2IsPressed[sf::Keyboard::Left])  LanternDxDy.x -= LanternFrameSpeed;
@@ -92,6 +92,7 @@ void Game::processLogic(float FrameDrawingTimeMs)
   if (Key2IsPressed[sf::Keyboard::Down]) LanternDxDy.y -= LanternFrameSpeed;
 
   Lantern->setPosition(Lantern->getPosition() + LanternDxDy);
+  Lantern->update();
 
   WorldWindowObj->updateByPlayerPos(Lantern->getPosition());
 }
@@ -107,6 +108,7 @@ void Game::renderScene()
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
   PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());
   PostprocessingShader->setUniform("world_light_pos", Lantern->getPosition());
+  PostprocessingShader->setUniform("light_intensity", Lantern->getIntensity());
 
   Window->draw(*ScreenSprite, PostprocessingShader.get());
   Window->display();

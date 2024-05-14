@@ -34,6 +34,8 @@ int main(int Argc, char** Argv)
   loguru::add_file("game.log", loguru::Append, loguru::Verbosity_MAX);
   // clang-format on
 
+  srand(time(nullptr));
+
   Game GameObj;
   GameObj.run();
 
