@@ -211,7 +211,16 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupLogicalDevice() {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   if (this->Instance->isPortabilityRequired()) {
-    EnabledExtensions.push_back("VK_KHR_portability_subset");
+    std::vector<vk::ExtensionProperties> Props = PhysicalDevice->enumerateDeviceExtensionProperties();
+    const auto FoundIt = std::find_if(Props.begin(), Props.end(), [](const vk::ExtensionProperties &Prop) {
+      return std::string(Prop.extensionName) == "VK_KHR_portability_subset";
+    });
+    if (FoundIt == Props.end()) {
+      LOG_F(WARNING, "Portability extension is not supported");
+    }
+    else {
+      EnabledExtensions.push_back("VK_KHR_portability_subset");
+    }
   }
 
   std::vector<const char *> EnabledLayers;
