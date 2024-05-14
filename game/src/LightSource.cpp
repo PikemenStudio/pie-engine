@@ -26,7 +26,7 @@ void LightSource::update()
   {
     // generate new interval
     // change intensity
-//    Intensity = 0.45 + static_cast<float>(rand() % 1000) / 1000 * 0.03;
+    Intensity = 0.45 + static_cast<float>(rand() % 1000) / 1000 * 0.03;
     IntensityIntervalMs = 50 + static_cast<float>(rand() % 1000) / 1000 * 250;
     IntervalStart = high_resolution_clock::now();
   }

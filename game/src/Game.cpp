@@ -28,17 +28,9 @@ Game::Game()
   RenderTex->display();
   ScreenSprite = std::make_unique<sf::Sprite>(RenderTex->getTexture());
 
-  // keyboard
   initKeyboard();
 
-  // game objects
-  Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
-  Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
-  FloorObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f);
-  WorldWindowObj = std::make_unique<WorldWindow>(
-      sf::Vector2f(0, 0), sf::Vector2f(3, 2),
-      FloorObj->getStartX(), FloorObj->getEndX());
-  PlayerObj = std::make_unique<Player>(sf::Vector2f(0, 0), sf::Vector2f(0.08f, 0.3f));
+  initGameObjects();
 
   // shaders
   if (!sf::Shader::isAvailable())
@@ -59,6 +51,23 @@ void Game::initKeyboard()
   Key2IsPressed[sf::Keyboard::Right] = false;
   Key2IsPressed[sf::Keyboard::Up] = false;
   Key2IsPressed[sf::Keyboard::Down] = false;
+}
+
+void Game::initGameObjects()
+{
+  Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
+  Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
+  TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f);
+  WorldWindowObj = std::make_unique<WorldWindow>(
+      sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
+      TunnelObj->getEndX());
+  PlayerObj = std::make_unique<Player>(
+      sf::Vector2f(0, 0),
+      sf::Vector2f(0.08f, 0.3f),
+      Lantern.get());
+
+  SolidObjects.push_back(PlayerObj.get());
+  SolidObjects.push_back(TunnelObj.get());
 }
 
 void Game::handleUserInput()
@@ -84,15 +93,16 @@ void Game::handleUserInput()
 
 void Game::processLogic(float FrameDrawingTimeMs)
 {
-  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 0.6;
+  float PlayerFrameSpeed = FrameDrawingTimeMs / 1000 * 0.6;
 
-  sf::Vector2f LanternDxDy;
-  if (Key2IsPressed[sf::Keyboard::Left])  LanternDxDy.x -= LanternFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Right]) LanternDxDy.x += LanternFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Up]) LanternDxDy.y += LanternFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Down]) LanternDxDy.y -= LanternFrameSpeed;
+  sf::Vector2f DxDy;
+  if (Key2IsPressed[sf::Keyboard::Left])  DxDy.x -= PlayerFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Right]) DxDy.x += PlayerFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Up]) DxDy.y += PlayerFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Down]) DxDy.y -= PlayerFrameSpeed;
 
-  Lantern->setPosition(Lantern->getPosition() + LanternDxDy);
+  PlayerObj->setPositionWithCollisionCheck(PlayerObj->getPosition() + DxDy,
+                                           SolidObjects);
   Lantern->update();
 
   WorldWindowObj->updateByPlayerPos(Lantern->getPosition());
@@ -104,7 +114,7 @@ void Game::renderScene()
 
   Backgr->draw(*RenderTex, *WorldWindowObj);
   PlayerObj->draw(*RenderTex, *WorldWindowObj);
-  FloorObj->draw(*RenderTex, *WorldWindowObj);
+  TunnelObj->draw(*RenderTex, *WorldWindowObj);
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
   PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());

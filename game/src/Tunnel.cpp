@@ -3,6 +3,7 @@
 //
 
 #include "Tunnel.h"
+#include "Player.h"
 #include "WorldWindow.h"
 #include "utils.h"
 
@@ -44,6 +45,21 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
 Tunnel::Tunnel(float StartX, float EndX, float StepX)
     : Tunnel(StartX, StepX, static_cast<int>((EndX - StartX) / StepX) + 1)
 {
+}
+
+bool Tunnel::isCollision(const SolidObject* Other) const
+{
+  if (dynamic_cast<const Tunnel*>(Other))
+    return false;
+  if (const Player* Pl = dynamic_cast<const Player*>(Other))
+    return isCollisionWithPlayer(Pl);
+
+  return false;
+}
+
+bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
+{
+  return false;
 }
 
 void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) const

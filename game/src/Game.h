@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
@@ -16,6 +17,7 @@ class Background;
 class Tunnel;
 class WorldWindow;
 class Player;
+class SolidObject;
 
 class Game
 {
@@ -27,6 +29,8 @@ public:
 
 private:
   void initKeyboard();
+  void initGameObjects();
+
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
   void renderScene();
@@ -37,11 +41,13 @@ private:
   std::unique_ptr<sf::Sprite> ScreenSprite;
 
   // game objects
-  std::unique_ptr<Tunnel> FloorObj;
+  std::unique_ptr<Tunnel> TunnelObj;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
+
+  std::vector<SolidObject*> SolidObjects;
 
   const std::string Title = "Game";
   std::map<sf::Keyboard::Key, bool> Key2IsPressed;

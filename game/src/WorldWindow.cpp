@@ -24,10 +24,10 @@ void WorldWindow::updateByPlayerPos(sf::Vector2f Pos)
     Center.x = SceneBorderRight - Size.x / 2;
 //  WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
 //
-//  if (WorldWindow.left < FloorObj->getStartX())
-//    WorldWindow.left = FloorObj->getStartX();
-//  else if (WorldWindow.left + WorldWindow.width > FloorObj->getEndX())
-//    WorldWindow.left = FloorObj->getEndX() - WorldWindow.width;
+//  if (WorldWindow.left < TunnelObj->getStartX())
+//    WorldWindow.left = TunnelObj->getStartX();
+//  else if (WorldWindow.left + WorldWindow.width > TunnelObj->getEndX())
+//    WorldWindow.left = TunnelObj->getEndX() - WorldWindow.width;
 //
 //  WorldWindow.top = WorldWindow.height / 2;
 }
