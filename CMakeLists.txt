@@ -10,7 +10,9 @@ endif (UNIX AND NOT APPLE)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20 REQUIRED)
+
+add_compile_options("-std=c++20")
 
 option(TESTS "Build tests (tests will compile modules)" OFF)
 

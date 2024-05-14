@@ -20,7 +20,7 @@ void GraphicEngine<WindowImpl, ShaderImpl>::setupInstance(
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
 void GraphicEngine<WindowImpl, ShaderImpl>::setupPhysicalDevice(
-    VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps Props) {
+    typename VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps Props) {
   LOG_F(INFO, "Setting up physical device");
   NativeComponents.PhysicalDevice =
       std::make_shared<vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>>(
@@ -69,7 +69,7 @@ GraphicEngine<WindowImpl, ShaderImpl>::getLocalPhysicalDevices() const {
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
 void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
-    const VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps
+    const typename VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps
         &Device) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");

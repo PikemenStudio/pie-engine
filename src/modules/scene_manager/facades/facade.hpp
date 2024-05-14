@@ -6,6 +6,7 @@
 #define ENGINE_SRC_MODULES_SCENE_MANAGER_FACADES_FACADE_HPP
 
 #include <concepts>
+#include <utility>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Define all structures to be used in the facades

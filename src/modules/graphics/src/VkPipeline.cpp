@@ -25,11 +25,9 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
 
   initWindowSurface();
   createSwapChain();
-  createPipeline({.VertexShaderPath = "/Users/fullhat/Documents/GitHub/"
-                                      "pie-engine/tests/resources/test.vert",
+  createPipeline({.VertexShaderPath = "/home/anton/dev/engine/pie-engine/tests/resources/test.vert",
                   .FragmentShaderPath =
-                      "/Users/fullhat/Documents/GitHub/"
-                      "pie-engine/tests/resources/test.frag"});
+                      "/home/anton/dev/engine/pie-engine/tests/resources/test.frag"});
   createFrameBuffers();
   createCommandPool();
   createCommandBuffers();

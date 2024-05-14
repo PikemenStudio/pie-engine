@@ -89,11 +89,11 @@ bool VkInstance::isApiSupportExtensions(
 }
 
 bool VkInstance::isApiSupportLayers(
-    const std::vector<const char *> &LayerNames) const {
+    std::vector<const char *> &LayerNames) const {
   std::vector<vk::LayerProperties> SupportedLayers =
       vk::enumerateInstanceLayerProperties();
 
-  for (const auto &RequiredLayerName : LayerNames) {
+  for (auto &RequiredLayerName : LayerNames) {
     auto It = std::find_if(SupportedLayers.begin(), SupportedLayers.end(),
                            [&](auto &SupportedLayer) {
                              return strcmp(SupportedLayer.layerName,
@@ -113,6 +113,7 @@ bool VkInstance::isApiSupportLayers(
         if (It != SupportedLayers.end()) {
           LOG_F(INFO, "Using deprecated validation layer \"%s\"",
                 DeprecatedLayer);
+          RequiredLayerName = "VK_LAYER_LUNARG_standard_validation";
           continue;
         }
       }

@@ -49,7 +49,7 @@ public:
 protected:
   bool
   isApiSupportExtensions(const std::vector<const char *> &ExtensionNames) const;
-  bool isApiSupportLayers(const std::vector<const char *> &LayerNames) const;
+  bool isApiSupportLayers(std::vector<const char *> &LayerNames) const;
 
   static void swap(VkInstance &I1, VkInstance &I2);
 
