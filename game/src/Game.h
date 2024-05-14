@@ -25,6 +25,7 @@ public:
   void run();
 
 private:
+  void initKeyboard();
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
   void renderScene();
@@ -35,13 +36,13 @@ private:
   std::unique_ptr<sf::Sprite> ScreenSprite;
 
   // game objects
-  std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<Floor> FloorObj;
   std::unique_ptr<Background> Backgr;
+  std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
 
   const std::string Title = "Game";
-  std::map<std::string, bool> Key2IsPressed;
+  std::map<sf::Keyboard::Key, bool> Key2IsPressed;
 };
 
 #endif // ENGINE_GAME_H

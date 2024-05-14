@@ -29,8 +29,7 @@ Game::Game()
   ScreenSprite = std::make_unique<sf::Sprite>(RenderTex->getTexture());
 
   // keyboard
-  Key2IsPressed["left"] = false;
-  Key2IsPressed["right"] = false;
+  initKeyboard();
 
   // game objects
   Lantern = std::make_unique<LightSource>(0, 0);
@@ -53,6 +52,14 @@ Game::Game()
 
 Game::~Game() = default;
 
+void Game::initKeyboard()
+{
+  Key2IsPressed[sf::Keyboard::Left] = false;
+  Key2IsPressed[sf::Keyboard::Right] = false;
+  Key2IsPressed[sf::Keyboard::Up] = false;
+  Key2IsPressed[sf::Keyboard::Down] = false;
+}
+
 void Game::handleUserInput()
 {
   sf::Event Event;
@@ -62,19 +69,14 @@ void Game::handleUserInput()
       Window->close();
     if (Event.type == sf::Event::KeyPressed)
     {
-      if (Event.key.code == sf::Keyboard::Left)
-        Key2IsPressed["left"] = true;
-      else if (Event.key.code == sf::Keyboard::Right)
-        Key2IsPressed["right"] = true;
-      else if (Event.key.code == sf::Keyboard::Escape)
+      if (Event.key.code == sf::Keyboard::Escape)
         Window->close();
+      else
+        Key2IsPressed[Event.key.code] = true;
     }
     else if (Event.type == sf::Event::KeyReleased)
     {
-      if (Event.key.code == sf::Keyboard::Left)
-        Key2IsPressed["left"] = false;
-      else if (Event.key.code == sf::Keyboard::Right)
-        Key2IsPressed["right"] = false;
+      Key2IsPressed[Event.key.code] = false;
     }
   }
 }
@@ -82,9 +84,12 @@ void Game::handleUserInput()
 void Game::processLogic(float FrameDrawingTimeMs)
 {
   float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 1.0;
+
   sf::Vector2f LanternDxDy;
-  if (Key2IsPressed["left"])  LanternDxDy.x -= LanternFrameSpeed;
-  if (Key2IsPressed["right"]) LanternDxDy.x += LanternFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Left])  LanternDxDy.x -= LanternFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Right]) LanternDxDy.x += LanternFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Up]) LanternDxDy.y += LanternFrameSpeed;
+  if (Key2IsPressed[sf::Keyboard::Down]) LanternDxDy.y -= LanternFrameSpeed;
 
   Lantern->setPosition(Lantern->getPosition() + LanternDxDy);
 
