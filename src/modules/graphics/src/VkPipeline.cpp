@@ -45,13 +45,6 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
   }
 
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .destroySemaphore(this->ImageAvailableSemaphore);
-  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .destroySemaphore(this->RenderFinishedSemaphore);
-  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .destroyFence(this->InFlightFence);
-
-  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .destroyCommandPool(this->CommandPool);
 
   if (PipelineBundle.has_value()) {
@@ -68,6 +61,12 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
         .destroyImageView(Frame.ImageView);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyFramebuffer(Frame.FrameBuffer);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroySemaphore(Frame.ImageAvailableSemaphore);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroySemaphore(Frame.RenderFinishedSemaphore);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyFence(Frame.InFlightFence);
   }
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
@@ -509,6 +508,9 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSwapChain() {
   this->SwapChainBundle = Bundle;
   this->SwapChainBundle->Format = Format.format;
   this->SwapChainBundle->Extent = Extent;
+
+  this->MaxFrameInFlight =
+      static_cast<int>(this->SwapChainBundle->Frames.size());
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
@@ -853,12 +855,14 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSemaphores() {
   vk::SemaphoreCreateInfo CreateInfo{};
 
   try {
-    this->ImageAvailableSemaphore =
-        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-            .createSemaphore(CreateInfo);
-    this->RenderFinishedSemaphore =
-        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-            .createSemaphore(CreateInfo);
+    for (auto &Frame : this->SwapChainBundle->Frames) {
+      Frame.ImageAvailableSemaphore =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+              .createSemaphore(CreateInfo);
+      Frame.RenderFinishedSemaphore =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+              .createSemaphore(CreateInfo);
+    }
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to create semaphores ") +
                              E.what());
@@ -870,15 +874,16 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
   vk::FenceCreateInfo CreateInfo{.flags = vk::FenceCreateFlags() |
                                           vk::FenceCreateFlagBits::eSignaled};
 
-  // for (auto &Frame : this->SwapChainBundle->Frames) {
-  try {
-    InFlightFence =
-        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-            .createFence(CreateInfo);
-  } catch (vk::SystemError &E) {
-    throw std::runtime_error(std::string("Failed to create fence ") + E.what());
+  for (auto &Frame : this->SwapChainBundle->Frames) {
+    try {
+      Frame.InFlightFence =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+              .createFence(CreateInfo);
+    } catch (vk::SystemError &E) {
+      throw std::runtime_error(std::string("Failed to create fence ") +
+                               E.what());
+    }
   }
-  //}
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
@@ -930,15 +935,20 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
   auto &Device =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
 
-  Device.waitForFences(1, &InFlightFence, VK_TRUE, UINT64_MAX);
-  Device.resetFences(1, &InFlightFence);
+  const auto &Discard1 = Device.waitForFences(
+      1, &SwapChainBundle->Frames[FrameNumber].InFlightFence, VK_TRUE,
+      UINT64_MAX);
+  const auto &Discard2 = Device.resetFences(
+      1, &SwapChainBundle->Frames[FrameNumber].InFlightFence);
 
   uint32_t ImageIndex;
   try {
     ImageIndex =
         Device
-            .acquireNextImageKHR(this->SwapChainBundle->Swapchain, UINT64_MAX,
-                                 this->ImageAvailableSemaphore, nullptr)
+            .acquireNextImageKHR(
+                this->SwapChainBundle->Swapchain, UINT64_MAX,
+                SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore,
+                nullptr)
             .value;
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to acquire next image ") +
@@ -951,13 +961,16 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
 
   recordDrawCommands(ImageIndex);
 
-  vk::Semaphore WaitSemaphores[] = {ImageAvailableSemaphore};
+  vk::Semaphore WaitSemaphores[] = {
+      SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore};
   vk::PipelineStageFlags WaitStages[] = {
       vk::PipelineStageFlagBits::eColorAttachmentOutput};
-  vk::Semaphore SignalSemaphores[] = {RenderFinishedSemaphore};
+  vk::Semaphore SignalSemaphores[] = {
+      SwapChainBundle->Frames[FrameNumber].RenderFinishedSemaphore};
   vk::SubmitInfo SubmitInfo{
       .waitSemaphoreCount = 1,
-      .pWaitSemaphores = &this->ImageAvailableSemaphore,
+      .pWaitSemaphores =
+          &SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore,
       .pWaitDstStageMask = WaitStages,
       .commandBufferCount = 1,
       .pCommandBuffers = &this->MainCommandBuffer,
@@ -966,7 +979,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
   };
 
   try {
-    this->NativeComponents.GraphicsQueue->submit(SubmitInfo, InFlightFence);
+    this->NativeComponents.GraphicsQueue->submit(
+        SubmitInfo, SwapChainBundle->Frames[FrameNumber].InFlightFence);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to submit draw command ") +
                              E.what());
@@ -980,7 +994,10 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
       .pSwapchains = SwapChains,
       .pImageIndices = &ImageIndex,
   };
-  this->NativeComponents.PresentQueue->presentKHR(PresentInfo);
+  const auto &Discard3 =
+      this->NativeComponents.PresentQueue->presentKHR(PresentInfo);
+
+  FrameNumber = (FrameNumber + 1) % MaxFrameInFlight;
 }
 
 template class vk_core::VkPipeline<window_api_impls::WindowApiFacadeGlfwImpl,
