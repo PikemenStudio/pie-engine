@@ -25,9 +25,9 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
 
   initWindowSurface();
   createSwapChain();
-  createPipeline({.VertexShaderPath = "/home/anton/dev/engine/pie-engine/tests/resources/test.vert",
+  createPipeline({.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test.vert",
                   .FragmentShaderPath =
-                      "/home/anton/dev/engine/pie-engine/tests/resources/test.frag"});
+                      "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test.frag"});
   createFrameBuffers();
   createCommandPool();
   createCommandBuffers();
@@ -971,7 +971,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
           &SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore,
       .pWaitDstStageMask = WaitStages,
       .commandBufferCount = 1,
-      .pCommandBuffers = &this->MainCommandBuffer,
+      .pCommandBuffers = &CommandBuffer,
       .signalSemaphoreCount = 1,
       .pSignalSemaphores = SignalSemaphores,
   };
