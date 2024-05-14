@@ -7,7 +7,7 @@
 #include "LightSource.h"
 #include "Tunnel.h"
 #include "WorldWindow.h"
-#include "utils.h"
+#include "Player.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -38,6 +38,7 @@ Game::Game()
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2),
       FloorObj->getStartX(), FloorObj->getEndX());
+  PlayerObj = std::make_unique<Player>(sf::Vector2f(0, 0), sf::Vector2f(0.08f, 0.3f));
 
   // shaders
   if (!sf::Shader::isAvailable())
@@ -102,7 +103,7 @@ void Game::renderScene()
   Window->clear(sf::Color::Black);
 
   Backgr->draw(*RenderTex, *WorldWindowObj);
-//  Lantern->draw(*RenderTex, *WorldWindowObj);
+  PlayerObj->draw(*RenderTex, *WorldWindowObj);
   FloorObj->draw(*RenderTex, *WorldWindowObj);
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());

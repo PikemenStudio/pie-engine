@@ -15,6 +15,7 @@ class LightSource;
 class Background;
 class Tunnel;
 class WorldWindow;
+class Player;
 
 class Game
 {
@@ -38,6 +39,7 @@ private:
   // game objects
   std::unique_ptr<Tunnel> FloorObj;
   std::unique_ptr<Background> Backgr;
+  std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
 
