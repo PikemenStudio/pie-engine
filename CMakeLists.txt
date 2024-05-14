@@ -6,6 +6,8 @@ if (UNIX AND NOT APPLE)
     set (CMAKE_CXX_COMPILER "/usr/bin/g++-10")
 endif (UNIX AND NOT APPLE)
 
+set(SFML_WARNINGS_AS_ERRORS OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 set(CMAKE_CXX_STANDARD 20)

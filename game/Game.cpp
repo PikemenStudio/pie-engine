@@ -20,7 +20,7 @@ Game::Game()
 {
   Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
                                               Title,
-                                              sf::Style::Fullscreen);
+                                              sf::Style::Default);
   Window->setFramerateLimit(100);
 
   if (!sf::Shader::isAvailable())

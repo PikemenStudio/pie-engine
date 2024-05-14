@@ -6,8 +6,9 @@ find_package(glm CONFIG REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
 
+set(SFML_WARNINGS_AS_ERRORS OFF)
+
 set(SFML_STATIC_LIBRARIES TRUE)
-find_package(SFML COMPONENTS graphics window system REQUIRED)
 
 add_executable(game_exe main.cpp
         Floor.cpp
@@ -26,6 +27,17 @@ target_link_libraries(game_exe PRIVATE graphics)
 target_link_libraries(game_exe PRIVATE sound)
 target_link_libraries(game_exe PRIVATE unofficial::noise::noise-static)
 target_link_libraries(game_exe PRIVATE unofficial::noiseutils::noiseutils-static)
-target_link_libraries(game_exe PRIVATE sfml-system sfml-graphics sfml-window)
+
+if (APPLE)
+    target_link_libraries(game_exe PRIVATE $ENV{SFML_PATH}/lib/libsfml-system.2.6.1.dylib
+            $ENV{SFML_PATH}/lib/libsfml-graphics.2.6.1.dylib
+            $ENV{SFML_PATH}/lib/libsfml-window.2.6.1.dylib)
+    target_include_directories(game_exe PRIVATE $ENV{SFML_PATH}/include)
+endif (APPLE)
+
+if (UNIX AND NOT APPLE)
+    find_package(SFML COMPONENTS graphics window system REQUIRED)
+    target_link_libraries(game_exe PRIVATE sfml-system sfml-graphics sfml-window)
+endif (UNIX AND NOT APPLE)
 
 include_directories(../src/modules)
