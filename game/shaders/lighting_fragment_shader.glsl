@@ -15,7 +15,8 @@ void main()
     vec2 delta = world_pos.xy - world_light_pos; // for now, the light source is always at the center
     float delta_len_squared = dot(delta, delta);
 
-    float intensity = clamp(1.0 / (delta_len_squared + 1.1), 0.0, 1.0); // + 1.1 is important
+//    float intensity = clamp(1.0 / (delta_len_squared + 1.1), 0.0, 1.0); // + 1.1 is important
+    float intensity = clamp(0.5 / (delta_len_squared + 0.5), 0.0, 1.0); 
 
     // multiply it by the color
     gl_FragColor = gl_Color * pixel * intensity;

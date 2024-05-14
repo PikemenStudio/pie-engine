@@ -83,7 +83,7 @@ void Game::handleUserInput()
 
 void Game::processLogic(float FrameDrawingTimeMs)
 {
-  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 1.0;
+  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 0.2;
 
   sf::Vector2f LanternDxDy;
   if (Key2IsPressed[sf::Keyboard::Left])  LanternDxDy.x -= LanternFrameSpeed;
