@@ -74,6 +74,9 @@ protected:
     vk::ImageView ImageView;
     vk::Framebuffer FrameBuffer;
     vk::CommandBuffer CommandBuffer;
+    vk::Semaphore ImageAvailableSemaphore = nullptr;
+    vk::Semaphore RenderFinishedSemaphore = nullptr;
+    vk::Fence InFlightFence = nullptr;
   };
 
   struct SwapChainBundleStruct {
@@ -117,11 +120,7 @@ protected:
   vk::CommandPool CommandPool = nullptr;
   vk::CommandBuffer MainCommandBuffer = nullptr;
 
-  vk::Semaphore ImageAvailableSemaphore = nullptr;
-  vk::Semaphore RenderFinishedSemaphore = nullptr;
-  vk::Fence InFlightFence = nullptr;
-
-  // int MaxFrameInFlight = 2, FrameNumber;
+  int MaxFrameInFlight, FrameNumber = 0;
 
 protected:
 protected:
