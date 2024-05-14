@@ -4,6 +4,7 @@
 
 #include "Floor.h"
 #include "utils.h"
+#include "WorldWindow.h"
 
 #include <noise/noise.h>
 
@@ -28,7 +29,7 @@ Floor::Floor(float StartX, float EndX, float StepX)
 {
 }
 
-void Floor::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow) const
+void Floor::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) const
 {
   for (int I = 0; I < WorldCoordsY.size() - 1; I++)
   {
@@ -37,8 +38,8 @@ void Floor::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow) const
     float WorldX2 = StartX + (I + 1) * StepX;
     float WorldY2 = WorldCoordsY[I + 1];
 
-    sf::Vector2f ScreenXY1 = worldCoordsToScreen(sf::Vector2f(WorldX1, WorldY1), WorldWindow);
-    sf::Vector2f ScreenXY2 = worldCoordsToScreen(sf::Vector2f(WorldX2, WorldY2), WorldWindow);
+    sf::Vector2f ScreenXY1 = worldCoordsToScreen(sf::Vector2f(WorldX1, WorldY1), WorldWindowObj);
+    sf::Vector2f ScreenXY2 = worldCoordsToScreen(sf::Vector2f(WorldX2, WorldY2), WorldWindowObj);
 
     sf::ConvexShape FloorPart;
     FloorPart.setPointCount(4);

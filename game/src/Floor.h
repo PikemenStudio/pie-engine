@@ -9,13 +9,15 @@
 
 #include <SFML/Graphics.hpp>
 
+class WorldWindow;
+
 class Floor
 {
 public:
   Floor(float StartX, float StepX, int PointsCount);
   Floor(float StartX, float EndX, float StepX);
 
-  void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow) const;
+  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) const;
 
   float getStartX() const { return StartX; }
   float getEndX() const { return StartX + (WorldCoordsY.size() - 1) * StepX; }

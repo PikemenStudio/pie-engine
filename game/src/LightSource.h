@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 
 class Background;
+class WorldWindow;
 
 class LightSource
 {
@@ -16,7 +17,7 @@ public:
 
   sf::Vector2f getPosition() const { return WorldCoords; }
   void setPosition(sf::Vector2f Pos) { WorldCoords = Pos; }
-  void draw(sf::RenderTarget& Win, sf::FloatRect WorldWindow);
+  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj);
 
 private:
   sf::Vector2f WorldCoords;

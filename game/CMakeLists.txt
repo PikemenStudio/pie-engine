@@ -21,7 +21,9 @@ add_executable(game_exe
         src/LightSource.cpp
         src/LightSource.h
         src/Background.cpp
-        src/Background.h)
+        src/Background.h
+        src/WorldWindow.cpp
+        src/WorldWindow.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)

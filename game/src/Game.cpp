@@ -6,6 +6,7 @@
 #include "Background.h"
 #include "Floor.h"
 #include "LightSource.h"
+#include "WorldWindow.h"
 #include "utils.h"
 
 #include <SFML/Graphics.hpp>
@@ -14,29 +15,40 @@
 
 #include <chrono>
 #include <iostream>
-#include <map>
 
 Game::Game()
 {
+  // objects for rendering
   Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
                                               Title);
 //                                              sf::Style::Fullscreen);
   Window->setFramerateLimit(100);
+  RenderTex = std::make_unique<sf::RenderTexture>();
+  RenderTex->create(ScreenWidth, ScreenHeight);
+  RenderTex->display();
+  ScreenSprite = std::make_unique<sf::Sprite>(RenderTex->getTexture());
 
+  // keyboard
   Key2IsPressed["left"] = false;
   Key2IsPressed["right"] = false;
 
+  // game objects
   Lantern = std::make_unique<LightSource>(0, 0);
+  Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
+  FloorObj = std::make_unique<Floor>(-3.0f, 3.0f, 0.01f);
+  WorldWindowObj = std::make_unique<WorldWindow>(
+      sf::Vector2f(0, 0), sf::Vector2f(3, 2),
+      FloorObj->getStartX(), FloorObj->getEndX());
 
+  // shaders
   if (!sf::Shader::isAvailable())
     throw std::runtime_error("Shaders are not available!");
-
-//  LightingShader = std::make_unique<sf::Shader>();
-//  LightingShader->loadFromFile("../../game/shaders/lighting_vertex_shader.glsl",
-//                              "../../game/shaders/lighting_fragment_shader.glsl");
-//  LightingShader->setUniform("texture", sf::Shader::CurrentTexture); // always use current texture
-//
-//
+  PostprocessingShader = std::make_unique<sf::Shader>();
+  PostprocessingShader->loadFromFile("../../game/shaders/lighting_vertex_shader.glsl",
+                              "../../game/shaders/lighting_fragment_shader.glsl");
+  // always use current texture
+  // (the texture of the current object being drawn)
+  PostprocessingShader->setUniform("texture", sf::Shader::CurrentTexture);
 }
 
 Game::~Game() = default;
@@ -75,23 +87,28 @@ void Game::processLogic(float FrameDrawingTimeMs)
   if (Key2IsPressed["right"]) LanternDxDy.x += LanternFrameSpeed;
 
   Lantern->setPosition(Lantern->getPosition() + LanternDxDy);
+
+  WorldWindowObj->updateByPlayerPos(Lantern->getPosition());
+}
+
+void Game::renderScene()
+{
+  Window->clear(sf::Color::Black);
+
+  Backgr->draw(*RenderTex, *WorldWindowObj);
+  Lantern->draw(*RenderTex, *WorldWindowObj);
+  FloorObj->draw(*RenderTex, *WorldWindowObj);
+
+  PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
+  PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());
+  PostprocessingShader->setUniform("world_light_pos", Lantern->getPosition());
+
+  Window->draw(*ScreenSprite, PostprocessingShader.get());
+  Window->display();
 }
 
 void Game::run()
 {
-  sf::Shader LightingShader;
-  LightingShader.loadFromFile("../../game/shaders/lighting_vertex_shader.glsl",
-                              "../../game/shaders/lighting_fragment_shader.glsl");
-  LightingShader.setUniform("texture", sf::Shader::CurrentTexture); // always use current texture
-
-  sf::RenderTexture RenderTex;
-  RenderTex.create(ScreenWidth, ScreenHeight);
-  RenderTex.display();
-  sf::Sprite ScreenSprite(RenderTex.getTexture());
-
-  Background BG(ScreenWidth, ScreenHeight);
-  Floor FloorObj(-5, 5, 0.01f);
-
   auto BeginTime = std::chrono::high_resolution_clock::now();
   long long FrameCount = 0;
   float FrameDrawingTimeMs = 0;
@@ -106,36 +123,19 @@ void Game::run()
     processLogic(FrameDrawingTimeMs);
 
     // drawing
-    sf::FloatRect WorldWindow;
-    WorldWindow.width = 3.0f;
-    WorldWindow.height = 2.0f;
-    WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
+//    sf::FloatRect WorldWindow;
+//    WorldWindow.width = 3.0f;
+//    WorldWindow.height = 2.0f;
+//    WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
+//
+//    if (WorldWindow.left < FloorObj->getStartX())
+//      WorldWindow.left = FloorObj->getStartX();
+//    else if (WorldWindow.left + WorldWindow.width > FloorObj->getEndX())
+//      WorldWindow.left = FloorObj->getEndX() - WorldWindow.width;
+//
+//    WorldWindow.top = WorldWindow.height / 2;
 
-    if (WorldWindow.left < FloorObj.getStartX())
-      WorldWindow.left = FloorObj.getStartX();
-    else if (WorldWindow.left + WorldWindow.width > FloorObj.getEndX())
-      WorldWindow.left = FloorObj.getEndX() - WorldWindow.width;
-
-    WorldWindow.top = WorldWindow.height / 2;
-
-    Window->clear(sf::Color::Black);
-
-    BG.draw(RenderTex, WorldWindow);
-    Lantern->draw(RenderTex, WorldWindow);
-    FloorObj.draw(RenderTex, WorldWindow);
-
-    auto WorldWinCenter = sf::Vector2f(WorldWindow.left, WorldWindow.top) +
-                                        sf::Vector2f(WorldWindow.width/2, -WorldWindow.height/2);
-
-    LightingShader.setUniform("world_window_center", WorldWinCenter);
-    LightingShader.setUniform(
-        "world_window_dimensions",
-        sf::Vector2f(WorldWindow.width, WorldWindow.height));
-    LightingShader.setUniform("world_light_pos", Lantern->getPosition());
-
-    Window->draw(ScreenSprite, &LightingShader);
-//    Window->draw(ScreenSprite);
-    Window->display();
+    renderScene();
 
     FrameCount++;
 

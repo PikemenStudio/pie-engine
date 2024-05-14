@@ -9,15 +9,12 @@
 #include <memory>
 #include <string>
 
-namespace sf
-{
-class RenderWindow;
-class Shader;
-class RenderTexture;
-class Sprite;
-} // namespace sf
+#include <SFML/Graphics.hpp>
 
 class LightSource;
+class Background;
+class Floor;
+class WorldWindow;
 
 class Game
 {
@@ -30,14 +27,18 @@ public:
 private:
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
+  void renderScene();
 
   std::unique_ptr<sf::RenderWindow> Window;
-//  std::unique_ptr<sf::Shader> LightingShader;
-//  std::unique_ptr<sf::RenderTexture> RenderTex;
-//  std::unique_ptr<sf::Sprite> ScreenSprite;
+  std::unique_ptr<sf::Shader> PostprocessingShader;
+  std::unique_ptr<sf::RenderTexture> RenderTex;
+  std::unique_ptr<sf::Sprite> ScreenSprite;
 
   // game objects
   std::unique_ptr<LightSource> Lantern;
+  std::unique_ptr<Floor> FloorObj;
+  std::unique_ptr<Background> Backgr;
+  std::unique_ptr<WorldWindow> WorldWindowObj;
 
   const std::string Title = "Game";
   std::map<std::string, bool> Key2IsPressed;

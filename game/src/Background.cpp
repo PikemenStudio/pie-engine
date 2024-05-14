@@ -3,6 +3,7 @@
 //
 
 #include "Background.h"
+#include "WorldWindow.h"
 
 Background::Background(float ScreenW, float ScreenH) : BackgrRect(sf::Vector2f(ScreenW, ScreenH))
 {
@@ -10,8 +11,8 @@ Background::Background(float ScreenW, float ScreenH) : BackgrRect(sf::Vector2f(S
   BackgrRect.setFillColor(sf::Color::White);
 }
 
-void Background::draw(sf::RenderTarget &Win, sf::FloatRect WorldWindow)
+void Background::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj)
 {
-  (void)WorldWindow;
+  (void)WorldWindowObj;
   Win.draw(BackgrRect);
 }

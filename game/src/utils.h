@@ -10,14 +10,15 @@
 #include <string>
 
 #include <SFML/System/Vector2.hpp>
-#include <SFML/Graphics/Rect.hpp>
+
+class WorldWindow;
 
 constexpr int ScreenWidth = 1366;
 constexpr int ScreenHeight = 768;
 constexpr int HalfScreenWidth = ScreenWidth / 2;
 constexpr int HalfScreenHeight = ScreenHeight / 2;
 
-sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, sf::FloatRect WorldWindow);
+sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, const WorldWindow& WorldWindowObj);
 //sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords);
 
 template <typename T>
