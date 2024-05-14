@@ -9,8 +9,16 @@
       "glfw3",
       "glm",
       "loguru",
-      "openal-soft",
-      "libsndfile"
+      {
+        "name": "openal-soft",
+        "platform": "!osx"
+      },
+      "libsndfile",
+      "libnoise",
+      {
+        "name": "sfml",
+        "platform": "!osx"
+      }
     ],
     "overrides":
     [

@@ -5,8 +5,10 @@ set(LOGURU_WITH_STREAMS TRUE)
 # Set global flags
 
 if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_COMPILER g++-10)
+    set (CMAKE_CXX_COMPILER "/usr/bin/g++-10")
 endif (UNIX AND NOT APPLE)
+
+set(SFML_WARNINGS_AS_ERRORS OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
@@ -35,6 +37,7 @@ set(ADAPTERS ${ADAPTERS}
 )
 
 add_subdirectory(tests)
+add_subdirectory(game)
 
 add_executable(main src/main.cpp ${ADAPTERS})
 
@@ -62,8 +65,6 @@ target_link_libraries(main PRIVATE loguru)
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(main PRIVATE glm::glm)
-
-#add_subdirectory(tests)
 
 # define path constants
 target_compile_definitions(main PRIVATE VULKAN_SDK_PATH="$ENV{VULKAN_SDK}" PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
