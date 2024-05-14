@@ -13,7 +13,7 @@
 
 class LightSource;
 class Background;
-class Floor;
+class Tunnel;
 class WorldWindow;
 
 class Game
@@ -36,7 +36,7 @@ private:
   std::unique_ptr<sf::Sprite> ScreenSprite;
 
   // game objects
-  std::unique_ptr<Floor> FloorObj;
+  std::unique_ptr<Tunnel> FloorObj;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;

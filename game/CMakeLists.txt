@@ -12,8 +12,8 @@ set(SFML_STATIC_LIBRARIES TRUE)
 
 add_executable(game_exe
         src/main.cpp
-        src/Floor.cpp
-        src/Floor.h
+        src/Tunnel.cpp
+        src/Tunnel.h
         src/utils.h
         src/utils.cpp
         src/Game.cpp

@@ -4,8 +4,8 @@
 
 #include "Game.h"
 #include "Background.h"
-#include "Floor.h"
 #include "LightSource.h"
+#include "Tunnel.h"
 #include "WorldWindow.h"
 #include "utils.h"
 
@@ -34,7 +34,7 @@ Game::Game()
   // game objects
   Lantern = std::make_unique<LightSource>(0, 0);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
-  FloorObj = std::make_unique<Floor>(-3.0f, 3.0f, 0.01f);
+  FloorObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f);
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2),
       FloorObj->getStartX(), FloorObj->getEndX());
