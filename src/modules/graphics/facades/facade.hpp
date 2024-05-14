@@ -5,6 +5,7 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_FACADES_FACADE_HPP
 
+#include "../../scene_manager/facades/facade.hpp"
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include <any>
@@ -89,7 +90,7 @@ concept GraphicApiImpl = requires(T Obj) {
 // Define all concepts with implementation dependencies
 template <typename DependencyStructT>
 concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
-  { Dep.Window };
+  { Dep.Window, Dep.SceneManager };
 };
 
 #define GRAPHIC_API_IMPL(name, DependencyStructConcept)                        \
@@ -122,13 +123,20 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 namespace graphic_api_impls {
-template <WindowApiImpl WindowT, ShaderLoaderImpl ShaderLoaderT>
+template <WindowApiImpl WindowT, ShaderLoaderImpl ShaderLoaderT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerT>
 struct VulkanDependencies {
   using WindowType = WindowT;
   std::shared_ptr<WindowApiFacade<WindowT>> Window;
 
   using ShaderLoaderType = ShaderLoaderT;
   std::shared_ptr<ShaderLoaderFacade<ShaderLoaderT>> ShaderLoader;
+
+  using SceneManagerType = SceneManagerT;
+  std::shared_ptr<SceneManagerFacade<
+      scene_manager_facades::SceneManagerDependencies, SceneManagerT>>
+      SceneManager;
 };
 GRAPHIC_API_IMPL(Vulkan, VulkanDependenciesConcept)
 } // namespace graphic_api_impls

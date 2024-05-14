@@ -16,7 +16,9 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 class VkPhysicalDevice;
 
 /*
@@ -35,12 +37,15 @@ class VkPhysicalDevice;
  *  1) Initialize by constructor(Props) -> no return params, can throw exception
  *
  */
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 class VkPipeline {
 public:
   struct FacadesStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
+    std::shared_ptr<SceneManagerFacade<scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>> SceneManager;
   };
 
   struct VkPipelineProps;
@@ -49,8 +54,8 @@ public:
   ~VkPipeline();
 
   struct VkPipelineProps {
-    std::shared_ptr<
-        typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>>
+    std::shared_ptr<typename vk_core::VkPhysicalDevice<
+        WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
         PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
     FacadesStruct Facades;
@@ -88,8 +93,8 @@ protected:
   std::optional<SwapChainBundleStruct> SwapChainBundle;
 
   struct NativeComponentsStruct {
-    std::shared_ptr<
-        typename vk_core::VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>>
+    std::shared_ptr<typename vk_core::VkPhysicalDevice<
+        WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
         PhysicalDevice;
     std::shared_ptr<vk_core::VkInstance> Instance;
 

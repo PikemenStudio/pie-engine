@@ -5,8 +5,13 @@
 #ifndef ENGINE_SRC_MODULES_SCENE_MANAGER_FACADES_FACADE_HPP
 #define ENGINE_SRC_MODULES_SCENE_MANAGER_FACADES_FACADE_HPP
 
+#include "../../objects/AllObjects.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include <concepts>
+#include <optional>
 #include <utility>
+#include <vector>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Define all structures to be used in the facades
@@ -16,6 +21,24 @@ struct SceneManagerFacadeStructs {
   template <typename DependencyStructT> struct SceneManagerProps {
     // Add your properties here
     DependencyStructT Dependencies;
+  };
+
+  enum class ObjectTypes {
+    TRIANGLE,
+  };
+
+  struct ObjectData {
+    std::vector<uint8_t> Vertexes;
+    glm::vec3 Position;
+
+    ObjectTypes Type;
+    struct TransformationStruct {
+      glm::mat4 Transformation;
+    };
+    TransformationStruct calculateTransformation() {
+      glm::mat4 Result = glm::translate(glm::mat4(1.0f), Position);
+      return {.Transformation = Result};
+    }
   };
 };
 
@@ -48,6 +71,12 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
         SceneManagerFacadeStructs::SceneManagerProps<Dep> &&);                 \
     ~SceneManager##name##Impl();                                               \
                                                                                \
+    std::string addObject(std::unique_ptr<BaseObject> Object);                 \
+    void addObject(std::string Name, std::unique_ptr<BaseObject> Object);      \
+                                                                               \
+    std::optional<SceneManagerFacadeStructs::ObjectData> getNextObject();      \
+    void resetObjectGetter();                                                  \
+                                                                               \
   protected:                                                                   \
     void *Data;                                                                \
   };
@@ -76,7 +105,7 @@ public:
       SceneManagerFacadeStructs::SceneManagerProps<DependencyStructT> &&Props)
       : ImplInstance(std::move(Props)) {}
 
-protected:
+public:
   Impl ImplInstance;
 };
 

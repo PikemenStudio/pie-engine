@@ -10,31 +10,39 @@
 #include <GLFW/glfw3.h>
 
 namespace vk_core {
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-void GraphicEngine<WindowImpl, ShaderImpl>::setupInstance(
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::setupInstance(
     VkInstance::VkInstanceProps Props) {
   LOG_F(INFO, "Setting up instance");
   NativeComponents.Instance = std::make_shared<vk_core::VkInstance>(Props);
   LOG_F(INFO, "Instance set up");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-void GraphicEngine<WindowImpl, ShaderImpl>::setupPhysicalDevice(
-    typename VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps Props) {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::setupPhysicalDevice(
+    typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+                              SceneImpl>::VkPhysicalDeviceProps Props) {
   LOG_F(INFO, "Setting up physical device");
-  NativeComponents.PhysicalDevice =
-      std::make_shared<vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>>(
-          Props);
+  NativeComponents.PhysicalDevice = std::make_shared<
+      vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>(Props);
   LOG_F(INFO, "Physical device set up");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-GraphicEngine<WindowImpl, ShaderImpl>::GraphicEngine(
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::GraphicEngine(
     GraphicEngine::GraphicEngineProps Props) {
   LOG_F(INFO, "Creating Graphic Engine");
 
-  NativeComponents.Adapters.emplace(AdaptersStruct{
-      .Window = Props.Window, .ShaderLoader = Props.ShaderLoader});
+  NativeComponents.Adapters.emplace(
+      AdaptersStruct{.Window = Props.Window,
+                     .ShaderLoader = Props.ShaderLoader,
+                     .SceneManager = Props.SceneManager});
 
   setupInstance(VkInstance::VkInstanceProps(Props.VkInstanceProps));
 
@@ -42,23 +50,28 @@ GraphicEngine<WindowImpl, ShaderImpl>::GraphicEngine(
     Props.VkPhysicalDeviceProps.Instance = NativeComponents.Instance;
   }
   setupPhysicalDevice(
-      typename VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps(
-          Props.VkPhysicalDeviceProps));
+      typename VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>::
+          VkPhysicalDeviceProps(Props.VkPhysicalDeviceProps));
   LOG_F(INFO, "Graphic Engine created");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-GraphicEngine<WindowImpl, ShaderImpl>::~GraphicEngine() {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::~GraphicEngine() {
   NativeComponents.PhysicalDevice.reset();
   // NativeComponents.Pipeline.reset();
   NativeComponents.Instance.reset();
   LOG_F(INFO, "Engine destroyed, ok");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-std::vector<
-    typename VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps>
-GraphicEngine<WindowImpl, ShaderImpl>::getLocalPhysicalDevices() const {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+std::vector<typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+                                      SceneImpl>::PhysicalDeviceLocalProps>
+GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::getLocalPhysicalDevices()
+    const {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
     throw std::runtime_error("Physical device is null");
@@ -67,10 +80,14 @@ GraphicEngine<WindowImpl, ShaderImpl>::getLocalPhysicalDevices() const {
   return NativeComponents.PhysicalDevice->getLocalPhysicalDevices();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
-    const typename VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps
-        &Device) {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::
+    chooseLocalPhysicalDevice(
+        const typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+                                        SceneImpl>::PhysicalDeviceLocalProps
+            &Device) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
     throw std::runtime_error("Physical device is null");
@@ -85,9 +102,11 @@ void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
   this->NativeComponents.PhysicalDevice->setupLogicalDevice();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
-    const DeviceChoosePolicy Policy) {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::
+    chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy) {
   LOG_F(INFO, "Choosing local physical device");
 
   if (NativeComponents.PhysicalDevice == nullptr) {
@@ -118,14 +137,17 @@ void GraphicEngine<WindowImpl, ShaderImpl>::chooseLocalPhysicalDevice(
   this->NativeComponents.PhysicalDevice->setupPipeline({
       .Window = NativeComponents.Adapters->Window,
       .ShaderLoader = NativeComponents.Adapters->ShaderLoader,
+      .SceneManager = NativeComponents.Adapters->SceneManager,
       .ThisPhysicalDevice = NativeComponents.PhysicalDevice,
   });
 
   LOG_F(INFO, "Local physical device chosen");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-void GraphicEngine<WindowImpl, ShaderImpl>::render() {
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::render() {
   LOG_F(INFO, "Rendering");
   NativeComponents.PhysicalDevice->render();
   LOG_F(INFO, "Rendered");
@@ -133,6 +155,8 @@ void GraphicEngine<WindowImpl, ShaderImpl>::render() {
 
 template class vk_core::GraphicEngine<
     window_api_impls::WindowApiFacadeGlfwImpl,
-    shader_loader_impls::ShaderLoaderSimpleImpl>;
+    shader_loader_impls::ShaderLoaderSimpleImpl,
+    scene_manager_facades::SceneManagerBaseImpl<
+        scene_manager_facades::SceneManagerDependencies>>;
 
 } // namespace vk_core

@@ -5,6 +5,7 @@
 #ifndef ENGINE_SRC_MODULES_VK_CORE_SRC_GRAPHICENGINE_HPP
 #define ENGINE_SRC_MODULES_VK_CORE_SRC_GRAPHICENGINE_HPP
 
+#include "../../scene_manager/facades/facade.hpp"
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include "VkInstance.hpp"
@@ -14,7 +15,9 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 class GraphicEngine {
 public:
   struct GraphicEngineProps;
@@ -25,23 +28,28 @@ public:
   struct GraphicEngineProps {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderImpl>> ShaderLoader;
+    std::shared_ptr<SceneManagerFacade<
+        scene_manager_facades::SceneManagerDependencies, SceneImpl>>
+        SceneManager;
 
     vk_core::VkInstance::VkInstanceProps VkInstanceProps;
-    vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps
+    vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl,
+                              SceneImpl>::VkPhysicalDeviceProps
         VkPhysicalDeviceProps;
   };
 
   void setupInstance(VkInstance::VkInstanceProps Props);
-  void setupPhysicalDevice(
-      VkPhysicalDevice<WindowImpl, ShaderImpl>::VkPhysicalDeviceProps Props);
+  void
+  setupPhysicalDevice(VkPhysicalDevice<WindowImpl, ShaderImpl,
+                                       SceneImpl>::VkPhysicalDeviceProps Props);
 
-  std::vector<typename VkPhysicalDevice<WindowImpl,
-                                        ShaderImpl>::PhysicalDeviceLocalProps>
+  std::vector<typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+                                        SceneImpl>::PhysicalDeviceLocalProps>
   getLocalPhysicalDevices() const;
 
   void chooseLocalPhysicalDevice(
-      const VkPhysicalDevice<WindowImpl, ShaderImpl>::PhysicalDeviceLocalProps
-          &Device);
+      const VkPhysicalDevice<WindowImpl, ShaderImpl,
+                             SceneImpl>::PhysicalDeviceLocalProps &Device);
 
   enum class DeviceChoosePolicy : uint_fast8_t {
     FIRST,
@@ -58,6 +66,9 @@ private:
   struct AdaptersStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderImpl>> ShaderLoader;
+    std::shared_ptr<SceneManagerFacade<
+        scene_manager_facades::SceneManagerDependencies, SceneImpl>>
+        SceneManager;
   };
 
   struct SwapChainSupportDetails {
@@ -70,7 +81,8 @@ private:
     std::optional<AdaptersStruct> Adapters;
 
     std::shared_ptr<vk_core::VkInstance> Instance;
-    std::shared_ptr<vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl>>
+    std::shared_ptr<
+        vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>
         PhysicalDevice;
   } NativeComponents;
 };

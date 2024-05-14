@@ -7,8 +7,9 @@
 
 #include <memory>
 
-#include "VkInstance.hpp"
+#include "../../scene_manager/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
+#include "VkInstance.hpp"
 #include "VkPipeline.h"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
@@ -16,9 +17,14 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT> class VkPipeline;
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+class VkPipeline;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 class VkPhysicalDevice {
 public:
   struct VkPhysicalDeviceProps;
@@ -101,8 +107,12 @@ public:
   struct PipelineInitDataStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
-    // It's strange, but we need pointer from GraphicEngine and can't just use this
-    std::shared_ptr<VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>> ThisPhysicalDevice;
+    std::shared_ptr<SceneManagerFacade<scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>> SceneManager;
+    // It's strange, but we need pointer from GraphicEngine and can't just use
+    // this
+    std::shared_ptr<
+        VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
+        ThisPhysicalDevice;
   };
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
 
@@ -115,7 +125,9 @@ protected:
   std::shared_ptr<VkInstance> Instance;
   std::optional<vk::PhysicalDevice> PhysicalDevice;
   std::optional<vk::Device> LogicalDevice;
-  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>> Pipeline;
+  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                                               SceneManagerImplT>>
+      Pipeline;
 
   struct QueueIndexes {
     std::optional<uint32_t> Graphics;

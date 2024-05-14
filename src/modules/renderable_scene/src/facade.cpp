@@ -7,12 +7,13 @@
 
 using WindowType = window_api_impls::WindowApiFacadeGlfwImpl;
 using ShaderLoaderType = shader_loader_impls::ShaderLoaderSimpleImpl;
+using SceneManagerType = scene_manager_facades::SceneManagerBaseImpl<scene_manager_facades::SceneManagerDependencies>;
 using GraphicsType = graphic_api_impls::GraphicApiFacadeVulkanImpl<
-    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType>>;
+    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType, SceneManagerType>>;
 using SceneManagerType = scene_manager_facades::SceneManagerBaseImpl<scene_manager_facades::SceneManagerDependencies>;
 using DependenciesType = renderable_scene_facades::RenderableSceneDependencies<
     scene_manager_facades::SceneManagerDependencies, SceneManagerType,
-    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType>,
+    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType, SceneManagerType>,
     GraphicsType, WindowType>;
 
 using namespace renderable_scene_facades;

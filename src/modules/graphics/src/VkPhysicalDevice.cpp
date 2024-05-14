@@ -10,16 +10,20 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::VkPhysicalDevice(
-    VkPhysicalDevice::VkPhysicalDeviceProps Props) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    VkPhysicalDevice(VkPhysicalDevice::VkPhysicalDeviceProps Props) {
   Instance = Props.Instance;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 std::vector<vk::PhysicalDevice>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::getNativePhysicalDevices()
-    const {
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                 SceneManagerImplT>::getNativePhysicalDevices() const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -51,37 +55,48 @@ VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::getNativePhysicalDevices()
   return Devices;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::~VkPhysicalDevice() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                 SceneManagerImplT>::~VkPhysicalDevice() {
   this->Pipeline.reset();
   this->LogicalDevice->destroy();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::swap(
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::swap(
     VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2) {
   std::swap(Pd1.Instance, Pd2.Instance);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::VkPhysicalDevice(
-    VkPhysicalDevice &&PdToMove) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    VkPhysicalDevice(VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT> &
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::operator=(
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT> &
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::operator=(
     VkPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
   return *this;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 std::vector<typename VkPhysicalDevice<
-    WindowImpl, ShaderLoaderImplT>::PhysicalDeviceLocalProps>
-VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::getLocalPhysicalDevices()
-    const {
+    WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::PhysicalDeviceLocalProps>
+VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                 SceneManagerImplT>::getLocalPhysicalDevices() const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -123,9 +138,11 @@ VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::getLocalPhysicalDevices()
   return LocalDevices;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl,
-                      ShaderLoaderImplT>::findQueueIndexesAndSetup() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                      SceneManagerImplT>::findQueueIndexesAndSetup() {
   LOG_F(INFO, "Finding queue indexes");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -156,9 +173,12 @@ void VkPhysicalDevice<WindowImpl,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::chooseDeviceAndSetup(
-    std::function<bool(const vk::PhysicalDevice &)> Predicate) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    chooseDeviceAndSetup(
+        std::function<bool(const vk::PhysicalDevice &)> Predicate) {
   std::vector<vk::PhysicalDevice> AvailableDevices =
       static_cast<vk::Instance &>(*Instance.get()).enumeratePhysicalDevices();
 
@@ -183,8 +203,11 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::chooseDeviceAndSetup(
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupLogicalDevice() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                      SceneManagerImplT>::setupLogicalDevice() {
   LOG_F(INFO, "Setting up logical device");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -211,14 +234,15 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupLogicalDevice() {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   if (this->Instance->isPortabilityRequired()) {
-    std::vector<vk::ExtensionProperties> Props = PhysicalDevice->enumerateDeviceExtensionProperties();
-    const auto FoundIt = std::find_if(Props.begin(), Props.end(), [](const vk::ExtensionProperties &Prop) {
-      return std::string(Prop.extensionName) == "VK_KHR_portability_subset";
-    });
+    std::vector<vk::ExtensionProperties> Props =
+        PhysicalDevice->enumerateDeviceExtensionProperties();
+    const auto FoundIt = std::find_if(
+        Props.begin(), Props.end(), [](const vk::ExtensionProperties &Prop) {
+          return std::string(Prop.extensionName) == "VK_KHR_portability_subset";
+        });
     if (FoundIt == Props.end()) {
       LOG_F(WARNING, "Portability extension is not supported");
-    }
-    else {
+    } else {
       EnabledExtensions.push_back("VK_KHR_portability_subset");
     }
   }
@@ -249,8 +273,11 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupLogicalDevice() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupQueues() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                      SceneManagerImplT>::setupQueues() {
   if (!LogicalDevice.has_value()) {
     LOG_F(ERROR, "Logical device is not initialized");
     throw std::runtime_error("Logical device is not initialized");
@@ -273,9 +300,12 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupQueues() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupPipeline(
-    const VkPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    setupPipeline(
+        const VkPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
   std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
   if (QueueIndexesInstance.Graphics.has_value()) {
     LOG_F(INFO, "Graphics family index: %d",
@@ -296,23 +326,27 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::setupPipeline(
         QueueIndexesInstance.Transfer.value();
   }
 
-  typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipelineProps
-      Props{
-          .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
-          .Instance = this->Instance,
-          .Facades = {.Window = PipelineInitData.Window,
-                      .ShaderLoader = PipelineInitData.ShaderLoader},
-          .FamilyIndexes = std::move(FamilyIndexes),
-          .GraphicsQueue = PipelineInitData.ThisPhysicalDevice->GraphicsQueue,
-          .PresentQueue = PipelineInitData.ThisPhysicalDevice->PresentQueue,
-      };
-  this->Pipeline =
-      std::make_unique<vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>>(
-          std::move(Props));
+  typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                               SceneManagerImplT>::VkPipelineProps Props{
+      .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
+      .Instance = this->Instance,
+      .Facades = {.Window = PipelineInitData.Window,
+                  .ShaderLoader = PipelineInitData.ShaderLoader,
+                  .SceneManager = PipelineInitData.SceneManager},
+      .FamilyIndexes = std::move(FamilyIndexes),
+      .GraphicsQueue = PipelineInitData.ThisPhysicalDevice->GraphicsQueue,
+      .PresentQueue = PipelineInitData.ThisPhysicalDevice->PresentQueue,
+  };
+  this->Pipeline = std::make_unique<
+      vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>(
+      std::move(Props));
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::render() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
+                      SceneManagerImplT>::render() {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
@@ -322,6 +356,8 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT>::render() {
 
 template class vk_core::VkPhysicalDevice<
     window_api_impls::WindowApiFacadeGlfwImpl,
-    shader_loader_impls::ShaderLoaderSimpleImpl>;
+    shader_loader_impls::ShaderLoaderSimpleImpl,
+    scene_manager_facades::SceneManagerBaseImpl<
+        scene_manager_facades::SceneManagerDependencies>>;
 
 } // namespace vk_core

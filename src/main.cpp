@@ -28,7 +28,8 @@ using SceneManagerFacadeType =
     SceneManagerFacade<SceneManagerDependencies, SceneManagerClass>;
 
 using GraphicDependenciesType =
-    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType>;
+    graphic_api_impls::VulkanDependencies<WindowType, ShaderLoaderType,
+                                          SceneManagerClass>;
 using GraphicClass =
     graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependenciesType>;
 
@@ -88,9 +89,27 @@ public:
         // clang-format on
     };
 
+    std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance =
+        std::make_shared<SceneManagerFacadeType>(
+            SceneManagerFacadeStructs::SceneManagerProps<
+                SceneManagerDependencies>{.Dependencies = {}});
+    std::unique_ptr<BaseObject> Object = std::unique_ptr<BaseObject>(
+        new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
+    Object->moveBy({0.5, 0.5, 0.5});
+    std::unique_ptr<BaseObject> Object1 = std::unique_ptr<BaseObject>(
+        new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
+    SceneManagerInstance->ImplInstance.addObject(std::move(Object));
+    SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
+
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
-            .Dependencies = {WindowAdapterInstance, ShaderLoaderInstance},
+            .Dependencies =
+                graphic_api_impls::VulkanDependencies<
+                    WindowType, ShaderLoaderType, SceneManagerClass>{
+                    .Window = WindowAdapterInstance,
+                    .ShaderLoader = ShaderLoaderInstance,
+                    .SceneManager = SceneManagerInstance,
+                },
             .InstancePropsInstance = InstanceProps,
             .PhysicalDevicePropsInstance = {},
         };
@@ -100,11 +119,6 @@ public:
                              graphic_api_impls::GraphicApiFacadeVulkanImpl<
                                  GraphicDependenciesType>>(
             std::move(FacadeProps)));
-
-    std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance =
-        std::make_shared<SceneManagerFacadeType>(
-            SceneManagerFacadeStructs::SceneManagerProps<
-                SceneManagerDependencies>{.Dependencies = {}});
 
     RenderableSceneInstance = std::make_shared<RenderableSceneFacadeType>(
         RenderableSceneFacadeStructs::RenderableSceneProps<

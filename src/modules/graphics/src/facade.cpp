@@ -3,33 +3,37 @@
 
 using namespace graphic_api_impls;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-using DataType = vk_core::GraphicEngine<WindowImpl, ShaderImpl>;
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+using DataType = vk_core::GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl>
-using DataTypePtr = DataType<WindowImpl, ShaderImpl> *;
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+using DataTypePtr = DataType<WindowImpl, ShaderImpl, SceneImpl> *;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Convertors
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 template <VulkanDependenciesConcept Dep>
-vk_core::GraphicEngine<typename Dep::WindowType,
-                       typename Dep::ShaderLoaderType>::DeviceChoosePolicy
+vk_core::GraphicEngine<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                       typename Dep::SceneManagerType>::DeviceChoosePolicy
 toModuleType(GraphicFacadeStructs::DeviceChoosePolicy Policy) {
   switch (Policy) {
   case GraphicFacadeStructs::DeviceChoosePolicy::FIRST:
     return vk_core::GraphicEngine<
-        typename Dep::WindowType,
-        typename Dep::ShaderLoaderType>::DeviceChoosePolicy::FIRST;
+        typename Dep::WindowType, typename Dep::ShaderLoaderType,
+        typename Dep::SceneManagerType>::DeviceChoosePolicy::FIRST;
   case GraphicFacadeStructs::DeviceChoosePolicy::BEST:
     return vk_core::GraphicEngine<
-        typename Dep::WindowType,
-        typename Dep::ShaderLoaderType>::DeviceChoosePolicy::BEST;
+        typename Dep::WindowType, typename Dep::ShaderLoaderType,
+        typename Dep::SceneManagerType>::DeviceChoosePolicy::BEST;
   default:
     return vk_core::GraphicEngine<
-        typename Dep::WindowType,
-        typename Dep::ShaderLoaderType>::DeviceChoosePolicy::FIRST;
+        typename Dep::WindowType, typename Dep::ShaderLoaderType,
+        typename Dep::SceneManagerType>::DeviceChoosePolicy::FIRST;
   }
 }
 
@@ -45,10 +49,11 @@ GraphicApiFacadeVulkanImpl<Dep>::GraphicApiFacadeVulkanImpl(
   // From GraphicFacadeStructs::GraphicEngineProps<Dep> &&Props
   // To   vk_core::GraphicEngine<Dep::WindowType>::GraphicEngineProps
   typename vk_core::GraphicEngine<
-      typename Dep::WindowType,
-      typename Dep::ShaderLoaderType>::GraphicEngineProps ModuleProps{
+      typename Dep::WindowType, typename Dep::ShaderLoaderType,
+      typename Dep::SceneManagerType>::GraphicEngineProps ModuleProps{
       .Window = Props.Dependencies.Window,
       .ShaderLoader = Props.Dependencies.ShaderLoader,
+      .SceneManager = Props.Dependencies.SceneManager,
       .VkInstanceProps =
           {
               .AppName = std::move(Props.InstancePropsInstance.AppName),
@@ -74,15 +79,16 @@ GraphicApiFacadeVulkanImpl<Dep>::GraphicApiFacadeVulkanImpl(
 
   // And pass to the module
   Data = new vk_core::GraphicEngine<typename Dep::WindowType,
-                                    typename Dep::ShaderLoaderType>(
+                                    typename Dep::ShaderLoaderType,
+                                    typename Dep::SceneManagerType>(
       std::move(ModuleProps));
 }
 
 template <VulkanDependenciesConcept Dep>
 GraphicApiFacadeVulkanImpl<Dep>::~GraphicApiFacadeVulkanImpl() {
   delete static_cast<
-      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType>>(
-      Data);
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data);
 }
 
 template <VulkanDependenciesConcept Dep>
@@ -90,8 +96,9 @@ std::vector<GraphicFacadeStructs::PhysicalDeviceData>
 GraphicApiFacadeVulkanImpl<Dep>::getLocalPhysicalDevices() const {
   std::vector<GraphicFacadeStructs::PhysicalDeviceData> Result;
   for (const auto &Device :
-       static_cast<DataTypePtr<typename Dep::WindowType,
-                               typename Dep::ShaderLoaderType>>(Data)
+       static_cast<
+           DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                       typename Dep::SceneManagerType>>(Data)
            ->getLocalPhysicalDevices()) {
     Result.push_back(GraphicFacadeStructs::PhysicalDeviceData{
         .Name = Device.Name,
@@ -110,21 +117,21 @@ template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::PhysicalDeviceData &DeviceData) {
   typename vk_core::VkPhysicalDevice<
-      typename Dep::WindowType,
-      typename Dep::ShaderLoaderType>::PhysicalDeviceLocalProps Device{
+      typename Dep::WindowType, typename Dep::ShaderLoaderType,
+      typename Dep::SceneManagerType>::PhysicalDeviceLocalProps Device{
       .Name = DeviceData.Name,
       .ApiVersion = DeviceData.ApiVersion,
       .DriverVersion = DeviceData.DriverVersion,
       .VendorId = DeviceData.VendorId,
       .DeviceId = DeviceData.DeviceId,
       .Type = static_cast<vk_core::VkPhysicalDevice<
-          typename Dep::WindowType,
-          typename Dep::ShaderLoaderType>::PhysicalDeviceLocalProps::TypeEnum>(
+          typename Dep::WindowType, typename Dep::ShaderLoaderType,
+          typename Dep::SceneManagerType>::PhysicalDeviceLocalProps::TypeEnum>(
           DeviceData.Type),
   };
   static_cast<
-      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType>>(
-      Data)
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
       ->chooseLocalPhysicalDevice(Device);
 }
 
@@ -132,16 +139,16 @@ template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::DeviceChoosePolicy Policy) {
   static_cast<
-      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType>>(
-      Data)
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
       ->chooseLocalPhysicalDevice(toModuleType<Dep>(Policy));
 }
 
 template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::render() {
   static_cast<
-      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType>>(
-      Data)
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
       ->render();
 }
 
@@ -149,4 +156,6 @@ void GraphicApiFacadeVulkanImpl<Dep>::render() {
 template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
     graphic_api_impls::VulkanDependencies<
         window_api_impls::WindowApiFacadeGlfwImpl,
-        shader_loader_impls::ShaderLoaderSimpleImpl>>;
+        shader_loader_impls::ShaderLoaderSimpleImpl,
+        scene_manager_facades::SceneManagerBaseImpl<
+            scene_manager_facades::SceneManagerDependencies>>>;

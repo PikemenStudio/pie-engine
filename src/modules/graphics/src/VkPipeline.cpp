@@ -12,22 +12,27 @@
 
 using namespace vk_core;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
-    VkPipeline::VkPipelineProps Props) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    VkPipeline(VkPipeline::VkPipelineProps Props) {
   this->NativeComponents.PhysicalDevice = Props.PhysicalDevice;
   this->NativeComponents.Instance = Props.Instance;
   this->NativeComponents.Facades = {.Window = Props.Facades.Window,
-                                    .ShaderLoader = Props.Facades.ShaderLoader};
+                                    .ShaderLoader = Props.Facades.ShaderLoader,
+                                    .SceneManager = Props.Facades.SceneManager};
   this->NativeComponents.FamilyIndexes = std::move(Props.FamilyIndexes);
   this->NativeComponents.GraphicsQueue = Props.GraphicsQueue;
   this->NativeComponents.PresentQueue = Props.PresentQueue;
 
   initWindowSurface();
   createSwapChain();
-  createPipeline({.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test.vert",
-                  .FragmentShaderPath =
-                      "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test.frag"});
+  createPipeline(
+      {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+                           "resources/test.vert",
+       .FragmentShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+                             "resources/test.frag"});
   createFrameBuffers();
   createCommandPool();
   createCommandBuffers();
@@ -36,8 +41,11 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::VkPipeline(
   LOG_F(INFO, "Init pipeline, GOOD");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::~VkPipeline() {
   if (this->NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(ERROR, "Device is null");
   }
@@ -78,7 +86,9 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::~VkPipeline() {
 template <>
 void vk_core::VkPipeline<
     window_api_impls::WindowApiFacadeGlfwImpl,
-    shader_loader_impls::ShaderLoaderSimpleImpl>::initWindowSurface() {
+    shader_loader_impls::ShaderLoaderSimpleImpl,
+    scene_manager_facades::SceneManagerBaseImpl<
+        scene_manager_facades::SceneManagerDependencies>>::initWindowSurface() {
   auto *NativeWindow =
       this->NativeComponents.Facades->Window->ImplInstance.getNativeType();
 
@@ -95,9 +105,11 @@ void vk_core::VkPipeline<
   this->NativeComponents.Surface = CStyleSurface;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl,
-                         ShaderLoaderImplT>::querySwapChainSupport() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::querySwapChainSupport() {
   if (NativeComponents.PhysicalDevice == nullptr || !NativeComponents.Surface) {
     LOG_F(ERROR, "Physical device or surface is not initialized");
     throw std::runtime_error("Physical device or surface is not initialized");
@@ -120,10 +132,12 @@ void vk_core::VkPipeline<WindowImpl,
   logSwapChainInfo();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::SurfaceFormatKHR
-vk_core::VkPipeline<WindowImpl,
-                    ShaderLoaderImplT>::chooseSwapChainSurfaceFormat() {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::chooseSwapChainSurfaceFormat() {
   for (vk::SurfaceFormatKHR Format :
        this->NativeComponents.SwapChainSupport.value().Formats) {
     if (Format.format == vk::Format::eB8G8R8A8Unorm &&
@@ -135,10 +149,12 @@ vk_core::VkPipeline<WindowImpl,
   return this->NativeComponents.SwapChainSupport.value().Formats[0];
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::PresentModeKHR
-vk_core::VkPipeline<WindowImpl,
-                    ShaderLoaderImplT>::chooseSwapChainPresentFormat() {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::chooseSwapChainPresentFormat() {
   for (vk::PresentModeKHR PresentMode :
        this->NativeComponents.SwapChainSupport.value().PresentModes) {
     if (PresentMode == vk::PresentModeKHR::eMailbox) {
@@ -149,10 +165,12 @@ vk_core::VkPipeline<WindowImpl,
   return vk::PresentModeKHR::eFifo;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::Extent2D
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::chooseSwapChainExtent(
-    std::pair<uint32_t, uint32_t> SizeWH) {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    chooseSwapChainExtent(std::pair<uint32_t, uint32_t> SizeWH) {
   const auto Capabilities =
       this->NativeComponents.SwapChainSupport.value().Capabilities;
 
@@ -173,8 +191,11 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::chooseSwapChainExtent(
   return Extent;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logSwapChainInfo() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::logSwapChainInfo() {
   auto &Support = this->NativeComponents.SwapChainSupport.value();
   LOG_F(INFO, "Swapchain can support the following surface capabilities:\n");
 
@@ -222,9 +243,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logSwapChainInfo() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logPresentMode(
-    vk::PresentModeKHR Mode) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    logPresentMode(vk::PresentModeKHR Mode) {
   switch (Mode) {
   case vk::PresentModeKHR::eImmediate:
     LOG_F(
@@ -292,9 +315,11 @@ This mode may result in visible tearing if rendering to the image is not timed c
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logTransformBits(
-    vk::SurfaceTransformFlagsKHR Transform) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    logTransformBits(vk::SurfaceTransformFlagsKHR Transform) {
   if (Transform & vk::SurfaceTransformFlagBitsKHR::eIdentity) {
     LOG_F(INFO, "identity");
   }
@@ -324,9 +349,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logTransformBits(
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logAlphaBits(
-    vk::CompositeAlphaFlagsKHR Alpha) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    logAlphaBits(vk::CompositeAlphaFlagsKHR Alpha) {
   if (Alpha & vk::CompositeAlphaFlagBitsKHR::eOpaque) {
     LOG_F(INFO, "opaque (alpha ignored)");
   }
@@ -342,9 +369,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logAlphaBits(
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::logImageBits(
-    vk::ImageUsageFlags ImageFlags) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    logImageBits(vk::ImageUsageFlags ImageFlags) {
   if (ImageFlags & vk::ImageUsageFlagBits::eTransferSrc) {
     LOG_F(
         INFO,
@@ -407,8 +436,11 @@ suitable for use as a fragment shading rate attachment or shading rate image");
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSwapChain() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createSwapChain() {
   querySwapChainSupport();
   auto Format = chooseSwapChainSurfaceFormat();
   auto PresentMode = chooseSwapChainPresentFormat();
@@ -511,10 +543,12 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSwapChain() {
       static_cast<int>(this->SwapChainBundle->Frames.size());
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::ShaderModule
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createShaderModule(
-    std::string ShaderPath) const {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    createShaderModule(std::string ShaderPath) const {
   std::vector<ShaderLoaderFacadeStructs::ShaderData> ShaderData =
       this->NativeComponents.Facades->ShaderLoader->ImplInstance
           .loadAndCompileShaders(ShaderLoaderFacadeStructs::ShadersLocations{
@@ -538,16 +572,25 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createShaderModule(
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::PipelineLayout
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createPipelineLayout()
-    const {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::createPipelineLayout() const {
+  vk::PushConstantRange PushConstantRange{
+      .stageFlags = vk::ShaderStageFlagBits::eVertex,
+      .offset = 0,
+      .size =
+          sizeof(SceneManagerFacadeStructs::ObjectData::TransformationStruct),
+  };
+
   vk::PipelineLayoutCreateInfo CreateInfo{
       .flags = vk::PipelineLayoutCreateFlags(),
       .setLayoutCount = 0,
       .pSetLayouts = nullptr,
-      .pushConstantRangeCount = 0,
-      .pPushConstantRanges = nullptr,
+      .pushConstantRangeCount = 1,
+      .pPushConstantRanges = &PushConstantRange,
   };
 
   try {
@@ -559,9 +602,12 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createPipelineLayout()
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::RenderPass
-vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createRenderPass() const {
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::createRenderPass() const {
   vk::AttachmentDescription ColorAttachment{
       .flags = vk::AttachmentDescriptionFlags(),
       .format = SwapChainBundle.value().Format,
@@ -615,9 +661,11 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createRenderPass() const {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createPipeline(
-    VkPipeline::GraphicsPipelineInBundle InBundle) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    createPipeline(VkPipeline::GraphicsPipelineInBundle InBundle) {
   vk::GraphicsPipelineCreateInfo CreateInfo;
   CreateInfo.flags = vk::PipelineCreateFlags();
 
@@ -769,8 +817,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createPipeline(
   LOG_F(INFO, "Pipeline created successfully");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFrameBuffers() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createFrameBuffers() {
   for (int I = 0; I < this->SwapChainBundle->Frames.size(); ++I) {
     std::vector<vk::ImageView> Attachments = {
         this->SwapChainBundle->Frames[I].ImageView,
@@ -797,8 +848,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFrameBuffers() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createCommandPool() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createCommandPool() {
   auto Indexes = this->NativeComponents.FamilyIndexes;
 
   vk::CommandPoolCreateInfo CreateInfo{
@@ -817,9 +871,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createCommandPool() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl,
-                         ShaderLoaderImplT>::createCommandBuffers() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createCommandBuffers() {
   vk::CommandBufferAllocateInfo AllocateInfo{
       .commandPool = this->CommandPool,
       .level = vk::CommandBufferLevel::ePrimary,
@@ -848,8 +904,11 @@ void vk_core::VkPipeline<WindowImpl,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSemaphores() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createSemaphores() {
   vk::SemaphoreCreateInfo CreateInfo{};
 
   try {
@@ -867,8 +926,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createSemaphores() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createFences() {
   vk::FenceCreateInfo CreateInfo{.flags = vk::FenceCreateFlags() |
                                           vk::FenceCreateFlagBits::eSignaled};
 
@@ -884,9 +946,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(vk::CommandBuffer CommandBuffer,
-    uint32_t ImageIndex) {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex) {
   vk::CommandBufferBeginInfo BeginInfo;
 
   try {
@@ -911,12 +975,32 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(vk::
       .pClearValues = &ClearColor,
   };
 
-  CommandBuffer.beginRenderPass(&RenderPassInfo,
-                                    vk::SubpassContents::eInline);
+  CommandBuffer.beginRenderPass(&RenderPassInfo, vk::SubpassContents::eInline);
   CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                                 this->PipelineBundle->Pipeline);
+                             this->PipelineBundle->Pipeline);
 
-  CommandBuffer.draw(3, 1, 0, 0);
+  auto *SceneManager =
+      &this->NativeComponents.Facades->SceneManager->ImplInstance;
+
+  SceneManager->resetObjectGetter();
+  while (true) {
+    auto Object = SceneManager->getNextObject();
+    if (Object.has_value() == false) {
+      break;
+    }
+    auto ObjectType = Object->Type;
+    switch (ObjectType) {
+    case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE:
+    {
+      auto Model = Object->calculateTransformation();
+      CommandBuffer.pushConstants(this->PipelineBundle->Layout,
+                                  vk::ShaderStageFlagBits::eVertex, 0,
+                                  sizeof(Model), &Model);
+      CommandBuffer.draw(3, 1, 0, 0);
+      break;
+    }
+    }
+  }
 
   CommandBuffer.endRenderPass();
 
@@ -928,8 +1012,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(vk::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::render() {
   auto &Device =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
 
@@ -998,5 +1085,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
   FrameNumber = (FrameNumber + 1) % MaxFrameInFlight;
 }
 
-template class vk_core::VkPipeline<window_api_impls::WindowApiFacadeGlfwImpl,
-                                   shader_loader_impls::ShaderLoaderSimpleImpl>;
+template class vk_core::VkPipeline<
+    window_api_impls::WindowApiFacadeGlfwImpl,
+    shader_loader_impls::ShaderLoaderSimpleImpl,
+    scene_manager_facades::SceneManagerBaseImpl<
+        scene_manager_facades::SceneManagerDependencies>>;
