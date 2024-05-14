@@ -23,13 +23,59 @@ Game::Game()
 //                                              sf::Style::Fullscreen);
   Window->setFramerateLimit(100);
 
+  Key2IsPressed["left"] = false;
+  Key2IsPressed["right"] = false;
+
+  Lantern = std::make_unique<LightSource>(0, 0);
+
   if (!sf::Shader::isAvailable())
-  {
     throw std::runtime_error("Shaders are not available!");
-  }
+
+//  LightingShader = std::make_unique<sf::Shader>();
+//  LightingShader->loadFromFile("../../game/shaders/lighting_vertex_shader.glsl",
+//                              "../../game/shaders/lighting_fragment_shader.glsl");
+//  LightingShader->setUniform("texture", sf::Shader::CurrentTexture); // always use current texture
+//
+//
 }
 
 Game::~Game() = default;
+
+void Game::handleUserInput()
+{
+  sf::Event Event;
+  while (Window->pollEvent(Event))
+  {
+    if (Event.type == sf::Event::Closed)
+      Window->close();
+    if (Event.type == sf::Event::KeyPressed)
+    {
+      if (Event.key.code == sf::Keyboard::Left)
+        Key2IsPressed["left"] = true;
+      else if (Event.key.code == sf::Keyboard::Right)
+        Key2IsPressed["right"] = true;
+      else if (Event.key.code == sf::Keyboard::Escape)
+        Window->close();
+    }
+    else if (Event.type == sf::Event::KeyReleased)
+    {
+      if (Event.key.code == sf::Keyboard::Left)
+        Key2IsPressed["left"] = false;
+      else if (Event.key.code == sf::Keyboard::Right)
+        Key2IsPressed["right"] = false;
+    }
+  }
+}
+
+void Game::processLogic(float FrameDrawingTimeMs)
+{
+  float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 1.0;
+  sf::Vector2f LanternDxDy;
+  if (Key2IsPressed["left"])  LanternDxDy.x -= LanternFrameSpeed;
+  if (Key2IsPressed["right"]) LanternDxDy.x += LanternFrameSpeed;
+
+  Lantern->setPosition(Lantern->getPosition() + LanternDxDy);
+}
 
 void Game::run()
 {
@@ -45,11 +91,6 @@ void Game::run()
 
   Background BG(ScreenWidth, ScreenHeight);
   Floor FloorObj(-5, 5, 0.01f);
-  LightSource Lantern(0, 0);
-
-  std::map<std::string, bool> Key2IsPressed;
-  Key2IsPressed["left"] = false;
-  Key2IsPressed["right"] = false;
 
   auto BeginTime = std::chrono::high_resolution_clock::now();
   long long FrameCount = 0;
@@ -59,43 +100,16 @@ void Game::run()
   {
     auto BeginFrameTime = std::chrono::high_resolution_clock::now();
 
-    // user input
-    sf::Event Event;
-    while (Window->pollEvent(Event))
-    {
-      if (Event.type == sf::Event::Closed)
-        Window->close();
-      if (Event.type == sf::Event::KeyPressed)
-      {
-        if (Event.key.code == sf::Keyboard::Left)
-          Key2IsPressed["left"] = true;
-        else if (Event.key.code == sf::Keyboard::Right)
-          Key2IsPressed["right"] = true;
-        else if (Event.key.code == sf::Keyboard::Escape)
-          Window->close();
-      }
-      else if (Event.type == sf::Event::KeyReleased)
-      {
-        if (Event.key.code == sf::Keyboard::Left)
-          Key2IsPressed["left"] = false;
-        else if (Event.key.code == sf::Keyboard::Right)
-          Key2IsPressed["right"] = false;
-      }
-    }
+    handleUserInput();
 
     // game logic
-    float LanternFrameSpeed = FrameDrawingTimeMs / 1000 * 1.0;
-    sf::Vector2f LanternDxDy;
-    if (Key2IsPressed["left"])  LanternDxDy.x -= LanternFrameSpeed;
-    if (Key2IsPressed["right"]) LanternDxDy.x += LanternFrameSpeed;
-
-    Lantern.setPosition(Lantern.getPosition() + LanternDxDy);
+    processLogic(FrameDrawingTimeMs);
 
     // drawing
     sf::FloatRect WorldWindow;
     WorldWindow.width = 3.0f;
     WorldWindow.height = 2.0f;
-    WorldWindow.left = (Lantern.getPosition().x - WorldWindow.width / 2);
+    WorldWindow.left = (Lantern->getPosition().x - WorldWindow.width / 2);
 
     if (WorldWindow.left < FloorObj.getStartX())
       WorldWindow.left = FloorObj.getStartX();
@@ -107,7 +121,7 @@ void Game::run()
     Window->clear(sf::Color::Black);
 
     BG.draw(RenderTex, WorldWindow);
-    Lantern.draw(RenderTex, WorldWindow);
+    Lantern->draw(RenderTex, WorldWindow);
     FloorObj.draw(RenderTex, WorldWindow);
 
     auto WorldWinCenter = sf::Vector2f(WorldWindow.left, WorldWindow.top) +
@@ -117,7 +131,7 @@ void Game::run()
     LightingShader.setUniform(
         "world_window_dimensions",
         sf::Vector2f(WorldWindow.width, WorldWindow.height));
-    LightingShader.setUniform("world_light_pos", Lantern.getPosition());
+    LightingShader.setUniform("world_light_pos", Lantern->getPosition());
 
     Window->draw(ScreenSprite, &LightingShader);
 //    Window->draw(ScreenSprite);
