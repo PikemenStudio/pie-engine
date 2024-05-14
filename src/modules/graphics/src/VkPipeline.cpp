@@ -885,12 +885,12 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::createFences() {
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(vk::CommandBuffer CommandBuffer,
     uint32_t ImageIndex) {
   vk::CommandBufferBeginInfo BeginInfo;
 
   try {
-    MainCommandBuffer.begin(BeginInfo);
+    CommandBuffer.begin(BeginInfo);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(
         std::string("Failed to begin recording main command buffer ") +
@@ -911,17 +911,17 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::recordDrawCommands(
       .pClearValues = &ClearColor,
   };
 
-  MainCommandBuffer.beginRenderPass(&RenderPassInfo,
+  CommandBuffer.beginRenderPass(&RenderPassInfo,
                                     vk::SubpassContents::eInline);
-  MainCommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+  CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                                  this->PipelineBundle->Pipeline);
 
-  MainCommandBuffer.draw(3, 1, 0, 0);
+  CommandBuffer.draw(3, 1, 0, 0);
 
-  MainCommandBuffer.endRenderPass();
+  CommandBuffer.endRenderPass();
 
   try {
-    MainCommandBuffer.end();
+    CommandBuffer.end();
   } catch (vk::SystemError &E) {
     throw std::runtime_error(
         std::string("Failed to end recording main command buffer ") + E.what());
@@ -957,7 +957,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT>::render() {
       SwapChainBundle->Frames[ImageIndex].CommandBuffer;
   CommandBuffer.reset();
 
-  recordDrawCommands(ImageIndex);
+  recordDrawCommands(CommandBuffer, ImageIndex);
 
   vk::Semaphore WaitSemaphores[] = {
       SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore};

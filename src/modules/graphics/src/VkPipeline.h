@@ -150,7 +150,7 @@ protected:
   void createSemaphores();
   void createFences();
 
-  void recordDrawCommands(uint32_t ImageIndex);
+  void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
 };
 
 } // namespace vk_core
