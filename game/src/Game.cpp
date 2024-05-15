@@ -101,8 +101,7 @@ void Game::processLogic(float FrameDrawingTimeMs)
   if (Key2IsPressed[sf::Keyboard::Up]) DxDy.y += PlayerFrameSpeed;
   if (Key2IsPressed[sf::Keyboard::Down]) DxDy.y -= PlayerFrameSpeed;
 
-  PlayerObj->setPositionWithCollisionCheck(PlayerObj->getPosition() + DxDy,
-                                           SolidObjects);
+  PlayerObj->move(DxDy, SolidObjects);
   Lantern->update();
 
   WorldWindowObj->updateByPlayerPos(Lantern->getPosition());

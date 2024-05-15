@@ -9,6 +9,8 @@
 
 #include <noise/noise.h>
 
+#include <bits/stdc++.h>
+
 static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float CurrX)
 {
   return (std::clamp(NoiseGen.GetValue(CurrX, 0, 0), -1.0, 1.0) + 1) / 2;
@@ -105,10 +107,12 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
   auto Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2, Pl->getSize().y / 2);
   std::vector<sf::Vector2f> PlPoly = {Pt1, Pt2};
 
-  int LeftIndex = static_cast<int>((Pt1.x - StartX) / StepX);
-  int RightIndex = static_cast<int>((Pt2.x - StartX) / StepX) + 1;
+  int LeftIndex = std::clamp(static_cast<int>((Pt1.x - StartX) / StepX), 0,
+                             static_cast<int>(WorldCoordsYCeiling.size()-1));
+  int RightIndex = std::clamp(static_cast<int>((Pt2.x - StartX) / StepX) + 1, 0,
+                              static_cast<int>(WorldCoordsYCeiling.size()-1));
   std::vector<sf::Vector2f> CeilPoly;
-  for (int I = LeftIndex; I <= RightIndex && I < WorldCoordsYCeiling.size(); I++)
+  for (int I = LeftIndex; I <= RightIndex; I++)
     CeilPoly.emplace_back(StartX + I * StepX, WorldCoordsYCeiling[I]);
 
   bool HasIntersection = isPolylinesIntersection(PlPoly, CeilPoly);

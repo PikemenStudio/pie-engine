@@ -66,6 +66,17 @@ public:
     }
   }
 
+  void move(sf::Vector2f DxDy, const std::vector<SolidObject*>& Objects)
+  {
+    setPosition(Center + sf::Vector2f(DxDy.x, 0));
+    if (checkCollisionWithObjects(Objects))
+      setPosition(Center - sf::Vector2f(DxDy.x, 0));
+
+    setPosition(Center + sf::Vector2f(0, DxDy.y));
+    if (checkCollisionWithObjects(Objects))
+      setPosition(Center - sf::Vector2f(0, DxDy.y));
+  }
+
 private:
   sf::Vector2f Center;
   sf::Vector2f Size;
