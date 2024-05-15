@@ -57,8 +57,38 @@ bool Tunnel::isCollision(const SolidObject* Other) const
   return false;
 }
 
+// line segments: [A, B] and [C, D]
+static bool lineSegmentsIntersect(sf::Vector2f A, sf::Vector2f B, sf::Vector2f C, sf::Vector2f D)
+{
+  auto K = (B.y - A.y) / (B.x - A.x);
+
+  auto DenomForT2 = (D.y - C.y - K*(D.x - C.x));
+  if (DenomForT2 == 0)
+    return false;
+
+  auto T2 = (A.y + K*C.x - K*A.x - C.y) / DenomForT2;
+  if (T2 < 0 || T2 > 1)
+    return false;
+
+  auto DenomForT1 = (B.x - A.x);
+  if (DenomForT1 == 0)
+    return false;
+
+  auto T1 = (C.x + (D.x - C.x)*T2 - A.x) / DenomForT1;
+  if (T1 < 0 || T1 > 1)
+    return false;
+
+  return true;
+}
+
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
+  bool HasIntersection = lineSegmentsIntersect(sf::Vector2f(0, 0), sf::Vector2f(1, 1),
+                                               sf::Vector2f(0, 1), sf::Vector2f(0.9, 1));
+  return HasIntersection;
+
+//  sf::Points
+//  Pl->get
   return false;
 }
 

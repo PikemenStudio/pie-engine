@@ -60,7 +60,7 @@ public:
     {
       if (isCollision(Obj))
       {
-        Pos = OldPos;
+        setPosition(OldPos);
         break;
       }
     }
