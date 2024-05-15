@@ -35,7 +35,8 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
                              "resources/test.frag"});
   createFrameBuffers();
   createCommandPool();
-  createCommandBuffers();
+  createFrameCommandBuffers();
+  createMainCommandBuffer();
   createSemaphores();
   createFences();
   LOG_F(INFO, "Init pipeline, GOOD");
@@ -62,21 +63,7 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
         .destroyRenderPass(PipelineBundle.value().RenderPass);
   }
 
-  for (auto &Frame : SwapChainBundle.value().Frames) {
-    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyImageView(Frame.ImageView);
-    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyFramebuffer(Frame.FrameBuffer);
-    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroySemaphore(Frame.ImageAvailableSemaphore);
-    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroySemaphore(Frame.RenderFinishedSemaphore);
-    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyFence(Frame.InFlightFence);
-  }
-
-  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
-      .destroySwapchainKHR(SwapChainBundle.value().Swapchain);
+  destroySwapChain();
 
   static_cast<vk::Instance &>(*NativeComponents.Instance)
       .destroySurfaceKHR(NativeComponents.Surface.value());
@@ -546,6 +533,55 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::destroySwapChain() {
+  for (auto &Frame : SwapChainBundle.value().Frames) {
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyImageView(Frame.ImageView);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyFramebuffer(Frame.FrameBuffer);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroySemaphore(Frame.ImageAvailableSemaphore);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroySemaphore(Frame.RenderFinishedSemaphore);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyFence(Frame.InFlightFence);
+  }
+
+  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+      .destroySwapchainKHR(SwapChainBundle.value().Swapchain);
+}
+
+template <>
+void vk_core::VkPipeline<
+    window_api_impls::WindowApiFacadeGlfwImpl,
+    shader_loader_impls::ShaderLoaderSimpleImpl,
+    scene_manager_facades::SceneManagerBaseImpl<
+        scene_manager_facades::SceneManagerDependencies>>::recreateSwapChain() {
+  auto Size = this->NativeComponents.Facades->Window->ImplInstance.getSize();
+  int Width = Size.first, Height = Size.second;
+  while (Size.first == 0 || Size.second == 0) {
+    glfwGetFramebufferSize((GLFWwindow *)this->NativeComponents.Facades->Window
+                               ->ImplInstance.getNativeType(),
+                           &Width, &Height);
+    this->NativeComponents.Facades->Window->ImplInstance.setSize(
+        {Width, Height});
+    glfwWaitEvents();
+  }
+
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice).waitIdle();
+
+  destroySwapChain();
+  createSwapChain();
+  createFrameBuffers();
+  createSemaphores();
+  createFences();
+  createFrameCommandBuffers();
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 vk::ShaderModule
 vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     createShaderModule(std::string ShaderPath) const {
@@ -875,7 +911,29 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
-                         SceneManagerImplT>::createCommandBuffers() {
+                         SceneManagerImplT>::createMainCommandBuffer() {
+  vk::CommandBufferAllocateInfo AllocateInfo{
+      .commandPool = this->CommandPool,
+      .level = vk::CommandBufferLevel::ePrimary,
+      .commandBufferCount =
+          static_cast<uint32_t>(this->SwapChainBundle->Frames.size()),
+  };
+
+  try {
+    this->MainCommandBuffer =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .allocateCommandBuffers(AllocateInfo)[0];
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to allocate main command buffer") + E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createFrameCommandBuffers() {
   vk::CommandBufferAllocateInfo AllocateInfo{
       .commandPool = this->CommandPool,
       .level = vk::CommandBufferLevel::ePrimary,
@@ -892,15 +950,6 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       throw std::runtime_error(
           std::string("Failed to allocate command buffers ") + E.what());
     }
-  }
-
-  try {
-    this->MainCommandBuffer =
-        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-            .allocateCommandBuffers(AllocateInfo)[0];
-  } catch (vk::SystemError &E) {
-    throw std::runtime_error(
-        std::string("Failed to allocate main command buffer") + E.what());
   }
 }
 
@@ -990,8 +1039,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     }
     auto ObjectType = Object->Type;
     switch (ObjectType) {
-    case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE:
-    {
+    case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE: {
       auto Model = Object->calculateTransformation();
       CommandBuffer.pushConstants(this->PipelineBundle->Layout,
                                   vk::ShaderStageFlagBits::eVertex, 0,
@@ -1028,17 +1076,22 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 
   uint32_t ImageIndex;
   try {
-    ImageIndex =
-        Device
-            .acquireNextImageKHR(
-                this->SwapChainBundle->Swapchain, UINT64_MAX,
-                SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore,
-                nullptr)
-            .value;
-  } catch (vk::SystemError &E) {
-    throw std::runtime_error(std::string("Failed to acquire next image ") +
-                             E.what());
+    vk::ResultValue Acquire = Device.acquireNextImageKHR(
+        SwapChainBundle->Swapchain, UINT64_MAX,
+        SwapChainBundle->Frames[FrameNumber].ImageAvailableSemaphore, nullptr);
+
+    ImageIndex = Acquire.value;
+  } catch (vk::OutOfDateKHRError &E) {
+    recreateSwapChain();
+    return;
+  } catch (vk::IncompatibleDisplayKHRError &E) {
+    recreateSwapChain();
+    return;
   }
+    catch (vk::SystemError &E) {
+      throw std::runtime_error(
+          std::string("Failed to acquire swap chain image ") + E.what());
+    }
 
   vk::CommandBuffer CommandBuffer =
       SwapChainBundle->Frames[ImageIndex].CommandBuffer;
@@ -1079,8 +1132,20 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       .pSwapchains = SwapChains,
       .pImageIndices = &ImageIndex,
   };
-  const auto &Discard3 =
-      this->NativeComponents.PresentQueue->presentKHR(PresentInfo);
+
+  vk::Result PresentResult;
+  try {
+    PresentResult =
+        this->NativeComponents.PresentQueue->presentKHR(PresentInfo);
+  } catch (vk::OutOfDateKHRError &E) {
+    PresentResult = vk::Result::eErrorOutOfDateKHR;
+  }
+
+  if (PresentResult == vk::Result::eErrorOutOfDateKHR ||
+      PresentResult == vk::Result::eSuboptimalKHR) {
+    recreateSwapChain();
+    return;
+  }
 
   FrameNumber = (FrameNumber + 1) % MaxFrameInFlight;
 }

@@ -57,7 +57,7 @@ public:
             .Size = {800, 600},
             .Title = "Test",
             .Mode = WindowFacadeStructs::WindowProps::WINDOWED,
-            .IsResizable = false,
+            .IsResizable = true,
         }));
 
 #ifdef __linux__

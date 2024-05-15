@@ -37,17 +37,18 @@ std::pair<uint32_t, uint32_t> Window::getSize() const {
   return std::pair<uint32_t, uint32_t>(this->Props.Size.x, this->Props.Size.y);
 }
 
-void Window::prepare() {
-  glfwMakeContextCurrent(GlfwWindow.get());
+void Window::setSize(const std::pair<uint32_t, uint32_t> &Size) {
+  this->Props.Size = {Size.second, Size.first};
+  glfwSetWindowSize(GlfwWindow.get(), Size.second, Size.first);
 }
+
+void Window::prepare() { glfwMakeContextCurrent(GlfwWindow.get()); }
 
 bool Window::shouldClose() const {
   return glfwWindowShouldClose(GlfwWindow.get());
 }
 
-void Window::update() {
-  glfwPollEvents();
-}
+void Window::update() { glfwPollEvents(); }
 
 void Window::swapBuffers() { glfwSwapBuffers(GlfwWindow.get()); }
 

@@ -141,6 +141,8 @@ protected:
   void logAlphaBits(vk::CompositeAlphaFlagsKHR Alpha);
   void logImageBits(vk::ImageUsageFlags ImageFlags);
   void createSwapChain();
+  void destroySwapChain();
+  void recreateSwapChain();
 
   vk::ShaderModule createShaderModule(std::string ShaderPath) const;
   vk::PipelineLayout createPipelineLayout() const;
@@ -150,7 +152,8 @@ protected:
 
   void createFrameBuffers();
   void createCommandPool();
-  void createCommandBuffers();
+  void createMainCommandBuffer();
+  void createFrameCommandBuffers();
 
   void createSemaphores();
   void createFences();

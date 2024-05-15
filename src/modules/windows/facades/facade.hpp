@@ -60,6 +60,8 @@ concept WindowApiImpl = requires(T Obj) {
     void *getNativeType() const;                                               \
     std::pair<uint32_t, uint32_t> getSize() const;                             \
                                                                                \
+    void setSize(const std::pair<uint32_t, uint32_t> &Size) const;             \
+                                                                               \
     std::vector<const char *> getRequiredExtensions() const;                   \
                                                                                \
     void prepare();                                                            \
