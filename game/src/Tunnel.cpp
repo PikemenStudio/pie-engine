@@ -102,11 +102,14 @@ static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
 
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
-  // ceiling
-  auto Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2, Pl->getSize().y / 2);
-  auto Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2, Pl->getSize().y / 2);
-  std::vector<sf::Vector2f> PlPoly = {Pt1, Pt2};
+  // player
+  auto Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2,  Pl->getSize().y / 2);
+  auto Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2,  Pl->getSize().y / 2);
+  auto Pt3 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2, -Pl->getSize().y / 2);
+  auto Pt4 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2, -Pl->getSize().y / 2);
+  std::vector<sf::Vector2f> PlPoly = {Pt1, Pt2, Pt3, Pt4};
 
+  // ceiling
   int LeftIndex = std::clamp(static_cast<int>((Pt1.x - StartX) / StepX), 0,
                              static_cast<int>(WorldCoordsYCeiling.size()-1));
   int RightIndex = std::clamp(static_cast<int>((Pt2.x - StartX) / StepX) + 1, 0,
@@ -120,10 +123,6 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
     return true;
 
   // floor
-  Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2, -Pl->getSize().y / 2);
-  Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2, -Pl->getSize().y / 2);
-  PlPoly = {Pt1, Pt2};
-
   std::vector<sf::Vector2f> FloorPoly;
   for (int I = LeftIndex; I <= RightIndex && I < WorldCoordsYFloor.size(); I++)
     FloorPoly.emplace_back(StartX + I * StepX, WorldCoordsYFloor[I]);

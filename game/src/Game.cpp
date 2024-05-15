@@ -93,18 +93,11 @@ void Game::handleUserInput()
 
 void Game::processLogic(float FrameDrawingTimeMs)
 {
-  float PlayerFrameSpeed = FrameDrawingTimeMs / 1000 * 0.6;
+  PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
 
-  sf::Vector2f DxDy;
-  if (Key2IsPressed[sf::Keyboard::Left])  DxDy.x -= PlayerFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Right]) DxDy.x += PlayerFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Up]) DxDy.y += PlayerFrameSpeed;
-  if (Key2IsPressed[sf::Keyboard::Down]) DxDy.y -= PlayerFrameSpeed;
-
-  PlayerObj->move(DxDy, SolidObjects);
   Lantern->update();
 
-  WorldWindowObj->updateByPlayerPos(Lantern->getPosition());
+  WorldWindowObj->updateByPlayerPos(PlayerObj->getPosition());
 }
 
 void Game::renderScene()

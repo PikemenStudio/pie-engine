@@ -11,6 +11,7 @@
 #include "LightSource.h"
 #include "SolidObject.h"
 #include "utils.h"
+#include "Keyboard.h"
 
 class Player : public SolidObject
 {
@@ -21,6 +22,8 @@ public:
     this->Size = Size;
     LightSrc = Src;
   }
+
+  void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
 
   bool isCollision(const SolidObject* Other) const override;
 

@@ -27,7 +27,8 @@ add_executable(game_exe
         src/Player.cpp
         src/Player.h
         src/SolidObject.h
-        src/SolidObject.cpp)
+        src/SolidObject.cpp
+        src/Keyboard.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
