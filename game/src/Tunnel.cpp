@@ -81,15 +81,49 @@ static bool lineSegmentsIntersect(sf::Vector2f A, sf::Vector2f B, sf::Vector2f C
   return true;
 }
 
+static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
+                                    const std::vector<sf::Vector2f>& Poly2)
+{
+  for (int I = 0; I < Poly1.size() - 1; I++)
+  {
+    for (int J = 0; J < Poly2.size() - 1; J++)
+    {
+      if (lineSegmentsIntersect(Poly1[I], Poly1[I+1], Poly2[J], Poly2[J+1]))
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
-  bool HasIntersection = lineSegmentsIntersect(sf::Vector2f(0, 0), sf::Vector2f(1, 1),
-                                               sf::Vector2f(0, 1), sf::Vector2f(0.9, 1));
-  return HasIntersection;
+//  std::vector<sf::Vector2f> Poly1 = {
+//      sf::Vector2f(0, 0),
+//      sf::Vector2f(0.5, 1),
+//      sf::Vector2f(1, 0),
+//  };
+//  std::vector<sf::Vector2f> Poly2 = {
+//      sf::Vector2f(-1, 0),
+//      sf::Vector2f(0, 1),
+//      sf::Vector2f(0, 0.5),
+//  };
+  // ceiling
+  auto Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2, Pl->getSize().y / 2);
+  auto Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2, Pl->getSize().y / 2);
+  std::vector<sf::Vector2f> PlPoly = {Pt1, Pt2};
 
-//  sf::Points
-//  Pl->get
-  return false;
+  int CeilLeftIndex = static_cast<int>((Pt1.x - StartX) / StepX);
+  int CeilRightIndex = static_cast<int>((Pt2.x - StartX) / StepX) + 1;
+  std::vector<sf::Vector2f> CeilPoly;
+  for (int I = CeilLeftIndex; I <= CeilRightIndex && I < WorldCoordsYCeiling.size(); I++)
+    CeilPoly.emplace_back(StartX + I * StepX, WorldCoordsYCeiling[I]);
+
+  bool HasIntersection = isPolylinesIntersection(PlPoly, CeilPoly);
+
+  return HasIntersection;
 }
 
 void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) const
