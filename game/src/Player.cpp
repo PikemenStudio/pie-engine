@@ -34,39 +34,49 @@ void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTi
   {
     auto PosBeforeSpaceSearch = Center;
 
-    // try to go up a little
-    bool HasSpaceUp = false;
-    for (int I = 0; I < 5; I++)
-    {
-      setPosition(Center + sf::Vector2f(0, Size.y / 200));
+    // try to go up and down a little
+    setPosition(Center + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
 
-      if (!CollObj->isCollision(this))
-      {
-        HasSpaceUp = true;
-        break;
-      }
-    }
-
-    if (!HasSpaceUp)
+    if (CollObj->isCollision(this))
     {
       setPosition(PosBeforeSpaceSearch);
+      setPosition(Center - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
 
-      bool HasSpaceDown = false;
-      for (int I = 0; I < 5; I++)
-      {
-        setPosition(Center - sf::Vector2f(0, Size.y / 200));
-        if (!CollObj->isCollision(this))
-        {
-          HasSpaceDown = true;
-          break;
-        }
-      }
-
-      if (!HasSpaceDown)
-      {
+      if (CollObj->isCollision(this))
         setPosition(OldPos);
-      }
     }
+//    bool HasSpaceUp = false;
+//    for (int I = 0; I < 5; I++)
+//    {
+//      setPosition(Center + sf::Vector2f(0, Size.y / 200));
+//
+//      if (!CollObj->isCollision(this))
+//      {
+//        HasSpaceUp = true;
+//        break;
+//      }
+//    }
+//
+//    if (!HasSpaceUp)
+//    {
+//      setPosition(PosBeforeSpaceSearch);
+//
+//      bool HasSpaceDown = false;
+//      for (int I = 0; I < 5; I++)
+//      {
+//        setPosition(Center - sf::Vector2f(0, Size.y / 200));
+//        if (!CollObj->isCollision(this))
+//        {
+//          HasSpaceDown = true;
+//          break;
+//        }
+//      }
+//
+//      if (!HasSpaceDown)
+//      {
+//        setPosition(OldPos);
+//      }
+//    }
 
 //    setPosition(Center - sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
   }
