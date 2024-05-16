@@ -10,6 +10,7 @@
 #include <noise/noise.h>
 
 #include <bits/stdc++.h>
+#include <loguru.hpp>
 
 static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float CurrX)
 {
@@ -62,25 +63,34 @@ bool Tunnel::isCollision(const SolidObject* Other) const
 // line segments: [A, B] and [C, D]
 static bool lineSegmentsIntersect(sf::Vector2f A, sf::Vector2f B, sf::Vector2f C, sf::Vector2f D)
 {
-  auto K = (B.y - A.y) / (B.x - A.x);
-
-  auto DenomForT2 = (D.y - C.y - K*(D.x - C.x));
-  if (DenomForT2 == 0)
+  float T2 = (A.y * (B.x - A.x) + (B.y - A.y) * C.x - (B.y - A.y) * A.x - C.y * (B.x - A.x)) /
+             ((D.y - C.y) * (B.x - A.x) - (B.y - A.y) * (D.x - C.x));
+  if (std::isnan(T2) || T2 < 0 || T2 > 1)
     return false;
 
-  auto T2 = (A.y + K*C.x - K*A.x - C.y) / DenomForT2;
-  if (T2 < 0 || T2 > 1)
+  float T1;
+  if (B.x - A.x != 0.0f)
+    T1 = (C.x + (D.x - C.x) * T2 - A.x) / (B.x - A.x);
+  else if (B.y - A.y)
+    T1 = (C.y + (D.y - C.y) * T2 - A.y) / (B.y - A.y);
+  else
     return false;
 
-  auto DenomForT1 = (B.x - A.x);
-  if (DenomForT1 == 0)
-    return false;
-
-  auto T1 = (C.x + (D.x - C.x)*T2 - A.x) / DenomForT1;
   if (T1 < 0 || T1 > 1)
     return false;
 
   return true;
+}
+
+static void testLineSegmentsIntersection()
+{
+  sf::Vector2f Pt1(-0.5, 0);
+  sf::Vector2f Pt2(0.5, 0);
+  sf::Vector2f Pt3(0, 0.5);
+  sf::Vector2f Pt4(0, -0.5);
+  assert(lineSegmentsIntersect(Pt3, Pt4, Pt1, Pt2));
+
+  LOG_F(INFO, "TEST PASSED");
 }
 
 static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
@@ -102,6 +112,8 @@ static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
 
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
+  testLineSegmentsIntersection();
+
   // player
   auto Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2,  Pl->getSize().y / 2);
   auto Pt2 = Pl->getPosition() + sf::Vector2f( Pl->getSize().x / 2,  Pl->getSize().y / 2);
@@ -118,17 +130,15 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
   for (int I = LeftIndex; I <= RightIndex; I++)
     CeilPoly.emplace_back(StartX + I * StepX, WorldCoordsYCeiling[I]);
 
-  bool HasIntersection = isPolylinesIntersection(PlPoly, CeilPoly);
-  if (HasIntersection)
+  if (isPolylinesIntersection(PlPoly, CeilPoly))
     return true;
 
   // floor
   std::vector<sf::Vector2f> FloorPoly;
-  for (int I = LeftIndex; I <= RightIndex && I < WorldCoordsYFloor.size(); I++)
+  for (int I = LeftIndex; I <= RightIndex; I++)
     FloorPoly.emplace_back(StartX + I * StepX, WorldCoordsYFloor[I]);
 
-  HasIntersection = isPolylinesIntersection(PlPoly, FloorPoly);
-  return HasIntersection;
+  return isPolylinesIntersection(PlPoly, FloorPoly);
 }
 
 void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) const

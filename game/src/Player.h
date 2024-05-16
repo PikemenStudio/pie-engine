@@ -69,20 +69,12 @@ public:
     }
   }
 
-  void move(sf::Vector2f DxDy, const std::vector<SolidObject*>& Objects)
-  {
-    setPosition(Center + sf::Vector2f(DxDy.x, 0));
-    if (checkCollisionWithObjects(Objects))
-      setPosition(Center - sf::Vector2f(DxDy.x, 0));
-
-    setPosition(Center + sf::Vector2f(0, DxDy.y));
-    if (checkCollisionWithObjects(Objects))
-      setPosition(Center - sf::Vector2f(0, DxDy.y));
-  }
-
 private:
+  void move(const std::vector<SolidObject*>& Objects);
+
   sf::Vector2f Center;
   sf::Vector2f Size;
+  sf::Vector2f DxDy = {0, 0};
 
   LightSource* LightSrc = nullptr;
 };
