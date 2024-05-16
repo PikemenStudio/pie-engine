@@ -70,11 +70,15 @@ public:
   }
 
 private:
-  void move(const std::vector<SolidObject*>& Objects);
+  void move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS);
 
   sf::Vector2f Center;
   sf::Vector2f Size;
+
+  // speed is measured in units per second
   sf::Vector2f DxDy = {0, 0};
+
+  bool OnGround = false;
 
   LightSource* LightSrc = nullptr;
 };

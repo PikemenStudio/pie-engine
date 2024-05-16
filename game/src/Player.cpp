@@ -9,35 +9,39 @@
 
 void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects)
 {
-  float FrameSpeed = FrameDrawingTimeMs / 1000 * 0.6;
+  float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
   DxDy.x = 0;
-  if (Keyboard.at(KeyCode::Left))  DxDy.x -= FrameSpeed;
-  if (Keyboard.at(KeyCode::Right)) DxDy.x += FrameSpeed;
+  if (Keyboard.at(KeyCode::Left))  DxDy.x -= 0.5;
+  if (Keyboard.at(KeyCode::Right)) DxDy.x += 0.5;
 
-  if (Keyboard.at(KeyCode::Up)) DxDy.y = FrameSpeed; // for now the player can fly
-//  if (Keyboard.at(KeyCode::Down)) DxDy.y -= FrameSpeed;
+  if (Keyboard.at(KeyCode::Up) && OnGround)
+  {
+    DxDy.y = 1.5;
+  }
 
-  DxDy.y += -FrameSpeed / 10; // gravity
+  DxDy.y -= 6 * FrameDrawingTimeS;
+  OnGround = false;
 
-  move(Objects);
+  move(Objects, FrameDrawingTimeS);
 }
 
-void Player::move(const std::vector<SolidObject*>& Objects)
+void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
 {
-  LOG_F(INFO, "DxDy.y == %f", DxDy.y);
-
-  setPosition(Center + sf::Vector2f(DxDy.x, 0));
+  setPosition(Center + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
   if (checkCollisionWithObjects(Objects))
-    setPosition(Center - sf::Vector2f(DxDy.x, 0));
+    setPosition(Center - sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
 
-  setPosition(Center + sf::Vector2f(0, DxDy.y));
+  setPosition(Center + sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
   if (checkCollisionWithObjects(Objects))
   {
-    setPosition(Center - sf::Vector2f(0, DxDy.y));
+    setPosition(Center - sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
 
     if (DxDy.y < 0) // we were falling
+    {
       DxDy.y = 0;
+      OnGround = true;
+    }
   }
 }
 
