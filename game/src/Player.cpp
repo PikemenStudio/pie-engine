@@ -42,6 +42,10 @@ void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTi
       DxDy.y = 0;
       OnGround = true;
     }
+    else if (!OnGround)
+    {
+      DxDy.y = 0;
+    }
   }
 }
 
