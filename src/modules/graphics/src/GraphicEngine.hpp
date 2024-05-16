@@ -60,6 +60,11 @@ public:
   // in the BEST policy ONLY
   void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
+  void
+  addObject(const std::string &Name,
+            const vk_core::VkPipeline<WindowImpl, ShaderImpl,
+                                      SceneImpl>::PublicObjectData &ObjectData);
+
   void render();
 
 private:

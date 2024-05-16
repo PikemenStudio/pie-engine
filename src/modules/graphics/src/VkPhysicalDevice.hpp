@@ -107,7 +107,9 @@ public:
   struct PipelineInitDataStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
-    std::shared_ptr<SceneManagerFacade<scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>> SceneManager;
+    std::shared_ptr<SceneManagerFacade<
+        scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>>
+        SceneManager;
     // It's strange, but we need pointer from GraphicEngine and can't just use
     // this
     std::shared_ptr<
@@ -117,6 +119,11 @@ public:
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
 
   void render();
+
+  void addObjectData(
+      const std::string &Name,
+      const vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                                SceneManagerImplT>::PublicObjectData &Data);
 
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);

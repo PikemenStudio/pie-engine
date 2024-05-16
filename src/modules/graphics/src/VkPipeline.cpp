@@ -708,10 +708,16 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   std::vector<vk::PipelineShaderStageCreateInfo> ShaderStages;
 
   // Vertex Input
+  vk::VertexInputBindingDescription BindingDescription =
+      getBindingDescription();
+  std::array<vk::VertexInputAttributeDescription, 2> AttributeDescriptions =
+      getAttributeDescriptions();
   vk::PipelineVertexInputStateCreateInfo VertexInputInfo = {
       .flags = vk::PipelineVertexInputStateCreateFlags(),
-      .vertexBindingDescriptionCount = 0,
-      .vertexAttributeDescriptionCount = 0,
+      .vertexBindingDescriptionCount = 1,
+      .pVertexBindingDescriptions = &BindingDescription,
+      .vertexAttributeDescriptionCount = 2,
+      .pVertexAttributeDescriptions = AttributeDescriptions.data(),
   };
   CreateInfo.pVertexInputState = &VertexInputInfo;
 
@@ -1028,6 +1034,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                              this->PipelineBundle->Pipeline);
 
+  prepareScene(CommandBuffer);
+
   auto *SceneManager =
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
 
@@ -1064,6 +1072,51 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::createBuffer(BufferInput Input,
+                                                          MeshData &MeshData) {
+  vk::BufferCreateInfo BufferInfo{
+      .flags = vk::BufferCreateFlags(),
+      .size = Input.Size,
+      .usage = Input.Usage,
+      .sharingMode = vk::SharingMode::eExclusive,
+  };
+
+  try {
+    MeshData.Buffer =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createBuffer(BufferInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to create buffer ") +
+                             E.what());
+  }
+
+  allocateBufferMemory(MeshData);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+uint32_t vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    findMemoryType(uint32_t TypeFilter, vk::MemoryPropertyFlags Properties) {
+  vk::PhysicalDeviceMemoryProperties MemoryProperties =
+      static_cast<vk::PhysicalDevice &>(*this->NativeComponents.PhysicalDevice)
+          .getMemoryProperties();
+
+  for (uint32_t I = 0; I < MemoryProperties.memoryTypeCount; ++I) {
+    const auto Supported = TypeFilter & (1 << I);
+    const auto Sufficient = (MemoryProperties.memoryTypes[I].propertyFlags &
+                             Properties) == Properties;
+    if (Supported && Sufficient) {
+      return I;
+    }
+  }
+  throw std::runtime_error("Failed to find suitable memory type");
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                          SceneManagerImplT>::render() {
   auto &Device =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
@@ -1087,11 +1140,10 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   } catch (vk::IncompatibleDisplayKHRError &E) {
     recreateSwapChain();
     return;
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to acquire swap chain image ") + E.what());
   }
-    catch (vk::SystemError &E) {
-      throw std::runtime_error(
-          std::string("Failed to acquire swap chain image ") + E.what());
-    }
 
   vk::CommandBuffer CommandBuffer =
       SwapChainBundle->Frames[ImageIndex].CommandBuffer;
@@ -1148,6 +1200,121 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   }
 
   FrameNumber = (FrameNumber + 1) % MaxFrameInFlight;
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    allocateBufferMemory(VkPipeline::MeshData &Mesh) {
+  vk::MemoryRequirements MemoryRequirements =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .getBufferMemoryRequirements(Mesh.Buffer);
+
+  vk::MemoryAllocateInfo AllocateInfo{
+      .allocationSize = MemoryRequirements.size,
+      .memoryTypeIndex =
+          findMemoryType(MemoryRequirements.memoryTypeBits,
+                         vk::MemoryPropertyFlagBits::eHostVisible |
+                             vk::MemoryPropertyFlagBits::eHostCoherent),
+  };
+
+  Mesh.Memory =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .allocateMemory(AllocateInfo);
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .bindBufferMemory(Mesh.Buffer, Mesh.Memory, 0);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+vk::VertexInputBindingDescription
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::getBindingDescription() {
+  vk::VertexInputBindingDescription BindingDescription{
+      .binding = 0,
+      .stride = 5 * sizeof(float),
+      .inputRate = vk::VertexInputRate::eVertex,
+  };
+
+  return BindingDescription;
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+std::array<vk::VertexInputAttributeDescription, 2>
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                    SceneManagerImplT>::getAttributeDescriptions() {
+  std::array<vk::VertexInputAttributeDescription, 2> Attributes{
+      vk::VertexInputAttributeDescription{
+          .location = 0,
+          .binding = 0,
+          .format = vk::Format::eR32G32Sfloat,
+          .offset = 0,
+      },
+      vk::VertexInputAttributeDescription{
+          .location = 1,
+          .binding = 0,
+          .format = vk::Format::eR32G32B32Sfloat,
+          .offset = 2 * sizeof(float),
+      },
+  };
+
+  return Attributes;
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    addObjectData(const std::string &Name,
+                  const VkPipeline::PublicObjectData &Data) {
+  std::vector<float> MeshArray;
+  for (int IVertex = 0, IColor = 0; IVertex < Data.Vertices.size();
+       IVertex += 2, IColor += 3) {
+    MeshArray.push_back(Data.Vertices[IVertex + 0]);
+    MeshArray.push_back(Data.Vertices[IVertex + 1]);
+    MeshArray.push_back(Data.Colors[IColor + 0]);
+    MeshArray.push_back(Data.Colors[IColor + 1]);
+    MeshArray.push_back(Data.Colors[IColor + 2]);
+  }
+
+  BufferInput BufferInput{
+      .Size = MeshArray.size() * sizeof(float),
+      .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
+  };
+
+  MeshData NewMeshData{
+      .Buffer = nullptr,
+      .Memory = nullptr,
+      .Device =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
+  };
+
+  createBuffer(BufferInput, NewMeshData);
+
+  void *MemoryLocation =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .mapMemory(NewMeshData.Memory, 0, BufferInput.Size);
+  std::memcpy(MemoryLocation, MeshArray.data(), BufferInput.Size);
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .unmapMemory(NewMeshData.Memory);
+
+  Meshes.emplace(Name, std::move(NewMeshData));
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    prepareScene(vk::CommandBuffer CommandBuffer) {
+  for (auto &[MeshType, MeshData] : this->Meshes) {
+    vk::Buffer Buffers[] = {MeshData.Buffer};
+    vk::DeviceSize Offsets[] = {0};
+    CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
+  }
 }
 
 template class vk_core::VkPipeline<

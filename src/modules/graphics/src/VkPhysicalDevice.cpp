@@ -354,6 +354,22 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   this->Pipeline->render();
 }
 
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    addObjectData(
+        const std::string &Name,
+        const typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                                           SceneManagerImplT>::PublicObjectData
+            &Data) {
+  if (this->Pipeline == nullptr) {
+    LOG_F(ERROR, "Pipeline is not initialized");
+    throw std::runtime_error("Pipeline is not initialized");
+  }
+  this->Pipeline->addObjectData(Name, Data);
+}
+
 template class vk_core::VkPhysicalDevice<
     window_api_impls::WindowApiFacadeGlfwImpl,
     shader_loader_impls::ShaderLoaderSimpleImpl,

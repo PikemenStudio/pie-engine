@@ -152,6 +152,22 @@ void GraphicApiFacadeVulkanImpl<Dep>::render() {
       ->render();
 }
 
+template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
+    const std::string &Name,
+    const GraphicFacadeStructs::ObjectData &ObjectData) {
+  typename vk_core::VkPipeline<
+      typename Dep::WindowType, typename Dep::ShaderLoaderType,
+      typename Dep::SceneManagerType>::PublicObjectData ModuleObjectData{
+      .Vertices = ObjectData.Vertices,
+      .Colors = ObjectData.Colors,
+  };
+  static_cast<
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
+      ->addObject(Name, ModuleObjectData);
+}
+
 // Explicitly instantiate class
 template class graphic_api_impls::GraphicApiFacadeVulkanImpl<
     graphic_api_impls::VulkanDependencies<

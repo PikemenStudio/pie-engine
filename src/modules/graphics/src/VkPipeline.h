@@ -7,6 +7,7 @@
 
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
+#include "ObjectsMemory.hpp"
 #include "VkInstance.hpp"
 #include "VkPhysicalDevice.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -45,7 +46,9 @@ public:
   struct FacadesStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
     std::shared_ptr<ShaderLoaderFacade<ShaderLoaderImplT>> ShaderLoader;
-    std::shared_ptr<SceneManagerFacade<scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>> SceneManager;
+    std::shared_ptr<SceneManagerFacade<
+        scene_manager_facades::SceneManagerDependencies, SceneManagerImplT>>
+        SceneManager;
   };
 
   struct VkPipelineProps;
@@ -64,6 +67,13 @@ public:
     std::shared_ptr<vk::Queue> GraphicsQueue;
     std::shared_ptr<vk::Queue> PresentQueue;
   };
+
+  struct PublicObjectData {
+    std::vector<float> Vertices;
+    std::vector<float> Colors;
+  };
+
+  void addObjectData(const std::string &Name, const PublicObjectData &Data);
 
   void render();
 
@@ -127,6 +137,28 @@ protected:
 
   int MaxFrameInFlight, FrameNumber = 0;
 
+  struct MeshData {
+    vk::Buffer Buffer;
+    vk::DeviceMemory Memory;
+    vk::Device &Device;
+
+//    ~MeshData() {
+//      if (Buffer == nullptr || Memory == nullptr) {
+//        return;
+//      }
+//      Device.destroyBuffer(Buffer);
+//      Device.freeMemory(Memory);
+//    }
+  };
+
+  struct BufferInput {
+    vk::DeviceSize Size;
+    vk::BufferUsageFlags Usage;
+    vk::MemoryPropertyFlags Properties;
+  };
+
+  std::unordered_map<std::string, MeshData> Meshes;
+
 protected:
 protected:
   // SwapChain
@@ -158,7 +190,17 @@ protected:
   void createSemaphores();
   void createFences();
 
+  vk::VertexInputBindingDescription getBindingDescription();
+  std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions();
+
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
+
+  void createBuffer(BufferInput Input, MeshData &Buffer);
+  uint32_t findMemoryType(uint32_t TypeFilter,
+                          vk::MemoryPropertyFlags Properties);
+  void allocateBufferMemory(MeshData &Mesh);
+
+  void prepareScene(vk::CommandBuffer CommandBuffer);
 };
 
 } // namespace vk_core

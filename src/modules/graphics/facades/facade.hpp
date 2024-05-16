@@ -61,6 +61,11 @@ struct GraphicFacadeStructs {
     FIRST,
     BEST,
   };
+
+  struct ObjectData {
+    std::vector<float> Vertices;
+    std::vector<float> Colors;
+  };
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,6 +119,9 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
     chooseGpu(const GraphicFacadeStructs::DeviceChoosePolicy ChoosePolicy);    \
                                                                                \
     void render();                                                             \
+                                                                               \
+    void addObjectData(const std::string &Name,                                \
+                       const GraphicFacadeStructs::ObjectData &ObjectData);    \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

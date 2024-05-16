@@ -50,6 +50,8 @@ using GraphicApiFacadeType = GraphicApiFacade<
 class RenderableSceneTest {
 public:
   void SetUp() {
+    std::runtime_error err("");
+    err.what();
     // Setup Graphic
     std::shared_ptr<WindowApiFacade<>> WindowAdapterInstance;
     WindowAdapterInstance = std::shared_ptr<WindowApiFacade<>>(
@@ -128,6 +130,12 @@ public:
                              .Window = WindowAdapterInstance}});
 
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
+
+    GraphicAdapterInstance->ImplInstance.addObjectData(
+        "Triangle",
+        GraphicFacadeStructs::ObjectData{
+            .Vertices = {0.0f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f},
+            .Colors = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}});
 
     RenderableSceneInstance->ImplInstance.runMainCycle();
   }

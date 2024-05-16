@@ -9,7 +9,7 @@ set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
         VkPipeline.cpp
         VkPipeline.h)
 set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
-        GraphicEngine.hpp)
+        GraphicEngine.hpp ObjectsMemory.hpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
