@@ -12,8 +12,8 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
   DxDy.x = 0;
-  if (Keyboard.at(KeyCode::Left))  DxDy.x -= 0.5;
-  if (Keyboard.at(KeyCode::Right)) DxDy.x += 0.5;
+  if (Keyboard.at(KeyCode::Left))  DxDy.x -= 0.2;
+  if (Keyboard.at(KeyCode::Right)) DxDy.x += 0.2;
 
   if (Keyboard.at(KeyCode::Up) && OnGround)
   {
@@ -28,9 +28,48 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
 
 void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
 {
+  auto OldPos = Center;
   setPosition(Center + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
-  if (checkCollisionWithObjects(Objects))
-    setPosition(Center - sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
+  if (auto* CollObj = checkCollisionWithObjects(Objects))
+  {
+    auto PosBeforeSpaceSearch = Center;
+
+    // try to go up a little
+    bool HasSpaceUp = false;
+    for (int I = 0; I < 5; I++)
+    {
+      setPosition(Center + sf::Vector2f(0, Size.y / 200));
+
+      if (!CollObj->isCollision(this))
+      {
+        HasSpaceUp = true;
+        break;
+      }
+    }
+
+    if (!HasSpaceUp)
+    {
+      setPosition(PosBeforeSpaceSearch);
+
+      bool HasSpaceDown = false;
+      for (int I = 0; I < 5; I++)
+      {
+        setPosition(Center - sf::Vector2f(0, Size.y / 200));
+        if (!CollObj->isCollision(this))
+        {
+          HasSpaceDown = true;
+          break;
+        }
+      }
+
+      if (!HasSpaceDown)
+      {
+        setPosition(OldPos);
+      }
+    }
+
+//    setPosition(Center - sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
+  }
 
   setPosition(Center + sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
   if (checkCollisionWithObjects(Objects))
