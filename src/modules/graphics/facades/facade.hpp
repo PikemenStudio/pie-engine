@@ -10,6 +10,7 @@
 #include "../../windows/facades/facade.hpp"
 #include <any>
 #include <concepts>
+#include <map>
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Define all structures to be used in the facades
@@ -66,6 +67,8 @@ struct GraphicFacadeStructs {
     std::vector<float> Vertices;
     std::vector<float> Colors;
   };
+
+  using ObjectsData = std::map<std::string, ObjectData>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,8 +123,9 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     void render();                                                             \
                                                                                \
-    void addObjectData(const std::string &Name,                                \
-                       const GraphicFacadeStructs::ObjectData &ObjectData);    \
+    void addObjectData(                                                        \
+        const std::map<std::string, GraphicFacadeStructs::ObjectData>          \
+            &ObjectData);                                                      \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

@@ -359,15 +359,14 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     addObjectData(
-        const std::string &Name,
-        const typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
-                                           SceneManagerImplT>::PublicObjectData
+        const std::map<std::string, typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                                           SceneManagerImplT>::PublicObjectData>
             &Data) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
   }
-  this->Pipeline->addObjectData(Name, Data);
+  this->Pipeline->addObjectData(Data);
 }
 
 template class vk_core::VkPhysicalDevice<

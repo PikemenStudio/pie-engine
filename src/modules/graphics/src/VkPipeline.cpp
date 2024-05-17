@@ -1034,27 +1034,31 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                              this->PipelineBundle->Pipeline);
 
-  prepareScene(CommandBuffer);
-
   auto *SceneManager =
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
 
-  SceneManager->resetObjectGetter();
-  while (true) {
-    auto Object = SceneManager->getNextObject();
-    if (Object.has_value() == false) {
-      break;
-    }
-    auto ObjectType = Object->Type;
-    switch (ObjectType) {
-    case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE: {
-      auto Model = Object->calculateTransformation();
-      CommandBuffer.pushConstants(this->PipelineBundle->Layout,
-                                  vk::ShaderStageFlagBits::eVertex, 0,
-                                  sizeof(Model), &Model);
-      CommandBuffer.draw(3, 1, 0, 0);
-      break;
-    }
+  // Iterate through dumps
+  for (size_t DumpIndex = 0; DumpIndex < Meshes.Dumps.size(); ++DumpIndex) {
+    prepareScene(CommandBuffer, DumpIndex);
+
+    SceneManager->resetObjectGetter();
+    // Iterate through objects in dump
+    while (true) {
+      auto Object = SceneManager->getNextObject();
+      if (Object.has_value() == false) {
+        break;
+      }
+      auto ObjectType = Object->Type;
+      switch (ObjectType) {
+      case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE: {
+        auto Model = Object->calculateTransformation();
+        CommandBuffer.pushConstants(this->PipelineBundle->Layout,
+                                    vk::ShaderStageFlagBits::eVertex, 0,
+                                    sizeof(Model), &Model);
+        CommandBuffer.draw(3, 1, 0, 0);
+        break;
+      }
+      }
     }
   }
 
@@ -1073,7 +1077,7 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                          SceneManagerImplT>::createBuffer(BufferInput Input,
-                                                          MeshData &MeshData) {
+                                                          MeshDump &MeshData) {
   vk::BufferCreateInfo BufferInfo{
       .flags = vk::BufferCreateFlags(),
       .size = Input.Size,
@@ -1206,7 +1210,7 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    allocateBufferMemory(VkPipeline::MeshData &Mesh) {
+    allocateBufferMemory(VkPipeline::MeshDump &Mesh) {
   vk::MemoryRequirements MemoryRequirements =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .getBufferMemoryRequirements(Mesh.Buffer);
@@ -1269,52 +1273,72 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    addObjectData(const std::string &Name,
-                  const VkPipeline::PublicObjectData &Data) {
-  std::vector<float> MeshArray;
-  for (int IVertex = 0, IColor = 0; IVertex < Data.Vertices.size();
-       IVertex += 2, IColor += 3) {
-    MeshArray.push_back(Data.Vertices[IVertex + 0]);
-    MeshArray.push_back(Data.Vertices[IVertex + 1]);
-    MeshArray.push_back(Data.Colors[IColor + 0]);
-    MeshArray.push_back(Data.Colors[IColor + 1]);
-    MeshArray.push_back(Data.Colors[IColor + 2]);
-  }
-
-  BufferInput BufferInput{
-      .Size = MeshArray.size() * sizeof(float),
-      .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
-  };
-
-  MeshData NewMeshData{
+    addObjectData(
+        const std::map<std::string, VkPipeline::PublicObjectData> &Data) {
+  MeshDump NewMeshDump{
       .Buffer = nullptr,
       .Memory = nullptr,
       .Device =
           static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
+      .Meshes = {},
   };
 
-  createBuffer(BufferInput, NewMeshData);
+  int Offset = 0;
+
+  // Create Dump of objects
+  for (auto &[Name, ObjectData] : Data) {
+    std::vector<float> MeshArray;
+    for (int IVertex = 0, IColor = 0; IVertex < ObjectData.Vertices.size();
+         IVertex += 2, IColor += 3) {
+      MeshArray.push_back(ObjectData.Vertices[IVertex + 0]);
+      MeshArray.push_back(ObjectData.Vertices[IVertex + 1]);
+      MeshArray.push_back(ObjectData.Colors[IColor + 0]);
+      MeshArray.push_back(ObjectData.Colors[IColor + 1]);
+      MeshArray.push_back(ObjectData.Colors[IColor + 2]);
+    }
+
+    MeshData NewMeshData{
+        .Data = std::move(MeshArray),
+        .Offset = Offset,
+        .Size = static_cast<int>(MeshArray.size() / 5),
+    };
+
+    Offset += NewMeshData.Size;
+
+    NewMeshDump.Meshes.emplace(Name, std::move(NewMeshData));
+  }
+
+  // Add Dump and calculate result buffer for buffer creation
+  Meshes.Dumps.push_back(std::move(NewMeshDump));
+  const size_t NewDumpIndex = Meshes.Dumps.size() - 1;
+  Meshes.recalculateDataCache(NewDumpIndex);
+
+  BufferInput BufferInput{
+      .Size = Meshes.DataCaches[NewDumpIndex].size() * sizeof(float),
+      .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
+  };
+
+  createBuffer(BufferInput, Meshes.Dumps[NewDumpIndex]);
 
   void *MemoryLocation =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-          .mapMemory(NewMeshData.Memory, 0, BufferInput.Size);
-  std::memcpy(MemoryLocation, MeshArray.data(), BufferInput.Size);
+          .mapMemory(Meshes.Dumps[NewDumpIndex].Memory, 0, BufferInput.Size);
+  std::memcpy(MemoryLocation, Meshes.DataCaches[NewDumpIndex].data(),
+              BufferInput.Size);
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .unmapMemory(NewMeshData.Memory);
-
-  Meshes.emplace(Name, std::move(NewMeshData));
+      .unmapMemory(Meshes.Dumps[NewDumpIndex].Memory);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    prepareScene(vk::CommandBuffer CommandBuffer) {
-  for (auto &[MeshType, MeshData] : this->Meshes) {
-    vk::Buffer Buffers[] = {MeshData.Buffer};
-    vk::DeviceSize Offsets[] = {0};
-    CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
-  }
+    prepareScene(vk::CommandBuffer CommandBuffer, size_t DumpIndex) {
+  auto &Dump = this->Meshes.Dumps[DumpIndex];
+
+  vk::Buffer Buffers[] = {Dump.Buffer};
+  vk::DeviceSize Offsets[] = {0};
+  CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
 }
 
 template class vk_core::VkPipeline<

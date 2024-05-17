@@ -121,9 +121,10 @@ public:
   void render();
 
   void addObjectData(
-      const std::string &Name,
-      const vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
-                                SceneManagerImplT>::PublicObjectData &Data);
+      const std::map<std::string,
+                     typename VkPipeline<WindowImpl, ShaderLoaderImplT,
+                                         SceneManagerImplT>::PublicObjectData>
+          &Data);
 
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);

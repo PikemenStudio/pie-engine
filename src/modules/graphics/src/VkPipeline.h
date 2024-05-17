@@ -73,7 +73,10 @@ public:
     std::vector<float> Colors;
   };
 
-  void addObjectData(const std::string &Name, const PublicObjectData &Data);
+  using PublicObjectDataMap = std::map<std::string, PublicObjectData>;
+
+  void addObjectData(
+      const std::map<std::string, VkPipeline::PublicObjectData> &Data);
 
   void render();
 
@@ -138,17 +141,9 @@ protected:
   int MaxFrameInFlight, FrameNumber = 0;
 
   struct MeshData {
-    vk::Buffer Buffer;
-    vk::DeviceMemory Memory;
-    vk::Device &Device;
-
-//    ~MeshData() {
-//      if (Buffer == nullptr || Memory == nullptr) {
-//        return;
-//      }
-//      Device.destroyBuffer(Buffer);
-//      Device.freeMemory(Memory);
-//    }
+    std::vector<float> Data;
+    int Offset;
+    int Size;
   };
 
   struct BufferInput {
@@ -157,7 +152,33 @@ protected:
     vk::MemoryPropertyFlags Properties;
   };
 
-  std::unordered_map<std::string, MeshData> Meshes;
+  struct MeshDump {
+    vk::Buffer Buffer;
+    vk::DeviceMemory Memory;
+    vk::Device &Device;
+    std::map<std::string, MeshData> Meshes;
+  };
+
+  struct Meshes {
+    std::vector<MeshDump> Dumps;
+
+    std::vector<std::vector<float>> DataCaches;
+    void recalculateDataCache(size_t DumpIndex) {
+      if (DumpIndex >= DataCaches.size()) {
+        DataCaches.resize(DumpIndex + 1);
+      }
+      std::vector<float> &DataCache = DataCaches[DumpIndex];
+
+      DataCache.clear();
+      for (auto &Dump : Dumps) {
+        for (auto &[Name, Mesh] : Dump.Meshes) {
+          DataCache.resize(DataCache.size() + Mesh.Data.size());
+          std::copy(Mesh.Data.begin(), Mesh.Data.end(),
+                    DataCache.end() - Mesh.Data.size());
+        }
+      }
+    }
+  } Meshes;
 
 protected:
 protected:
@@ -195,12 +216,12 @@ protected:
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
 
-  void createBuffer(BufferInput Input, MeshData &Buffer);
+  void createBuffer(BufferInput Input, MeshDump &Buffer);
   uint32_t findMemoryType(uint32_t TypeFilter,
                           vk::MemoryPropertyFlags Properties);
-  void allocateBufferMemory(MeshData &Mesh);
+  void allocateBufferMemory(MeshDump &Mesh);
 
-  void prepareScene(vk::CommandBuffer CommandBuffer);
+  void prepareScene(vk::CommandBuffer CommandBuffer, size_t DumpIndex);
 };
 
 } // namespace vk_core

@@ -148,14 +148,13 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addObject(
-    const std::string &Name,
-    const VkPipeline<WindowImpl, ShaderImpl, SceneImpl>::PublicObjectData
+    const std::map<std::string, typename VkPipeline<WindowImpl, ShaderImpl, SceneImpl>::PublicObjectData>
         &ObjectData) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
     throw std::runtime_error("Physical device is null");
   }
-  NativeComponents.PhysicalDevice->addObjectData(Name, ObjectData);
+  NativeComponents.PhysicalDevice->addObjectData(ObjectData);
 }
 
 template <

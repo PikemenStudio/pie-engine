@@ -61,9 +61,10 @@ public:
   void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
   void
-  addObject(const std::string &Name,
-            const vk_core::VkPipeline<WindowImpl, ShaderImpl,
-                                      SceneImpl>::PublicObjectData &ObjectData);
+  addObject(const std::map<std::string,
+                           typename VkPipeline<WindowImpl, ShaderImpl,
+                                               SceneImpl>::PublicObjectData>
+                &ObjectData);
 
   void render();
 

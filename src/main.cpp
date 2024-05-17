@@ -131,11 +131,11 @@ public:
 
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
-    GraphicAdapterInstance->ImplInstance.addObjectData(
-        "Triangle",
-        GraphicFacadeStructs::ObjectData{
-            .Vertices = {0.0f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f},
-            .Colors = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}});
+    GraphicFacadeStructs::ObjectsData ObjectsData;
+    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData{
+        .Vertices = {0.0f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f},
+        .Colors = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}};
+    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData);
 
     RenderableSceneInstance->ImplInstance.runMainCycle();
   }
