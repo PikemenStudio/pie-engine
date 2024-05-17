@@ -45,40 +45,6 @@ void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTi
       if (CollObj->isCollision(this))
         setPosition(OldPos);
     }
-//    bool HasSpaceUp = false;
-//    for (int I = 0; I < 5; I++)
-//    {
-//      setPosition(Center + sf::Vector2f(0, Size.y / 200));
-//
-//      if (!CollObj->isCollision(this))
-//      {
-//        HasSpaceUp = true;
-//        break;
-//      }
-//    }
-//
-//    if (!HasSpaceUp)
-//    {
-//      setPosition(PosBeforeSpaceSearch);
-//
-//      bool HasSpaceDown = false;
-//      for (int I = 0; I < 5; I++)
-//      {
-//        setPosition(Center - sf::Vector2f(0, Size.y / 200));
-//        if (!CollObj->isCollision(this))
-//        {
-//          HasSpaceDown = true;
-//          break;
-//        }
-//      }
-//
-//      if (!HasSpaceDown)
-//      {
-//        setPosition(OldPos);
-//      }
-//    }
-
-//    setPosition(Center - sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
   }
 
   setPosition(Center + sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));

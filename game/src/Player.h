@@ -18,6 +18,11 @@ class Player : public SolidObject
 public:
   Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
   {
+    Tex.loadFromFile("../../game/resources/Run_01.png");
+    Tex.setSmooth(true);
+    Sprite.setTexture(Tex);
+    Sprite.setScale(2, 2);
+
     this->Center = Center;
     this->Size = Size;
     LightSrc = Src;
@@ -81,6 +86,9 @@ private:
   bool OnGround = false;
 
   LightSource* LightSrc = nullptr;
+
+  sf::Texture Tex;
+  sf::Sprite Sprite;
 };
 
 #endif // ENGINE_PLAYER_H
