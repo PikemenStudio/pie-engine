@@ -17,75 +17,13 @@
 class Player : public SolidObject
 {
 public:
-  Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
-  {
-    this->Center = Center;
-    this->Size = Size;
-    LightSrc = Src;
-
-    RunAnim = std::make_unique<Animation>(std::vector<std::string> {
-        "../../game/resources/CartoonDetective/Run/Run_01.png",
-        "../../game/resources/CartoonDetective/Run/Run_02.png",
-        "../../game/resources/CartoonDetective/Run/Run_03.png",
-        "../../game/resources/CartoonDetective/Run/Run_04.png",
-        "../../game/resources/CartoonDetective/Run/Run_05.png",
-        "../../game/resources/CartoonDetective/Run/Run_06.png",
-        "../../game/resources/CartoonDetective/Run/Run_07.png",
-        "../../game/resources/CartoonDetective/Run/Run_08.png",
-    });
-    RunAnim->setLoop(true);
-    RunAnim->setFrameTime(0.1);
-    RunAnim->start();
-
-//    Tex.loadFromFile("../../game/resources/Run_01.png");
-//    Tex.setSmooth(false);
-//    Sprite.setTexture(Tex);
-  }
+  Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src);
 
   void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
 
   bool isCollision(const SolidObject* Other) const override;
 
-  void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj)
-  {
-    sf::Vector2f WorldTopLeft = Center + sf::Vector2f(-Size.x / 2, Size.y / 2);
-    sf::Vector2f WorldBottomRight = Center + sf::Vector2f(Size.x / 2, -Size.y / 2);
-
-    sf::Vector2f ScreenTopLeft = worldCoordsToScreen(WorldTopLeft, WorldWindowObj);
-    sf::Vector2f ScreenBottomRight = worldCoordsToScreen(WorldBottomRight, WorldWindowObj);
-
-    sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
-
-    sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
-
-    constexpr float CharacterHeightToBoundingBox = 1.1;
-    float SpriteScale = ScreenBBSize.y / CharacterHeightPx * CharacterHeightToBoundingBox;
-    Sprite.setTexture(*RunAnim->getFrames()[RunAnim->getCurrFrameIndex()]);
-    Sprite.setScale(SpriteScale, SpriteScale);
-    Sprite.setPosition(CenterScreenCoords -
-                       sf::Vector2f(CharacterCenterXPx * SpriteScale,
-                                    CharacterCenterYPx * SpriteScale));
-
-    if (DxDy.x < 0 || (TurnedLeft && DxDy.x == 0))
-    {
-      TurnedLeft = true;
-      Sprite.scale(-1, 1);
-      Sprite.move(CharacterCenterXPx * 2 * SpriteScale, 0);
-    }
-    else if (DxDy.x > 0 || (!TurnedLeft && DxDy.x == 0))
-    {
-      TurnedLeft = false;
-      Sprite.scale(1, 1);
-    }
-
-    sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
-    Rect.setPosition(ScreenTopLeft);
-    Rect.setOutlineThickness(5);
-    Rect.setOutlineColor(sf::Color::Cyan);
-
-//    Win.draw(Rect);
-    Win.draw(Sprite);
-  }
+  void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj);
 
   sf::Vector2f getPosition() const { return Center; }
   sf::Vector2f getSize() const { return Size; }
@@ -129,7 +67,9 @@ private:
   LightSource* LightSrc = nullptr;
 
   std::unique_ptr<Animation> RunAnim;
-//  sf::Texture Tex;
+  std::unique_ptr<Animation> IdleAnim;
+  Animation* CurrAnim = nullptr;
+
   sf::Sprite Sprite;
 
   static constexpr int CharacterHeightPx = 40;

@@ -7,9 +7,82 @@
 
 #include <loguru.hpp>
 
+Player::Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
+{
+  this->Center = Center;
+  this->Size = Size;
+  LightSrc = Src;
+
+  RunAnim = std::make_unique<Animation>(std::vector<std::string> {
+      "../../game/resources/CartoonDetective/Run/Run_01.png",
+      "../../game/resources/CartoonDetective/Run/Run_02.png",
+      "../../game/resources/CartoonDetective/Run/Run_03.png",
+      "../../game/resources/CartoonDetective/Run/Run_04.png",
+      "../../game/resources/CartoonDetective/Run/Run_05.png",
+      "../../game/resources/CartoonDetective/Run/Run_06.png",
+      "../../game/resources/CartoonDetective/Run/Run_07.png",
+      "../../game/resources/CartoonDetective/Run/Run_08.png",
+  });
+  RunAnim->setLoop(true);
+  RunAnim->setFrameTime(0.1);
+
+  IdleAnim = std::make_unique<Animation>(std::vector<std::string> {
+      "../../game/resources/CartoonDetective/Idle/Idle_01.png",
+      "../../game/resources/CartoonDetective/Idle/Idle_02.png",
+      "../../game/resources/CartoonDetective/Idle/Idle_03.png",
+      "../../game/resources/CartoonDetective/Idle/Idle_04.png",
+  });
+  IdleAnim->setLoop(true);
+  IdleAnim->setFrameTime(0.1);
+
+  CurrAnim = IdleAnim.get();
+  CurrAnim->start();
+}
+
+void Player::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj)
+{
+  sf::Vector2f WorldTopLeft = Center + sf::Vector2f(-Size.x / 2, Size.y / 2);
+  sf::Vector2f WorldBottomRight = Center + sf::Vector2f(Size.x / 2, -Size.y / 2);
+
+  sf::Vector2f ScreenTopLeft = worldCoordsToScreen(WorldTopLeft, WorldWindowObj);
+  sf::Vector2f ScreenBottomRight = worldCoordsToScreen(WorldBottomRight, WorldWindowObj);
+
+  sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
+
+  sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
+
+  constexpr float CharacterHeightToBoundingBox = 1.1;
+  float SpriteScale = ScreenBBSize.y / CharacterHeightPx * CharacterHeightToBoundingBox;
+  Sprite.setTexture(*CurrAnim->getFrames()[CurrAnim->getCurrFrameIndex()]);
+  Sprite.setScale(SpriteScale, SpriteScale);
+  Sprite.setPosition(CenterScreenCoords -
+                     sf::Vector2f(CharacterCenterXPx * SpriteScale,
+                                  CharacterCenterYPx * SpriteScale));
+
+  if (DxDy.x < 0 || (TurnedLeft && DxDy.x == 0))
+  {
+    TurnedLeft = true;
+    Sprite.scale(-1, 1);
+    Sprite.move(CharacterCenterXPx * 2 * SpriteScale, 0);
+  }
+  else if (DxDy.x > 0 || (!TurnedLeft && DxDy.x == 0))
+  {
+    TurnedLeft = false;
+    Sprite.scale(1, 1);
+  }
+
+  sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
+  Rect.setPosition(ScreenTopLeft);
+  Rect.setOutlineThickness(5);
+  Rect.setOutlineColor(sf::Color::Cyan);
+
+  //    Win.draw(Rect); // Draw bounding box
+  Win.draw(Sprite);
+}
+
 void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects)
 {
-  RunAnim->update();
+  CurrAnim->update();
 
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
@@ -24,6 +97,19 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
 
   DxDy.y -= 6 * FrameDrawingTimeS;
   OnGround = false;
+
+  if (DxDy.x != 0 && CurrAnim != RunAnim.get())
+  {
+    IdleAnim->stop();
+    CurrAnim = RunAnim.get();
+    CurrAnim->start();
+  }
+  else if (DxDy.x == 0 && CurrAnim != IdleAnim.get())
+  {
+    RunAnim->stop();
+    CurrAnim = IdleAnim.get();
+    CurrAnim->start();
+  }
 
   move(Objects, FrameDrawingTimeS);
 }
