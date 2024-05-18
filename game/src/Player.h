@@ -43,14 +43,20 @@ public:
     sf::Vector2f ScreenBottomRight = worldCoordsToScreen(WorldBottomRight, WorldWindowObj);
 
     sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
+
     sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
-    float SpriteScale = ScreenBBSize.y / Tex.getSize().y;
+//    float SpriteScale = ScreenBBSize.y / Tex.getSize().y;
+//    Sprite.setScale(SpriteScale, SpriteScale);
+    float SpriteScale = ScreenBBSize.y / CharacterHeightPx;
     Sprite.setScale(SpriteScale, SpriteScale);
-    Sprite.setPosition(CenterScreenCoords - sf::Vector2f(ScreenBBSize.y / 2, ScreenBBSize.y / 2));
+    Sprite.setPosition(CenterScreenCoords -
+                       sf::Vector2f(CharacterCenterXPx * SpriteScale,
+                                    CharacterCenterYPx * SpriteScale));
 
     sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
     Rect.setPosition(ScreenTopLeft);
-    Rect.setFillColor(sf::Color::Cyan);
+    Rect.setOutlineThickness(5);
+    Rect.setOutlineColor(sf::Color::Cyan);
 
     Win.draw(Rect);
     Win.draw(Sprite);
@@ -98,6 +104,10 @@ private:
 
   sf::Texture Tex;
   sf::Sprite Sprite;
+
+  static constexpr int CharacterHeightPx = 40;
+  static constexpr int CharacterCenterXPx = 25;
+  static constexpr int CharacterCenterYPx = 28;
 };
 
 #endif // ENGINE_PLAYER_H
