@@ -18,6 +18,14 @@ sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, const WorldWin
                       (WinH/2 - WindowCoords.y) / WinH * ScreenHeight);
 }
 
+sf::Vector2f worldDeltaToScreen(const sf::Vector2f& WorldDelta, const WorldWindow& WorldWindowObj)
+{
+  float PixelsInUnitX = ScreenWidth / WorldWindowObj.getSize().x;
+  float PixelsInUnitY = ScreenHeight / WorldWindowObj.getSize().y;
+
+  return {WorldDelta.x * PixelsInUnitX, WorldDelta.y * PixelsInUnitY};
+}
+
 //sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
 //{
 //  return sf::Vector2f((ScreenCoords.x - HalfScreenWidth) / HalfScreenWidth,

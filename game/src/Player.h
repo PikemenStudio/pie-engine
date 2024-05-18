@@ -8,24 +8,26 @@
 #include <SFML/Graphics.hpp>
 
 #include "WorldWindow.h"
+#include "Keyboard.h"
 #include "LightSource.h"
 #include "SolidObject.h"
 #include "utils.h"
-#include "Keyboard.h"
 
 class Player : public SolidObject
 {
 public:
   Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
   {
-    Tex.loadFromFile("../../game/resources/Run_01.png");
-    Tex.setSmooth(true);
-    Sprite.setTexture(Tex);
-    Sprite.setScale(2, 2);
-
     this->Center = Center;
     this->Size = Size;
     LightSrc = Src;
+
+    // Sprite
+    Tex.loadFromFile("../../game/resources/Run_01.png");
+    Tex.setSmooth(false);
+    Sprite.setTexture(Tex);
+
+//    Sprite.setScale(2, 2);
   }
 
   void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
@@ -40,11 +42,18 @@ public:
     sf::Vector2f ScreenTopLeft = worldCoordsToScreen(WorldTopLeft, WorldWindowObj);
     sf::Vector2f ScreenBottomRight = worldCoordsToScreen(WorldBottomRight, WorldWindowObj);
 
+    sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
+    sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
+    float SpriteScale = ScreenBBSize.y / Tex.getSize().y;
+    Sprite.setScale(SpriteScale, SpriteScale);
+    Sprite.setPosition(CenterScreenCoords - sf::Vector2f(ScreenBBSize.y / 2, ScreenBBSize.y / 2));
+
     sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
     Rect.setPosition(ScreenTopLeft);
     Rect.setFillColor(sf::Color::Cyan);
 
     Win.draw(Rect);
+    Win.draw(Sprite);
   }
 
   sf::Vector2f getPosition() const { return Center; }

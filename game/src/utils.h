@@ -21,6 +21,8 @@ constexpr int HalfScreenHeight = ScreenHeight / 2;
 sf::Vector2f worldCoordsToScreen(const sf::Vector2f& WorldCoords, const WorldWindow& WorldWindowObj);
 //sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords);
 
+sf::Vector2f worldDeltaToScreen(const sf::Vector2f& WorldDelta, const WorldWindow& WorldWindowObj);
+
 template <typename T>
 T vectorLen(const sf::Vector2<T>& Vec)
 {
