@@ -33,7 +33,7 @@ Player::Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
       "../../game/resources/CartoonDetective/Idle/Idle_04.png",
   });
   IdleAnim->setLoop(true);
-  IdleAnim->setFrameTime(0.1);
+  IdleAnim->setFrameTime(0.2);
 
   CurrAnim = IdleAnim.get();
   CurrAnim->start();
