@@ -63,7 +63,7 @@ void Game::initGameObjects()
       TunnelObj->getEndX());
   PlayerObj = std::make_unique<Player>(
       sf::Vector2f(0, 0),
-      sf::Vector2f(0.08f, 0.3f),
+      sf::Vector2f(0.05f, 0.3f),
       Lantern.get());
 
   SolidObjects.push_back(PlayerObj.get());

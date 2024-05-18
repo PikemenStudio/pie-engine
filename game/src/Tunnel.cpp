@@ -89,8 +89,6 @@ static void testLineSegmentsIntersection()
   sf::Vector2f Pt3(0, 0.5);
   sf::Vector2f Pt4(0, -0.5);
   assert(lineSegmentsIntersect(Pt3, Pt4, Pt1, Pt2));
-
-  LOG_F(INFO, "TEST PASSED");
 }
 
 static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
@@ -112,7 +110,7 @@ static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
 
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
-  testLineSegmentsIntersection();
+//  testLineSegmentsIntersection();
 
   // player
   auto Pt1 = Pl->getPosition() + sf::Vector2f(-Pl->getSize().x / 2,  Pl->getSize().y / 2);

@@ -45,13 +45,23 @@ public:
     sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
 
     sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
-//    float SpriteScale = ScreenBBSize.y / Tex.getSize().y;
-//    Sprite.setScale(SpriteScale, SpriteScale);
     float SpriteScale = ScreenBBSize.y / CharacterHeightPx;
     Sprite.setScale(SpriteScale, SpriteScale);
     Sprite.setPosition(CenterScreenCoords -
                        sf::Vector2f(CharacterCenterXPx * SpriteScale,
                                     CharacterCenterYPx * SpriteScale));
+
+    if (DxDy.x < 0 || (TurnedLeft && DxDy.x == 0))
+    {
+      TurnedLeft = true;
+      Sprite.scale(-1, 1);
+      Sprite.move(CharacterCenterXPx * 2 * SpriteScale, 0);
+    }
+    else if (DxDy.x > 0 || (!TurnedLeft && DxDy.x == 0))
+    {
+      TurnedLeft = false;
+      Sprite.scale(1, 1);
+    }
 
     sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
     Rect.setPosition(ScreenTopLeft);
@@ -99,6 +109,7 @@ private:
   sf::Vector2f DxDy = {0, 0};
 
   bool OnGround = false;
+  bool TurnedLeft = false;
 
   LightSource* LightSrc = nullptr;
 
