@@ -9,6 +9,8 @@
 
 void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects)
 {
+  RunAnim->update();
+
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
   DxDy.x = 0;

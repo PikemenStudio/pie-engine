@@ -7,10 +7,11 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "WorldWindow.h"
+#include "Animation.h"
 #include "Keyboard.h"
 #include "LightSource.h"
 #include "SolidObject.h"
+#include "WorldWindow.h"
 #include "utils.h"
 
 class Player : public SolidObject
@@ -22,12 +23,23 @@ public:
     this->Size = Size;
     LightSrc = Src;
 
-    // Sprite
-    Tex.loadFromFile("../../game/resources/Run_01.png");
-    Tex.setSmooth(false);
-    Sprite.setTexture(Tex);
+    RunAnim = std::make_unique<Animation>(std::vector<std::string> {
+        "../../game/resources/CartoonDetective/Run/Run_01.png",
+        "../../game/resources/CartoonDetective/Run/Run_02.png",
+        "../../game/resources/CartoonDetective/Run/Run_03.png",
+        "../../game/resources/CartoonDetective/Run/Run_04.png",
+        "../../game/resources/CartoonDetective/Run/Run_05.png",
+        "../../game/resources/CartoonDetective/Run/Run_06.png",
+        "../../game/resources/CartoonDetective/Run/Run_07.png",
+        "../../game/resources/CartoonDetective/Run/Run_08.png",
+    });
+    RunAnim->setLoop(true);
+    RunAnim->setFrameTime(0.1);
+    RunAnim->start();
 
-//    Sprite.setScale(2, 2);
+//    Tex.loadFromFile("../../game/resources/Run_01.png");
+//    Tex.setSmooth(false);
+//    Sprite.setTexture(Tex);
   }
 
   void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
@@ -45,7 +57,10 @@ public:
     sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Center, WorldWindowObj);
 
     sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
-    float SpriteScale = ScreenBBSize.y / CharacterHeightPx;
+
+    constexpr float CharacterHeightToBoundingBox = 1.1;
+    float SpriteScale = ScreenBBSize.y / CharacterHeightPx * CharacterHeightToBoundingBox;
+    Sprite.setTexture(*RunAnim->getFrames()[RunAnim->getCurrFrameIndex()]);
     Sprite.setScale(SpriteScale, SpriteScale);
     Sprite.setPosition(CenterScreenCoords -
                        sf::Vector2f(CharacterCenterXPx * SpriteScale,
@@ -68,7 +83,7 @@ public:
     Rect.setOutlineThickness(5);
     Rect.setOutlineColor(sf::Color::Cyan);
 
-    Win.draw(Rect);
+//    Win.draw(Rect);
     Win.draw(Sprite);
   }
 
@@ -113,7 +128,8 @@ private:
 
   LightSource* LightSrc = nullptr;
 
-  sf::Texture Tex;
+  std::unique_ptr<Animation> RunAnim;
+//  sf::Texture Tex;
   sf::Sprite Sprite;
 
   static constexpr int CharacterHeightPx = 40;
