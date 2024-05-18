@@ -38,14 +38,18 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::getNextObject() {
     return {SceneManagerFacadeStructs::ObjectData{
         .Vertexes = LocalObjectData->Vertexes,
         .Position = LocalObjectData->Position,
+        .DumpName = LocalObjectData->DumpName,
+        .Name = LocalObjectData->Name,
+        .Type = (SceneManagerFacadeStructs::ObjectTypes)LocalObjectData->Type,
     }};
   }
   return {};
 }
 
 template <SceneManagerDependenciesConcept Dep>
-void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter() {
-  static_cast<SceneManager *>(Data)->resetObjectGetter();
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter(
+    const std::string &DumpName) {
+  static_cast<SceneManager *>(Data)->resetObjectGetter(DumpName);
 }
 
 template class scene_manager_facades::SceneManagerBaseImpl<

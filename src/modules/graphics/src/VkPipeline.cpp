@@ -1038,10 +1038,10 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
 
   // Iterate through dumps
-  for (size_t DumpIndex = 0; DumpIndex < Meshes.Dumps.size(); ++DumpIndex) {
-    prepareScene(CommandBuffer, DumpIndex);
+  for (auto &[DumpName, Dump] : MeshTypes.Dumps) {
+    prepareScene(CommandBuffer, Dump);
 
-    SceneManager->resetObjectGetter();
+    SceneManager->resetObjectGetter(DumpName);
     // Iterate through objects in dump
     while (true) {
       auto Object = SceneManager->getNextObject();
@@ -1050,12 +1050,17 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       }
       auto ObjectType = Object->Type;
       switch (ObjectType) {
-      case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE: {
+      case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE:
+      case SceneManagerFacadeStructs::ObjectTypes::SQUARE: {
         auto Model = Object->calculateTransformation();
         CommandBuffer.pushConstants(this->PipelineBundle->Layout,
                                     vk::ShaderStageFlagBits::eVertex, 0,
                                     sizeof(Model), &Model);
-        CommandBuffer.draw(3, 1, 0, 0);
+
+        const auto &MeshTypeName =
+            SceneManagerFacadeStructs::toString(ObjectType);
+        CommandBuffer.draw(Dump.Meshes[MeshTypeName].Size, 1,
+                           Dump.Meshes[MeshTypeName].Offset, 0);
         break;
       }
       }
@@ -1274,19 +1279,18 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     addObjectData(
-        const std::map<std::string, VkPipeline::PublicObjectData> &Data) {
+        const std::map<std::string, VkPipeline::PublicObjectData> &Dump,
+        const std::string &DumpName) {
   MeshDump NewMeshDump{
       .Buffer = nullptr,
       .Memory = nullptr,
-      .Device =
-          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
       .Meshes = {},
   };
 
   int Offset = 0;
 
   // Create Dump of objects
-  for (auto &[Name, ObjectData] : Data) {
+  for (auto &[Name, ObjectData] : Dump) {
     std::vector<float> MeshArray;
     for (int IVertex = 0, IColor = 0; IVertex < ObjectData.Vertices.size();
          IVertex += 2, IColor += 3) {
@@ -1297,10 +1301,11 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       MeshArray.push_back(ObjectData.Colors[IColor + 2]);
     }
 
+    size_t ArraySize = MeshArray.size();
     MeshData NewMeshData{
         .Data = std::move(MeshArray),
         .Offset = Offset,
-        .Size = static_cast<int>(MeshArray.size() / 5),
+        .Size = static_cast<int>(ArraySize / 5),
     };
 
     Offset += NewMeshData.Size;
@@ -1309,33 +1314,30 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 
   // Add Dump and calculate result buffer for buffer creation
-  Meshes.Dumps.push_back(std::move(NewMeshDump));
-  const size_t NewDumpIndex = Meshes.Dumps.size() - 1;
-  Meshes.recalculateDataCache(NewDumpIndex);
+  MeshTypes.Dumps.emplace(DumpName, std::move(NewMeshDump));
+  MeshTypes.Dumps[DumpName].recalculateDataCache();
 
   BufferInput BufferInput{
-      .Size = Meshes.DataCaches[NewDumpIndex].size() * sizeof(float),
+      .Size = MeshTypes.Dumps[DumpName].DataCache.size() * sizeof(float),
       .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
   };
 
-  createBuffer(BufferInput, Meshes.Dumps[NewDumpIndex]);
+  createBuffer(BufferInput, MeshTypes.Dumps[DumpName]);
 
   void *MemoryLocation =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-          .mapMemory(Meshes.Dumps[NewDumpIndex].Memory, 0, BufferInput.Size);
-  std::memcpy(MemoryLocation, Meshes.DataCaches[NewDumpIndex].data(),
+          .mapMemory(MeshTypes.Dumps[DumpName].Memory, 0, BufferInput.Size);
+  std::memcpy(MemoryLocation, MeshTypes.Dumps[DumpName].DataCache.data(),
               BufferInput.Size);
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .unmapMemory(Meshes.Dumps[NewDumpIndex].Memory);
+      .unmapMemory(MeshTypes.Dumps[DumpName].Memory);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    prepareScene(vk::CommandBuffer CommandBuffer, size_t DumpIndex) {
-  auto &Dump = this->Meshes.Dumps[DumpIndex];
-
+    prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &Dump) {
   vk::Buffer Buffers[] = {Dump.Buffer};
   vk::DeviceSize Offsets[] = {0};
   CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);

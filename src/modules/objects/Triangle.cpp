@@ -19,7 +19,11 @@ std::vector<uint8_t> Triangle::getVertices() {
 }
 
 glm::vec3 Triangle::getPosition() { return this->Position; }
+
 BaseObject::ObjectTypes Triangle::getType() {
   return BaseObject::ObjectTypes::TRIANGLE;
 }
+
+std::string Triangle::getDumpName() { return "TS"; }
+
 void Triangle::moveBy(glm::vec3 Vector) { this->Position += Vector; }

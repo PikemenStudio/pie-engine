@@ -25,11 +25,22 @@ struct SceneManagerFacadeStructs {
 
   enum class ObjectTypes {
     TRIANGLE,
+    SQUARE,
   };
+  static std::string toString(ObjectTypes Type) {
+    switch (Type) {
+    case ObjectTypes::TRIANGLE:
+      return "Triangle";
+    case ObjectTypes::SQUARE:
+      return "Square";
+    }
+  }
 
   struct ObjectData {
     std::vector<uint8_t> Vertexes;
     glm::vec3 Position;
+    std::string DumpName;
+    std::string Name;
 
     ObjectTypes Type;
     struct TransformationStruct {
@@ -75,7 +86,7 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
     void addObject(std::string Name, std::unique_ptr<BaseObject> Object);      \
                                                                                \
     std::optional<SceneManagerFacadeStructs::ObjectData> getNextObject();      \
-    void resetObjectGetter();                                                  \
+    void resetObjectGetter(const std::string &DumpName);                       \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

@@ -18,11 +18,17 @@ public:
 
   enum class ObjectTypes {
     TRIANGLE,
+    SQUARE,
   };
 
   virtual ObjectTypes getType() = 0;
+  virtual std::string getDumpName() = 0;
+  virtual std::string getName() { return Name; }
 
   virtual void moveBy(glm::vec3 Vector) = 0;
+
+protected:
+  std::string Name;
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_BASEOBJECT_HPP

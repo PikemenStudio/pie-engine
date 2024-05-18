@@ -361,12 +361,12 @@ void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     addObjectData(
         const std::map<std::string, typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                                            SceneManagerImplT>::PublicObjectData>
-            &Data) {
+            &Dump, const std::string &DumpName) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
   }
-  this->Pipeline->addObjectData(Data);
+  this->Pipeline->addObjectData(Dump, DumpName);
 }
 
 template class vk_core::VkPhysicalDevice<

@@ -154,12 +154,13 @@ void GraphicApiFacadeVulkanImpl<Dep>::render() {
 
 template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
-    const std::map<std::string, GraphicFacadeStructs::ObjectData> &ObjectData) {
+    const std::map<std::string, GraphicFacadeStructs::ObjectData> &Dump,
+    const std::string &DumpName) {
   typename vk_core::VkPipeline<
       typename Dep::WindowType, typename Dep::ShaderLoaderType,
       typename Dep::SceneManagerType>::PublicObjectDataMap ModuleObjectData;
 
-  for (const auto &[Name, ObjectData] : ObjectData) {
+  for (const auto &[Name, ObjectData] : Dump) {
     ModuleObjectData[Name] = {
         .Vertices = ObjectData.Vertices,
         .Colors = ObjectData.Colors,
@@ -168,7 +169,7 @@ void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
   static_cast<
       DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
                   typename Dep::SceneManagerType>>(Data)
-      ->addObject(ModuleObjectData);
+      ->addObject(ModuleObjectData, DumpName);
 }
 
 // Explicitly instantiate class

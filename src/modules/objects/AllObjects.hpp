@@ -7,5 +7,6 @@
 
 #include "BaseObject.hpp"
 #include "Triangle.hpp"
+#include "Square.hpp"
 
 #endif // ENGINE_SRC_MODULES_OBJECTS_ALLOBJECTS_HPP

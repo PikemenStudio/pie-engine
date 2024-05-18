@@ -19,6 +19,9 @@ public:
   struct ObjectData {
     std::vector<uint8_t> Vertexes;
     glm::vec3 Position;
+    std::string DumpName;
+    std::string Name;
+    BaseObject::ObjectTypes Type;
   };
 
   SceneManager(SceneManagerProps Props);
@@ -27,12 +30,14 @@ public:
   void addObject(std::string Name, std::unique_ptr<BaseObject> Object);
 
   std::optional<ObjectData> getNextObject();
-  void resetObjectGetter();
+  void resetObjectGetter(const std::string &DumpName);
 
 protected:
-  std::map<std::string, std::unique_ptr<BaseObject>> Objects;
+  using ObjectsDumps = std::map<std::string, std::unique_ptr<BaseObject>>;
+  std::map<std::string, ObjectsDumps> Objects;
 
   std::map<std::string, std::unique_ptr<BaseObject>>::iterator ObjectGetterIt;
+  std::string CurrentDumpName;
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_SCENEMANAGER_HPP

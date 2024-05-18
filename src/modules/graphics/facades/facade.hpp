@@ -124,8 +124,8 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
     void render();                                                             \
                                                                                \
     void addObjectData(                                                        \
-        const std::map<std::string, GraphicFacadeStructs::ObjectData>          \
-            &ObjectData);                                                      \
+        const std::map<std::string, GraphicFacadeStructs::ObjectData> &Dump,   \
+        const std::string &DumpName);                                          \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

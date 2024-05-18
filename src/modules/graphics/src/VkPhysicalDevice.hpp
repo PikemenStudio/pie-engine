@@ -124,7 +124,8 @@ public:
       const std::map<std::string,
                      typename VkPipeline<WindowImpl, ShaderLoaderImplT,
                                          SceneManagerImplT>::PublicObjectData>
-          &Data);
+          &Dump,
+      const std::string &DumpName);
 
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);

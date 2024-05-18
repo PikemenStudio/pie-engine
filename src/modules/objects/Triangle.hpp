@@ -16,6 +16,8 @@ public:
   std::vector<uint8_t> getVertices() override;
   glm::vec3 getPosition() override;
   ObjectTypes getType() override;
+  std::string getDumpName() override;
+
   void moveBy(glm::vec3 Vector) override;
 
 protected:

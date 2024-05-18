@@ -71,12 +71,14 @@ public:
   struct PublicObjectData {
     std::vector<float> Vertices;
     std::vector<float> Colors;
+    std::string ObjectName;
   };
 
   using PublicObjectDataMap = std::map<std::string, PublicObjectData>;
 
-  void addObjectData(
-      const std::map<std::string, VkPipeline::PublicObjectData> &Data);
+  void
+  addObjectData(const std::map<std::string, VkPipeline::PublicObjectData> &Dump,
+                const std::string &DumpName);
 
   void render();
 
@@ -155,30 +157,22 @@ protected:
   struct MeshDump {
     vk::Buffer Buffer;
     vk::DeviceMemory Memory;
-    vk::Device &Device;
     std::map<std::string, MeshData> Meshes;
+    std::vector<float> DataCache;
+
+    void recalculateDataCache() {
+      DataCache.clear();
+      for (auto &[Name, Mesh] : Meshes) {
+        DataCache.resize(DataCache.size() + Mesh.Data.size());
+        std::copy(Mesh.Data.begin(), Mesh.Data.end(),
+                  DataCache.end() - Mesh.Data.size());
+      }
+    };
   };
 
-  struct Meshes {
-    std::vector<MeshDump> Dumps;
-
-    std::vector<std::vector<float>> DataCaches;
-    void recalculateDataCache(size_t DumpIndex) {
-      if (DumpIndex >= DataCaches.size()) {
-        DataCaches.resize(DumpIndex + 1);
-      }
-      std::vector<float> &DataCache = DataCaches[DumpIndex];
-
-      DataCache.clear();
-      for (auto &Dump : Dumps) {
-        for (auto &[Name, Mesh] : Dump.Meshes) {
-          DataCache.resize(DataCache.size() + Mesh.Data.size());
-          std::copy(Mesh.Data.begin(), Mesh.Data.end(),
-                    DataCache.end() - Mesh.Data.size());
-        }
-      }
-    }
-  } Meshes;
+  struct MeshTypes {
+    std::map<std::string, MeshDump> Dumps;
+  } MeshTypes;
 
 protected:
 protected:
@@ -221,7 +215,7 @@ protected:
                           vk::MemoryPropertyFlags Properties);
   void allocateBufferMemory(MeshDump &Mesh);
 
-  void prepareScene(vk::CommandBuffer CommandBuffer, size_t DumpIndex);
+  void prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &DumpIndex);
 };
 
 } // namespace vk_core
