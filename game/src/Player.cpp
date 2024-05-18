@@ -14,23 +14,23 @@ Player::Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
   LightSrc = Src;
 
   RunAnim = std::make_unique<Animation>(std::vector<std::string> {
-      "../../game/resources/CartoonDetective/Run/Run_01.png",
-      "../../game/resources/CartoonDetective/Run/Run_02.png",
-      "../../game/resources/CartoonDetective/Run/Run_03.png",
-      "../../game/resources/CartoonDetective/Run/Run_04.png",
-      "../../game/resources/CartoonDetective/Run/Run_05.png",
-      "../../game/resources/CartoonDetective/Run/Run_06.png",
-      "../../game/resources/CartoonDetective/Run/Run_07.png",
-      "../../game/resources/CartoonDetective/Run/Run_08.png",
+      "../../game/resources/CartoonDetective/Run/output-0.png",
+      "../../game/resources/CartoonDetective/Run/output-1.png",
+      "../../game/resources/CartoonDetective/Run/output-2.png",
+      "../../game/resources/CartoonDetective/Run/output-3.png",
+      "../../game/resources/CartoonDetective/Run/output-4.png",
+      "../../game/resources/CartoonDetective/Run/output-5.png",
+      "../../game/resources/CartoonDetective/Run/output-6.png",
+      "../../game/resources/CartoonDetective/Run/output-7.png",
   });
   RunAnim->setLoop(true);
   RunAnim->setFrameTime(0.1);
 
   IdleAnim = std::make_unique<Animation>(std::vector<std::string> {
-      "../../game/resources/CartoonDetective/Idle/Idle_01.png",
-      "../../game/resources/CartoonDetective/Idle/Idle_02.png",
-      "../../game/resources/CartoonDetective/Idle/Idle_03.png",
-      "../../game/resources/CartoonDetective/Idle/Idle_04.png",
+      "../../game/resources/CartoonDetective/Idle/output-0.png",
+      "../../game/resources/CartoonDetective/Idle/output-1.png",
+      "../../game/resources/CartoonDetective/Idle/output-2.png",
+      "../../game/resources/CartoonDetective/Idle/output-3.png",
   });
   IdleAnim->setLoop(true);
   IdleAnim->setFrameTime(0.2);
