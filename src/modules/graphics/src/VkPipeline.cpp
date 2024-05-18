@@ -1105,6 +1105,35 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer, vk::DeviceSize Size,
+               vk::Queue Queue, vk::CommandBuffer CommandBuffer) {
+  CommandBuffer.reset();
+
+  vk::CommandBufferBeginInfo BeginInfo{
+      .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
+  };
+  CommandBuffer.begin(BeginInfo);
+
+  vk::BufferCopy CopyRegion{
+      .srcOffset = 0,
+      .dstOffset = 0,
+      .size = Size,
+  };
+  CommandBuffer.copyBuffer(SrcBuffer, DstBuffer, CopyRegion);
+  CommandBuffer.end();
+
+  vk::SubmitInfo SubmitInfo{
+      .commandBufferCount = 1,
+      .pCommandBuffers = &CommandBuffer,
+  };
+  const auto &Discard = Queue.submit(1, &SubmitInfo, nullptr);
+  Queue.waitIdle();
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
 uint32_t vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     findMemoryType(uint32_t TypeFilter, vk::MemoryPropertyFlags Properties) {
   vk::PhysicalDeviceMemoryProperties MemoryProperties =
@@ -1281,7 +1310,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     addObjectData(
         const std::map<std::string, VkPipeline::PublicObjectData> &Dump,
         const std::string &DumpName) {
-  MeshDump NewMeshDump{
+  MeshDump StagingDump{
       .Buffer = nullptr,
       .Memory = nullptr,
       .Meshes = {},
@@ -1310,27 +1339,51 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
     Offset += NewMeshData.Size;
 
-    NewMeshDump.Meshes.emplace(Name, std::move(NewMeshData));
+    StagingDump.Meshes.emplace(Name, std::move(NewMeshData));
   }
 
-  // Add Dump and calculate result buffer for buffer creation
-  MeshTypes.Dumps.emplace(DumpName, std::move(NewMeshDump));
-  MeshTypes.Dumps[DumpName].recalculateDataCache();
+  StagingDump.recalculateDataCache();
 
   BufferInput BufferInput{
-      .Size = MeshTypes.Dumps[DumpName].DataCache.size() * sizeof(float),
+      .Size = StagingDump.DataCache.size() * sizeof(float),
       .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
+      .Properties = vk::MemoryPropertyFlagBits::eHostVisible |
+                    vk::MemoryPropertyFlagBits::eHostCoherent,
   };
 
-  createBuffer(BufferInput, MeshTypes.Dumps[DumpName]);
+  MeshDump NewMeshDump{
+      .Buffer = nullptr,
+      .Memory = nullptr,
+      .Meshes = {},
+  };
+
+  createBuffer(BufferInput, StagingDump);
 
   void *MemoryLocation =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-          .mapMemory(MeshTypes.Dumps[DumpName].Memory, 0, BufferInput.Size);
-  std::memcpy(MemoryLocation, MeshTypes.Dumps[DumpName].DataCache.data(),
-              BufferInput.Size);
+          .mapMemory(StagingDump.Memory, 0, BufferInput.Size);
+  std::memcpy(MemoryLocation, StagingDump.DataCache.data(), BufferInput.Size);
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .unmapMemory(MeshTypes.Dumps[DumpName].Memory);
+      .unmapMemory(StagingDump.Memory);
+
+  NewMeshDump.Meshes = std::move(StagingDump.Meshes);
+
+  BufferInput.Usage = vk::BufferUsageFlagBits::eTransferDst |
+                      vk::BufferUsageFlagBits::eVertexBuffer;
+  BufferInput.Properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
+  createBuffer(BufferInput, NewMeshDump);
+
+  copyBuffer(StagingDump.Buffer, NewMeshDump.Buffer,
+             BufferInput.Size, *this->NativeComponents.GraphicsQueue,
+             this->MainCommandBuffer);
+
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroyBuffer(StagingDump.Buffer);
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .freeMemory(StagingDump.Memory);
+
+  // Add Dump and calculate result buffer for buffer creation
+  MeshTypes.Dumps.emplace(DumpName, std::move(NewMeshDump));
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,

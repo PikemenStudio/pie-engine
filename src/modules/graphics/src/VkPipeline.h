@@ -211,6 +211,9 @@ protected:
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
 
   void createBuffer(BufferInput Input, MeshDump &Buffer);
+  void copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer,
+                  vk::DeviceSize Size, vk::Queue Queue,
+                  vk::CommandBuffer CommandBuffer);
   uint32_t findMemoryType(uint32_t TypeFilter,
                           vk::MemoryPropertyFlags Properties);
   void allocateBufferMemory(MeshDump &Mesh);
