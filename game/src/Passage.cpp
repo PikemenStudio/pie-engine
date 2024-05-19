@@ -7,17 +7,23 @@
 
 #include "utils.h"
 
-Passage::Passage(const Tunnel* T1, const Tunnel* T2, float X)
+Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X)
+  : Tunnel1(T1), Tunnel2(T1), CurrTunnel(Current), XCoord(X)
 {
-  Tunnel1 = T1;
-  Tunnel2 = T2;
-  XCoord = X;
-
   Tex.loadFromFile("../../game/resources/cave_entrance_2.png");
-//  Tex.loadFromFile("../../game/resources/entrance.png");
 
   Height = static_cast<float>(Tex.getSize().y) / Tex.getSize().x * PassageWidth;
-  YCoord = -0.5; // should be computed
+
+  computeYCoord();
+}
+
+void Passage::computeYCoord()
+{
+  // PassageWidth
+  float LeftBottomYCoord = CurrTunnel->getFloorYCoord(XCoord - PassageWidth / 2);
+  float RightBottomYCoord = CurrTunnel->getFloorYCoord(XCoord + PassageWidth / 2);
+
+  YCoord = std::min(LeftBottomYCoord, RightBottomYCoord) + Height / 2;
 }
 
 void Passage::draw(sf::RenderTarget &Win, const WorldWindow &WorldWindowObj)

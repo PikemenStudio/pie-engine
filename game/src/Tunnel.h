@@ -29,6 +29,8 @@ public:
   float getStartX() const { return StartX; }
   float getEndX() const { return StartX + (WorldCoordsYFloor.size() - 1) * StepX; }
 
+  float getFloorYCoord(float XCoord) const;
+
 //  float getStepX() const { return StepX; }
 //  const std::vector<float>& getFloorCoords() const { return WorldCoordsYFloor; }
 //  const std::vector<float>& getCeilingCoords() const { return WorldCoordsYCeiling; }

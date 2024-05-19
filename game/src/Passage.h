@@ -12,17 +12,19 @@ class Tunnel;
 class Passage : public Drawable
 {
 public:
-  Passage(const Tunnel* T1, const Tunnel* T2, float X);
+  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X);
 
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
 private:
-  const Tunnel* Tunnel1, * Tunnel2;
+  void computeYCoord();
+
+  const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
   float XCoord;
   float YCoord;
   float Height;
 
-  static constexpr float PassageWidth = 0.4f;
+  static constexpr float PassageWidth = 0.45f;
   static constexpr float ScaleFactor = 0.5f;
 
   sf::Texture Tex;

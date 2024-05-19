@@ -80,6 +80,18 @@ Tunnel::Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHei
 {
 }
 
+float Tunnel::getFloorYCoord(float XCoord) const
+{
+  XCoord = std::clamp(XCoord, getStartX(), getEndX());
+  int I = static_cast<int>((XCoord - getStartX()) / StepX);
+
+  if (XCoord >= getEndX())
+    return WorldCoordsYFloor[I];
+
+  return WorldCoordsYFloor[I] +
+         (WorldCoordsYFloor[I + 1] - WorldCoordsYFloor[I]) * (XCoord - (StartX + I * StepX));
+}
+
 bool Tunnel::isCollision(const SolidObject* Other) const
 {
   if (dynamic_cast<const Tunnel*>(Other))
