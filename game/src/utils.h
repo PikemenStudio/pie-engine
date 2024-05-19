@@ -13,8 +13,8 @@
 
 class WorldWindow;
 
-constexpr int ScreenWidth = 1366;
-constexpr int ScreenHeight = 768;
+constexpr int ScreenWidth = 1920;
+constexpr int ScreenHeight = 1080;
 constexpr int HalfScreenWidth = ScreenWidth / 2;
 constexpr int HalfScreenHeight = ScreenHeight / 2;
 

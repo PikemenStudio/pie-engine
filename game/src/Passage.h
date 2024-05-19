@@ -24,7 +24,7 @@ private:
   float YCoord;
   float Height;
 
-  static constexpr float PassageWidth = 0.45f;
+  static constexpr float PassageWidth = 0.55f;
   static constexpr float ScaleFactor = 0.5f;
 
   sf::Texture Tex;

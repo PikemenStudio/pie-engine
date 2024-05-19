@@ -21,8 +21,8 @@ Game::Game()
 {
   // objects for rendering
   Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
-                                              Title);//,
-//                                              sf::Style::Fullscreen);
+                                              Title,
+                                              sf::Style::Fullscreen);
   Window->setFramerateLimit(100);
   RenderTex = std::make_unique<sf::RenderTexture>();
   RenderTex->create(ScreenWidth, ScreenHeight);
