@@ -11,10 +11,10 @@
 
 #include <iostream>
 
-Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, DimmingTransition* Transition, float X)
+Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X)
   : Tunnel1(T1), Tunnel2(T1), CurrTunnel(Current), XCoord(X)
 {
-  this->Transition = Transition;
+//  this->Transition = Transition;
 
   Tex.loadFromFile("../../game/resources/cave_entrance_2.png");
 
@@ -36,7 +36,7 @@ bool Passage::isInInteractZone(const Player* Pl)
 
 void Passage::runInteraction()
 {
-  if (!Transition->isPlaying())
+  if (Transition && !Transition->isPlaying())
     Transition->play();
 }
 

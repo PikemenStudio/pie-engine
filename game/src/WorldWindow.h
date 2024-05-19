@@ -14,6 +14,8 @@ public:
 
   void updateByPlayerPos(sf::Vector2f Pos);
 
+  void setSceneBorders(float Left, float Right) { SceneBorderLeft = Left; SceneBorderRight = Right; }
+
   sf::Vector2f getCenter() const { return Center; }
   sf::Vector2f getSize() const { return Size; }
 

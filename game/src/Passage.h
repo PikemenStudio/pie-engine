@@ -14,7 +14,15 @@ class DimmingTransition;
 class Passage : public Drawable, public Interactable
 {
 public:
-  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, DimmingTransition* Transition, float X);
+  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X);
+
+  void setTransition(DimmingTransition* T)
+  {
+    this->Transition = T;
+  }
+
+  const Tunnel* getCurrTunnel() const { return CurrTunnel; }
+  void setCurrTunnel(const Tunnel* T) { CurrTunnel = T; }
 
   bool isInInteractZone(const Player* Pl) override;
   void runInteraction() override;
@@ -24,7 +32,7 @@ private:
   void computeYCoord();
 
   const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
-  DimmingTransition* Transition;
+  DimmingTransition* Transition = nullptr;
   float XCoord;
   float YCoord;
   float Height;

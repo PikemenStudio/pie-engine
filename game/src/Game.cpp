@@ -71,13 +71,13 @@ void Game::initGameObjects()
       sf::Vector2f(0, 0), PlSize,
       Lantern.get(), Tunnels[0].get());
 
-//  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
-  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [](){
-    std::cout << "hello world!\n";
-  });
   Passages.push_back(std::make_unique<Passage>(
-      Tunnels[0].get(), Tunnels[1].get(), PlayerObj->getCurrTunnel(),
-      Transition.get(), 2.0));
+      Tunnels[0].get(), Tunnels[1].get(), PlayerObj->getCurrTunnel(), 2.0));
+  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
+    transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
+  });
+  Passages.back()->setTransition(Transition.get());
+
 //  Passages.push_back(std::make_unique<Passage>(
 //      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), -1.0));
 
@@ -105,6 +105,15 @@ void Game::positionPlayer()
                    static_cast<float>(rand() % 1000) / 1000 * WorldWindowObj->getSize().x / 2;
     PlayerObj->setPosition({XCoord, -0.25});
   } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
+}
+
+void Game::transferToTunnel(Tunnel* From, Tunnel* To, Passage* Pass)
+{
+  Pass->setCurrTunnel(To);
+  From->setVisible(false);
+  To->setVisible(true);
+  WorldWindowObj->setSceneBorders(To->getStartX(), To->getEndX());
+  PlayerObj->moveToTunnel(To);
 }
 
 void Game::handleUserInput()

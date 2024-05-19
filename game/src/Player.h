@@ -31,6 +31,8 @@ public:
   sf::Vector2f getPosition() const { return Center; }
   sf::Vector2f getSize() const { return Size; }
 
+  void moveToTunnel(Tunnel* To);
+
   Tunnel* getCurrTunnel() const { return CurrTunnel; }
 
   void setPosition(sf::Vector2f C)

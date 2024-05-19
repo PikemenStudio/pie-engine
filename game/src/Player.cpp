@@ -115,6 +115,12 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
   move(Objects, FrameDrawingTimeS);
 }
 
+void Player::moveToTunnel(Tunnel* To)
+{
+  CurrTunnel = To;
+  setPosition({ Center.x, To->getFloorYCoord(Center.x) + Size.y / 2 });
+}
+
 void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
 {
   auto OldPos = Center;

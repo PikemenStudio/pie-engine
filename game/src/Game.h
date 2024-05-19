@@ -37,6 +37,8 @@ private:
 
   void positionPlayer();
 
+  void transferToTunnel(Tunnel* From, Tunnel* To, Passage* Pass);
+
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
   void renderScene();
