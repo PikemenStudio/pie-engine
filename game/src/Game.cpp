@@ -60,12 +60,13 @@ void Game::initGameObjects()
   Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
-  PlayerObj = std::make_unique<Player>(
-      sf::Vector2f(0, 0),
-      sf::Vector2f(0.05f, 0.3f),
-      Lantern.get());
+  const sf::Vector2f PlSize = {0.05f, 0.3f};
   TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
-                                       PlayerObj->getSize().x, PlayerObj->getSize().y);
+                                       PlSize.x, PlSize.y);
+  PlayerObj = std::make_unique<Player>(
+      sf::Vector2f(0, 0), PlSize,
+      Lantern.get(), TunnelObj.get());
+
 //  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
   Passages.push_back(std::make_unique<Passage>(
       TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), 2.0));
@@ -83,6 +84,9 @@ void Game::initGameObjects()
 
   SolidObjects.push_back(PlayerObj.get());
   SolidObjects.push_back(TunnelObj.get());
+
+  for (const auto& P : Passages)
+    Interactables.push_back(P.get());
 }
 
 void Game::positionPlayer()
@@ -111,6 +115,11 @@ void Game::handleUserInput()
         // Interact
         if (!Transition->isPlaying())
           Transition->play();
+        for (auto& Inter : Interactables)
+        {
+          if (Inter->isInInteractZone(PlayerObj.get()))
+            Inter->runInteraction();
+        }
       }
       else
         Key2IsPressed[Event.key.code] = true;

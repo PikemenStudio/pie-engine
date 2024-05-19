@@ -20,6 +20,7 @@ class Player;
 class SolidObject;
 class Passage;
 class Drawable;
+class Interactable;
 class DimmingTransition;
 
 class Game
@@ -55,6 +56,7 @@ private:
   std::unique_ptr<DimmingTransition> Transition;
 
   std::vector<SolidObject*> SolidObjects;
+  std::vector<Interactable*> Interactables;
   // maybe TODO
 //  std::vector<Drawable*> Drawables;
 

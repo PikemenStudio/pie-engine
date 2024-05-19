@@ -7,8 +7,9 @@
 
 #include <loguru.hpp>
 
-Player::Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src)
+Player::Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src, Tunnel* CurrTunnel)
 {
+  this->CurrTunnel = CurrTunnel;
   this->Center = Center;
   this->Size = Size;
   LightSrc = Src;

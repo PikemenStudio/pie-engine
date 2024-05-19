@@ -15,10 +15,12 @@
 #include "WorldWindow.h"
 #include "utils.h"
 
+class Tunnel;
+
 class Player : public SolidObject, public Drawable
 {
 public:
-  Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src);
+  Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src, Tunnel* CurrTunnel);
 
   void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
 
@@ -28,6 +30,8 @@ public:
 
   sf::Vector2f getPosition() const { return Center; }
   sf::Vector2f getSize() const { return Size; }
+
+  Tunnel* getCurrTunnel() const { return CurrTunnel; }
 
   void setPosition(sf::Vector2f C)
   {
@@ -70,6 +74,8 @@ private:
   std::unique_ptr<Animation> RunAnim;
   std::unique_ptr<Animation> IdleAnim;
   Animation* CurrAnim = nullptr;
+
+  Tunnel* CurrTunnel;
 
   sf::Sprite Sprite;
 

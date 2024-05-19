@@ -6,14 +6,17 @@
 #define ENGINE_PASSAGE_H
 
 #include "Drawable.h"
+#include "Interactable.h"
 
 class Tunnel;
 
-class Passage : public Drawable
+class Passage : public Drawable, public Interactable
 {
 public:
   Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X);
 
+  bool isInInteractZone(const Player* Pl) override;
+  void runInteraction() override;
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
 private:

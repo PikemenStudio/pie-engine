@@ -3,9 +3,12 @@
 //
 
 #include "Passage.h"
+#include "Player.h"
 #include "Tunnel.h"
 
 #include "utils.h"
+
+#include <iostream>
 
 Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X)
   : Tunnel1(T1), Tunnel2(T1), CurrTunnel(Current), XCoord(X)
@@ -15,6 +18,22 @@ Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, floa
   Height = static_cast<float>(Tex.getSize().y) / Tex.getSize().x * PassageWidth;
 
   computeYCoord();
+}
+
+bool Passage::isInInteractZone(const Player* Pl)
+{
+  Tunnel* PlTunnel = Pl->getCurrTunnel();
+
+  if (PlTunnel != CurrTunnel)
+    return false;
+
+  const auto& PlPos = Pl->getPosition();
+  return PlPos.x < XCoord + PassageWidth/2 && PlPos.x > XCoord - PassageWidth/2;
+}
+
+void Passage::runInteraction()
+{
+  std::cout << "Run interaction\n";
 }
 
 void Passage::computeYCoord()
