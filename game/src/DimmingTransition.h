@@ -18,7 +18,7 @@ public:
   void play()
   {
     Playing = true;
-    Intensity = 1.0f;
+    Intensity = 1;
   }
 
   void update()
@@ -31,13 +31,14 @@ public:
     if (Intensity < 0)
     {
       Intensity = 0;
-      TransitionFunc();
+//      TransitionFunc();
       Delta = -Delta;
     }
     else if (Intensity > 1)
     {
       Intensity = 1;
       Playing = false;
+      Delta = -Delta;
     }
   }
 

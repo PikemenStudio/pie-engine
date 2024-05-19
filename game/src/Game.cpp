@@ -22,8 +22,8 @@ Game::Game()
 {
   // objects for rendering
   Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
-                                              Title,
-                                              sf::Style::Fullscreen);
+                                              Title);
+//                                              sf::Style::Fullscreen);
   Window->setFramerateLimit(100);
   RenderTex = std::make_unique<sf::RenderTexture>();
   RenderTex->create(ScreenWidth, ScreenHeight);
@@ -108,6 +108,11 @@ void Game::handleUserInput()
     {
       if (Event.key.code == sf::Keyboard::Escape)
         Window->close();
+      else if (Event.key.code == sf::Keyboard::E)
+      {
+        // Interact
+        Transition->play();
+      }
       else
         Key2IsPressed[Event.key.code] = true;
     }
@@ -123,6 +128,7 @@ void Game::processLogic(float FrameDrawingTimeMs)
   PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
 
   Lantern->update();
+  Transition->update();
 
   WorldWindowObj->updateByPlayerPos(PlayerObj->getPosition());
 }
