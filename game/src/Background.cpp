@@ -8,7 +8,7 @@
 Background::Background(float ScreenW, float ScreenH) : BackgrRect(sf::Vector2f(ScreenW, ScreenH))
 {
   BackgrRect.setPosition(0, 0);
-  BackgrRect.setFillColor(sf::Color(200, 200, 200));
+  BackgrRect.setFillColor(sf::Color::White);
 //  BackgrRect.setFillColor(sf::Color(100, 100, 100));
 }
 

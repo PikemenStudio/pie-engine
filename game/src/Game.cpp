@@ -68,11 +68,9 @@ void Game::initGameObjects()
                                        PlayerObj->getSize().x, PlayerObj->getSize().y);
 //  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
   Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), 1.0)
-                     );
+      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), 2.0));
   Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), -1.0)
-                     );
+      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), -1.0));
 
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
@@ -111,7 +109,8 @@ void Game::handleUserInput()
       else if (Event.key.code == sf::Keyboard::E)
       {
         // Interact
-        Transition->play();
+        if (!Transition->isPlaying())
+          Transition->play();
       }
       else
         Key2IsPressed[Event.key.code] = true;

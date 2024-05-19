@@ -10,9 +10,14 @@
 class DimmingTransition
 {
 public:
-  DimmingTransition(float& Intens, const std::function<void()>& Func)
+  DimmingTransition(float& Intens, std::function<void()> Func)
   : Intensity(Intens), TransitionFunc(Func)
   {
+  }
+
+  bool isPlaying() const
+  {
+    return Playing;
   }
 
   void play()
@@ -31,7 +36,7 @@ public:
     if (Intensity < 0)
     {
       Intensity = 0;
-//      TransitionFunc();
+      TransitionFunc();
       Delta = -Delta;
     }
     else if (Intensity > 1)
@@ -44,7 +49,7 @@ public:
 
 private:
   float& Intensity;
-  const std::function<void()>& TransitionFunc;
+  std::function<void()> TransitionFunc;
   bool Playing = false;
   float Delta = -0.05f;
 };
