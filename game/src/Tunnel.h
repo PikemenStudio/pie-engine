@@ -16,8 +16,8 @@ class Player;
 
 class Tunnel : public SolidObject {
 public:
-  Tunnel(float StartX, float StepX, int PointsCount);
-  Tunnel(float StartX, float EndX, float StepX);
+  Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight);
+  Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight);
 
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithPlayer(const Player* Pl) const;

@@ -57,28 +57,31 @@ void Game::initGameObjects()
 {
   Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
-  TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f);
+
+  PlayerObj = std::make_unique<Player>(
+      sf::Vector2f(0, 0),
+      sf::Vector2f(0.05f, 0.3f),
+      Lantern.get());
+  TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
+                                       PlayerObj->getSize().x, PlayerObj->getSize().y);
+
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
       TunnelObj->getEndX());
 
-  generatePlayer();
+  positionPlayer();
 
   SolidObjects.push_back(PlayerObj.get());
   SolidObjects.push_back(TunnelObj.get());
 }
 
-void Game::generatePlayer()
+void Game::positionPlayer()
 {
   do
   {
     float XCoord = TunnelObj->getStartX() + WorldWindowObj->getSize().x / 10 +
                    static_cast<float>(rand() % 1000) / 1000 * WorldWindowObj->getSize().x / 2;
-
-    PlayerObj = std::make_unique<Player>(
-        sf::Vector2f(XCoord, 0),
-        sf::Vector2f(0.05f, 0.3f),
-        Lantern.get());
+    PlayerObj->setPosition({XCoord, -0.25});
   } while (PlayerObj->isCollision(TunnelObj.get()));
 }
 

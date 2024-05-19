@@ -17,7 +17,7 @@ static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float Cu
   return (std::clamp(NoiseGen.GetValue(CurrX, 0, 0), -1.0, 1.0) + 1) / 2;
 }
 
-Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
+Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight)
 {
   noise::module::Perlin NoiseGenFloor;
   NoiseGenFloor.SetSeed(time(nullptr));
@@ -29,7 +29,14 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
   float CurrX = StartX;
 
   float FloorTop = -0.5, FloorBottom = -0.95;
-  float CeilingTop = 0.95, CeilingBottom = -0.5;
+//  float CeilingTop = 0.95, CeilingBottom = -0.5;
+  float CeilingTop = 0.5, CeilingBottom = -0.5;
+
+  // Some reserve
+//  PlWidth *= 1.1;
+//  PlHeight *= 1.1;
+//  float PlDiagSquare = PlWidth * PlWidth + PlHeight * PlHeight;
+  float MinHeight = PlHeight * 1.5;
 
   while (PointsCount--)
   {
@@ -39,14 +46,37 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount)
 
     NoiseVal = getNoiseValFrom0To1(NoiseGenCeiling, CurrX);
     float CeilY = CeilingBottom + NoiseVal * (CeilingTop - CeilingBottom);
+
+    // the player should always be able to walk through the tunnel
+//    if (!WorldCoordsYCeiling.empty())
+//    {
+//      float& FloorYPrev = WorldCoordsYFloor.back();
+//      float& CeilYPrev = WorldCoordsYCeiling.back();
+//      float PrevX = CurrX - StepX;
+//
+//      float Diag1Square = (CeilY - FloorYPrev) * (CeilY - FloorYPrev) +
+//                          (CurrX - PrevX) * (CurrX - PrevX);
+//      float Diag2Square = (CeilYPrev - FloorY) * (CeilYPrev - FloorY) +
+//                          (CurrX - PrevX) * (CurrX - PrevX);
+//
+//      // Raise y coordinate
+//      if (Diag1Square < PlDiagSquare)
+//        CeilY = FloorYPrev + PlHeight;
+//      if (Diag2Square < PlDiagSquare)
+//        CeilYPrev = FloorY + PlHeight;
+//    }
+
+    if (CeilY - FloorY < MinHeight)
+      CeilY = FloorY + MinHeight;
+
     WorldCoordsYCeiling.push_back(CeilY);
 
     CurrX += StepX;
   }
 }
 
-Tunnel::Tunnel(float StartX, float EndX, float StepX)
-    : Tunnel(StartX, StepX, static_cast<int>((EndX - StartX) / StepX) + 1)
+Tunnel::Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight)
+    : Tunnel(StartX, StepX, static_cast<int>((EndX - StartX) / StepX) + 1, PlWidth, PlHeight)
 {
 }
 

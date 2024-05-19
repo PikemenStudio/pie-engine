@@ -31,7 +31,7 @@ private:
   void initKeyboard();
   void initGameObjects();
 
-  void generatePlayer();
+  void positionPlayer();
 
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
@@ -51,8 +51,9 @@ private:
 
   std::vector<SolidObject*> SolidObjects;
 
-  const std::string Title = "Game";
   std::map<sf::Keyboard::Key, bool> Key2IsPressed;
+
+  const std::string Title = "Game";
 };
 
 #endif // ENGINE_GAME_H

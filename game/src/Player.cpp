@@ -87,8 +87,8 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
   DxDy.x = 0;
-  if (Keyboard.at(KeyCode::Left))  DxDy.x -= 0.2;
-  if (Keyboard.at(KeyCode::Right)) DxDy.x += 0.2;
+  if (Keyboard.at(KeyCode::Left))  DxDy.x -= 0.6; // slow to 0.2
+  if (Keyboard.at(KeyCode::Right)) DxDy.x += 0.6;
 
   if (Keyboard.at(KeyCode::Up) && OnGround)
   {
