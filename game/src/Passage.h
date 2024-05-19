@@ -19,6 +19,9 @@ public:
 private:
   const Tunnel* Tunnel1, * Tunnel2;
   float XCoord;
+
+  sf::Texture Tex;
+  sf::Sprite Sprite;
 };
 
 #endif // ENGINE_PASSAGE_H
