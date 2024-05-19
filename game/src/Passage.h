@@ -9,11 +9,12 @@
 #include "Interactable.h"
 
 class Tunnel;
+class DimmingTransition;
 
 class Passage : public Drawable, public Interactable
 {
 public:
-  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X);
+  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, DimmingTransition* Transition, float X);
 
   bool isInInteractZone(const Player* Pl) override;
   void runInteraction() override;
@@ -23,6 +24,7 @@ private:
   void computeYCoord();
 
   const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
+  DimmingTransition* Transition;
   float XCoord;
   float YCoord;
   float Height;

@@ -3,6 +3,7 @@
 //
 
 #include "Passage.h"
+#include "DimmingTransition.h"
 #include "Player.h"
 #include "Tunnel.h"
 
@@ -10,9 +11,11 @@
 
 #include <iostream>
 
-Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X)
+Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, DimmingTransition* Transition, float X)
   : Tunnel1(T1), Tunnel2(T1), CurrTunnel(Current), XCoord(X)
 {
+  this->Transition = Transition;
+
   Tex.loadFromFile("../../game/resources/cave_entrance_2.png");
 
   Height = static_cast<float>(Tex.getSize().y) / Tex.getSize().x * PassageWidth;
@@ -33,7 +36,8 @@ bool Passage::isInInteractZone(const Player* Pl)
 
 void Passage::runInteraction()
 {
-  std::cout << "Run interaction\n";
+  if (!Transition->isPlaying())
+    Transition->play();
 }
 
 void Passage::computeYCoord()

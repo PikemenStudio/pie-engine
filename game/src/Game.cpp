@@ -68,17 +68,17 @@ void Game::initGameObjects()
       Lantern.get(), TunnelObj.get());
 
 //  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
+  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [](){
+    std::cout << "hello world!\n";
+  });
   Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), 2.0));
+      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), 2.0));
   Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), -1.0));
+      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), -1.0));
 
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
       TunnelObj->getEndX());
-  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [](){
-    std::cout << "hello world!\n";
-  });
 
   positionPlayer();
 
@@ -113,8 +113,6 @@ void Game::handleUserInput()
       else if (Event.key.code == sf::Keyboard::E)
       {
         // Interact
-        if (!Transition->isPlaying())
-          Transition->play();
         for (auto& Inter : Interactables)
         {
           if (Inter->isInInteractZone(PlayerObj.get()))
