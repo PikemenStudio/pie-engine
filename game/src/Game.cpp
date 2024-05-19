@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Background.h"
 #include "LightSource.h"
+#include "Passage.h"
 #include "Player.h"
 #include "Tunnel.h"
 #include "WorldWindow.h"
@@ -64,6 +65,9 @@ void Game::initGameObjects()
       Lantern.get());
   TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
                                        PlayerObj->getSize().x, PlayerObj->getSize().y);
+  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
+  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 1.0));
+  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), -1.0));
 
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
@@ -120,6 +124,10 @@ void Game::renderScene()
   Window->clear(sf::Color::Black);
 
   Backgr->draw(*RenderTex, *WorldWindowObj);
+
+  for (auto& P : Passages)
+    P->draw(*RenderTex, *WorldWindowObj);
+
   PlayerObj->draw(*RenderTex, *WorldWindowObj);
   TunnelObj->draw(*RenderTex, *WorldWindowObj);
 

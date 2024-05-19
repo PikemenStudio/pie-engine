@@ -18,6 +18,8 @@ class Tunnel;
 class WorldWindow;
 class Player;
 class SolidObject;
+class Passage;
+class Drawable;
 
 class Game
 {
@@ -44,12 +46,15 @@ private:
 
   // game objects
   std::unique_ptr<Tunnel> TunnelObj;
+  std::vector<std::unique_ptr<Passage>> Passages;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
 
   std::vector<SolidObject*> SolidObjects;
+  // maybe TODO
+//  std::vector<Drawable*> Drawables;
 
   std::map<sf::Keyboard::Key, bool> Key2IsPressed;
 

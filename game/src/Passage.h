@@ -14,7 +14,7 @@ class Passage : public Drawable
 public:
   Passage(const Tunnel* T1, const Tunnel* T2, float X);
 
-//  void draw();
+  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
 private:
   const Tunnel* Tunnel1, * Tunnel2;
