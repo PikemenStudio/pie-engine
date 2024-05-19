@@ -9,12 +9,14 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "Drawable.h"
 #include "SolidObject.h"
 
 class WorldWindow;
 class Player;
 
-class Tunnel : public SolidObject {
+class Tunnel : public SolidObject, public Drawable
+{
 public:
   Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight);
   Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight);
@@ -22,7 +24,7 @@ public:
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithPlayer(const Player* Pl) const;
 
-  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) const;
+  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
   float getStartX() const { return StartX; }
   float getEndX() const { return StartX + (WorldCoordsYFloor.size() - 1) * StepX; }

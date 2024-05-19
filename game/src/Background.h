@@ -8,14 +8,16 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+#include "Drawable.h"
+
 class WorldWindow;
 
-class Background
+class Background : public Drawable
 {
 public:
   Background(float ScreenW, float ScreenH);
 
-  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj);
+  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
 private:
   sf::RectangleShape BackgrRect;

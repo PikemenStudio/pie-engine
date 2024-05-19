@@ -8,13 +8,14 @@
 #include <SFML/Graphics.hpp>
 
 #include "Animation.h"
+#include "Drawable.h"
 #include "Keyboard.h"
 #include "LightSource.h"
 #include "SolidObject.h"
 #include "WorldWindow.h"
 #include "utils.h"
 
-class Player : public SolidObject
+class Player : public SolidObject, public Drawable
 {
 public:
   Player(sf::Vector2f Center, sf::Vector2f Size, LightSource* Src);
@@ -23,7 +24,7 @@ public:
 
   bool isCollision(const SolidObject* Other) const override;
 
-  void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj);
+  void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) override;
 
   sf::Vector2f getPosition() const { return Center; }
   sf::Vector2f getSize() const { return Size; }

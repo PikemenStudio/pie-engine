@@ -181,7 +181,7 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
   return isPolylinesIntersection(PlPoly, FloorPoly);
 }
 
-void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) const
+void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj)
 {
   drawTunnelPart(Win, WorldWindowObj, WorldCoordsYFloor, true);
   drawTunnelPart(Win, WorldWindowObj, WorldCoordsYCeiling, false);

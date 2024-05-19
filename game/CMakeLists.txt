@@ -30,7 +30,10 @@ add_executable(game_exe
         src/SolidObject.cpp
         src/Keyboard.h
         src/Animation.cpp
-        src/Animation.h)
+        src/Animation.h
+        src/Passage.cpp
+        src/Passage.h
+        src/Drawable.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
