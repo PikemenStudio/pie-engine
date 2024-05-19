@@ -19,6 +19,11 @@ public:
 private:
   const Tunnel* Tunnel1, * Tunnel2;
   float XCoord;
+  float YCoord;
+  float Height;
+
+  static constexpr float PassageWidth = 0.4f;
+  static constexpr float ScaleFactor = 0.5f;
 
   sf::Texture Tex;
   sf::Sprite Sprite;
