@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Background.h"
+#include "DimmingTransition.h"
 #include "LightSource.h"
 #include "Passage.h"
 #include "Player.h"
@@ -76,6 +77,9 @@ void Game::initGameObjects()
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
       TunnelObj->getEndX());
+  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [](){
+    std::cout << "hello world!\n";
+  });
 
   positionPlayer();
 
@@ -139,6 +143,7 @@ void Game::renderScene()
   PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());
   PostprocessingShader->setUniform("world_light_pos", Lantern->getPosition());
   PostprocessingShader->setUniform("light_intensity", Lantern->getIntensity());
+  PostprocessingShader->setUniform("backgr_intensity", BackgrIntensity);
 
   Window->draw(*ScreenSprite, PostprocessingShader.get());
   Window->display();

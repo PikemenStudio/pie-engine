@@ -6,6 +6,8 @@ uniform vec2 world_window_dimensions;
 uniform vec2 world_light_pos;
 uniform float light_intensity;
 
+uniform float backgr_intensity;
+
 void main()
 {
     // lookup the pixel in the texture
@@ -21,5 +23,5 @@ void main()
     float intensity = clamp(light_intensity / (delta_len_squared + 0.5), 0.0, 1.0);
 
     // multiply it by the color
-    gl_FragColor = gl_Color * pixel * intensity;
+    gl_FragColor = gl_Color * pixel * intensity * backgr_intensity;
 }

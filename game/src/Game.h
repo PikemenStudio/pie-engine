@@ -20,6 +20,7 @@ class Player;
 class SolidObject;
 class Passage;
 class Drawable;
+class DimmingTransition;
 
 class Game
 {
@@ -51,12 +52,15 @@ private:
   std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
+  std::unique_ptr<DimmingTransition> Transition;
 
   std::vector<SolidObject*> SolidObjects;
   // maybe TODO
 //  std::vector<Drawable*> Drawables;
 
   std::map<sf::Keyboard::Key, bool> Key2IsPressed;
+
+  float BackgrIntensity = 1.0f;
 
   const std::string Title = "Game";
 };
