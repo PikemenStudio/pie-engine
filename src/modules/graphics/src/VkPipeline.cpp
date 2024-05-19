@@ -28,11 +28,13 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   initWindowSurface();
   createSwapChain();
-  createDescriptorSetLayout({.Count = 1,
-                             .Indexes = {0},
-                             .Types = {vk::DescriptorType::eUniformBuffer},
-                             .Counts = {1},
-                             .Stages = {vk::ShaderStageFlagBits::eVertex}});
+  createDescriptorSetLayout({.Count = 2,
+                             .Indexes = {0, 1},
+                             .Types = {vk::DescriptorType::eUniformBuffer,
+                                       vk::DescriptorType::eStorageBuffer},
+                             .Counts = {1, 1},
+                             .Stages = {vk::ShaderStageFlagBits::eVertex,
+                                        vk::ShaderStageFlagBits::eVertex}});
   createPipeline(
       {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
                            "resources/test.vert",
@@ -561,6 +563,13 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
         .freeMemory(Frame.CameraMemory);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyBuffer(Frame.CameraBuffer);
+
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .unmapMemory(Frame.ModelMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .freeMemory(Frame.ModelMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyBuffer(Frame.ModelBuffer);
   }
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
@@ -632,19 +641,19 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 vk::PipelineLayout
 vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                     SceneManagerImplT>::createPipelineLayout() const {
-  vk::PushConstantRange PushConstantRange{
-      .stageFlags = vk::ShaderStageFlagBits::eVertex,
-      .offset = 0,
-      .size =
-          sizeof(SceneManagerFacadeStructs::ObjectData::TransformationStruct),
-  };
+  //  vk::PushConstantRange PushConstantRange{
+  //      .stageFlags = vk::ShaderStageFlagBits::eVertex,
+  //      .offset = 0,
+  //      .size =
+  //          sizeof(SceneManagerFacadeStructs::ObjectData::TransformationStruct),
+  //  };
 
   vk::PipelineLayoutCreateInfo CreateInfo{
       .flags = vk::PipelineLayoutCreateFlags(),
       .setLayoutCount = 1,
       .pSetLayouts = &this->DescriptorSetLayout,
-      .pushConstantRangeCount = 1,
-      .pPushConstantRanges = &PushConstantRange,
+      .pushConstantRangeCount = 0,
+      .pPushConstantRanges = nullptr,
   };
 
   try {
@@ -796,6 +805,17 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   };
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .updateDescriptorSets(WriteDescriptorSet, nullptr);
+
+  vk::WriteDescriptorSet WriteDescriptorSet1{
+      .dstSet = Frame.DescriptorSet,
+      .dstBinding = 1,
+      .dstArrayElement = 0,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eStorageBuffer,
+      .pBufferInfo = &Frame.ModelBufferDescriptor,
+  };
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .updateDescriptorSets(WriteDescriptorSet1, nullptr);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
@@ -1091,11 +1111,9 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                                           vk::FenceCreateFlagBits::eSignaled};
 
   DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
-      .Count = 1,
-      .Indexes = {0},
-      .Types = {vk::DescriptorType::eUniformBuffer},
-      .Counts = {1},
-      .Stages = {vk::ShaderStageFlagBits::eVertex},
+      .Count = 2,
+      .Types = {vk::DescriptorType::eUniformBuffer,
+                vk::DescriptorType::eStorageBuffer},
   };
   createDescriptorPool(this->SwapChainBundle->Frames.size(),
                        DescriptorSetLayoutInput);
@@ -1110,7 +1128,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                                E.what());
     }
 
-    createCameraBuffer(Frame);
+    createDescriptorBuffer(Frame);
   }
 }
 
@@ -1153,34 +1171,25 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   auto *SceneManager =
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
 
-  // Iterate through dumps
-  for (auto &[DumpName, Dump] : MeshTypes.Dumps) {
-    prepareScene(CommandBuffer, Dump);
+  SceneManager->resetObjectGetter();
+  while (true) {
+    SceneManagerFacadeStructs::OneTypeObjects Objects =
+        SceneManager->getCurrentObjects();
 
-    SceneManager->resetObjectGetter(DumpName);
-    // Iterate through objects in dump
-    while (true) {
-      auto Object = SceneManager->getNextObject();
-      if (Object.has_value() == false) {
-        break;
+    // Current type vector is empty (or not even created)
+    if (Objects.empty()) {
+      if (SceneManager->goToNextDump()) {
+        // Step to next dump
+        Objects = SceneManager->getCurrentObjects();
+        drawObjects(Objects, CommandBuffer);
+        continue;
       }
-      auto ObjectType = Object->Type;
-      switch (ObjectType) {
-      case SceneManagerFacadeStructs::ObjectTypes::TRIANGLE:
-      case SceneManagerFacadeStructs::ObjectTypes::SQUARE: {
-        auto Model = Object->calculateTransformation();
-        CommandBuffer.pushConstants(this->PipelineBundle->Layout,
-                                    vk::ShaderStageFlagBits::eVertex, 0,
-                                    sizeof(Model), &Model);
-
-        const auto &MeshTypeName =
-            SceneManagerFacadeStructs::toString(ObjectType);
-        CommandBuffer.draw(Dump.Meshes[MeshTypeName].Size, 1,
-                           Dump.Meshes[MeshTypeName].Offset, 0);
-        break;
-      }
-      }
+      break;
     }
+
+    // if all ok
+    drawObjects(Objects, CommandBuffer);
+    const auto &Discard = SceneManager->getNextObjects();
   }
 
   CommandBuffer.endRenderPass();
@@ -1191,6 +1200,23 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     throw std::runtime_error(
         std::string("Failed to end recording main command buffer ") + E.what());
   }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
+                vk::CommandBuffer CommandBuffer) {
+  std::string DumpName = Objects[0]->getDumpName();
+  prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
+
+  BaseObject::ObjectTypes Type = Objects[0]->getType();
+  std::string TypeName = BaseObject::toString(Type);
+
+  CommandBuffer.draw(
+      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Size, Objects.size(),
+      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Offset, 0);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
@@ -1485,7 +1511,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   BufferInput BufferInput{
       .Size = StagingDump.DataCache.size() * sizeof(float),
-      .Usage = vk::BufferUsageFlagBits::eVertexBuffer,
+      .Usage = vk::BufferUsageFlagBits::eTransferSrc |
+               vk::BufferUsageFlagBits::eVertexBuffer,
       .Properties = vk::MemoryPropertyFlagBits::eHostVisible |
                     vk::MemoryPropertyFlagBits::eHostCoherent,
   };
@@ -1550,6 +1577,16 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   std::memcpy(Frame.CameraDataWriteLocation, &CameraData,
               sizeof(SceneManagerFacadeStructs::CameraData));
 
+  std::vector<glm::mat4> Transformations =
+      this->NativeComponents.Facades->SceneManager->ImplInstance
+          .getTransformations();
+  for (int I = 0; I < Transformations.size(); ++I) {
+    Frame.ModelTransforms[I] = Transformations[I];
+  }
+
+  std::memcpy(Frame.ModelDataWriteLocation, Frame.ModelTransforms.data(),
+              Transformations.size() * sizeof(glm::mat4));
+
   writeDescriptorSet(Frame);
 }
 
@@ -1557,7 +1594,7 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createCameraBuffer(VkPipeline::SwapChainFrameStruct &Frame) {
+    createDescriptorBuffer(SwapChainFrameStruct &Frame) {
   BufferInput BufferInputInstance{
       .Size = sizeof(SceneManagerFacadeStructs::CameraData),
       .Usage = vk::BufferUsageFlagBits::eUniformBuffer,
@@ -1578,9 +1615,36 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .mapMemory(Frame.CameraMemory, 0, BufferInputInstance.Size);
 
+  BufferInputInstance.Size = 1024 * sizeof(glm::mat4);
+  BufferInputInstance.Usage = vk::BufferUsageFlagBits::eStorageBuffer;
+
+  MeshDump UniformBuffer{
+      .Buffer = nullptr,
+      .Memory = nullptr,
+      .Meshes = {},
+      .DataCache = {},
+  };
+  createBuffer(BufferInputInstance, UniformBuffer);
+
+  Frame.ModelBuffer = UniformBuffer.Buffer;
+  Frame.ModelMemory = UniformBuffer.Memory;
+  Frame.ModelDataWriteLocation =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .mapMemory(Frame.ModelMemory, 0, BufferInputInstance.Size);
+
+  Frame.ModelTransforms.reserve(1024);
+  for (int I = 0; I < 1024; ++I) {
+    Frame.ModelTransforms.push_back(glm::mat4(1.0f));
+  }
+
   Frame.UniformBufferDescriptor.buffer = Frame.CameraBuffer;
   Frame.UniformBufferDescriptor.offset = 0;
-  Frame.UniformBufferDescriptor.range = BufferInputInstance.Size;
+  Frame.UniformBufferDescriptor.range =
+      sizeof(SceneManagerFacadeStructs::CameraData);
+
+  Frame.ModelBufferDescriptor.buffer = Frame.ModelBuffer;
+  Frame.ModelBufferDescriptor.offset = 0;
+  Frame.ModelBufferDescriptor.range = 1024 * sizeof(glm::mat4);
 
   allocateDescriptorSet(Frame);
 }

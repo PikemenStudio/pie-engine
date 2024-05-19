@@ -20,6 +20,8 @@ public:
 
   void moveBy(glm::vec3 Vector) override;
 
+  glm::mat4 calculateTransformation() override;
+
 protected:
   std::array<glm::vec3, 4> Vertexes;
   glm::vec3 Position;

@@ -29,3 +29,8 @@ BaseObject::ObjectTypes Square::getType() {
 std::string Square::getDumpName() { return "TS1"; }
 
 void Square::moveBy(glm::vec3 Vector) { this->Position += Vector; }
+
+glm::mat4 Square::calculateTransformation() {
+  glm::mat4 Result = glm::mat4(1.0f);
+  return Result;
+}

@@ -102,9 +102,9 @@ public:
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
     std::unique_ptr<BaseObject> Object2 = std::unique_ptr<BaseObject>(
         new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
-    SceneManagerInstance->ImplInstance.addObject("Object", std::move(Object));
-    SceneManagerInstance->ImplInstance.addObject("Object1", std::move(Object1));
-    SceneManagerInstance->ImplInstance.addObject("Object2", std::move(Object2));
+    SceneManagerInstance->ImplInstance.addObject(std::move(Object));
+    SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
+    SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{

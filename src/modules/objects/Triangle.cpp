@@ -27,3 +27,8 @@ BaseObject::ObjectTypes Triangle::getType() {
 std::string Triangle::getDumpName() { return "TS"; }
 
 void Triangle::moveBy(glm::vec3 Vector) { this->Position += Vector; }
+
+glm::mat4 Triangle::calculateTransformation() {
+  glm::mat4 Result = glm::mat4(1.0f);
+  return Result;
+}

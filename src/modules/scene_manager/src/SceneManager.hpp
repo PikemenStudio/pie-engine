@@ -14,15 +14,9 @@
 
 class SceneManager {
 public:
-  struct SceneManagerProps {};
+  using OneTypeObjects = std::vector<std::shared_ptr<BaseObject>>;
 
-  struct ObjectData {
-    std::vector<uint8_t> Vertexes;
-    glm::vec3 Position;
-    std::string DumpName;
-    std::string Name;
-    BaseObject::ObjectTypes Type;
-  };
+  struct SceneManagerProps {};
 
   struct CameraData {
     glm::mat4 View;
@@ -32,20 +26,33 @@ public:
 
   SceneManager(SceneManagerProps Props);
 
-  std::string addObject(std::unique_ptr<BaseObject> Object);
-  void addObject(std::string Name, std::unique_ptr<BaseObject> Object);
+  void addObject(std::shared_ptr<BaseObject> Object);
 
-  std::optional<ObjectData> getNextObject();
-  void resetObjectGetter(const std::string &DumpName);
+  bool goToNextDump();
+  OneTypeObjects getNextObjects();
+  OneTypeObjects getCurrentObjects() const;
+  void resetObjectGetter();
 
   CameraData getCamera(glm::vec2 WindowSize);
 
-protected:
-  using ObjectsDumps = std::map<std::string, std::unique_ptr<BaseObject>>;
-  std::map<std::string, ObjectsDumps> Objects;
+  std::vector<glm::mat4> getTransformations() {
+    std::vector<glm::mat4> Result;
+    for (auto &[DumpName, MultiTypeObjects] : Objects) {
+      for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+        for (auto &Object : OneTypeObjects) {
+          Result.push_back(Object->calculateTransformation());
+        }
+      }
+    }
+    return Result;
+  }
 
-  std::map<std::string, std::unique_ptr<BaseObject>>::iterator ObjectGetterIt;
-  std::string CurrentDumpName;
+protected:
+  using MultiTypeObjects = std::map<BaseObject::ObjectTypes, OneTypeObjects>;
+  std::map<std::string, MultiTypeObjects> Objects;
+
+  std::map<std::string, MultiTypeObjects>::iterator ObjectGetterIt;
+  MultiTypeObjects::iterator TypeIt;
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_SCENEMANAGER_HPP

@@ -57,6 +57,8 @@ struct SceneManagerFacadeStructs {
     glm::mat4 Projection;
     glm::mat4 ViewProjection;
   };
+
+  using OneTypeObjects = std::vector<std::shared_ptr<BaseObject>>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,13 +90,16 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
         SceneManagerFacadeStructs::SceneManagerProps<Dep> &&);                 \
     ~SceneManager##name##Impl();                                               \
                                                                                \
-    std::string addObject(std::unique_ptr<BaseObject> Object);                 \
-    void addObject(std::string Name, std::unique_ptr<BaseObject> Object);      \
+    void addObject(std::shared_ptr<BaseObject> Object);                        \
                                                                                \
-    std::optional<SceneManagerFacadeStructs::ObjectData> getNextObject();      \
-    void resetObjectGetter(const std::string &DumpName);                       \
+    bool goToNextDump();                                                       \
+    SceneManagerFacadeStructs::OneTypeObjects getNextObjects();                \
+    SceneManagerFacadeStructs::OneTypeObjects getCurrentObjects() const;       \
+    void resetObjectGetter();                                                  \
                                                                                \
     SceneManagerFacadeStructs::CameraData getCamera(glm::vec2 WindowSize);     \
+                                                                               \
+    std::vector<glm::mat4> getTransformations();                               \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

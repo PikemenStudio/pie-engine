@@ -8,40 +8,48 @@
 
 SceneManager::SceneManager(SceneManagerProps Props) {}
 
-std::string SceneManager::addObject(std::unique_ptr<BaseObject> Object) {
-  std::hash<std::unique_ptr<BaseObject>> Hasher;
-  auto Hash = std::to_string(Hasher(Object));
-
-  Objects[Object->getDumpName()][Hash] = std::move(Object);
-
-  return Hash;
+void SceneManager::addObject(std::shared_ptr<BaseObject> Object) {
+  Objects[Object->getDumpName()][Object->getType()].push_back(
+      std::move(Object));
 }
 
-void SceneManager::addObject(std::string Name,
-                             std::unique_ptr<BaseObject> Object) {
-  Objects[Object->getDumpName()][Name] = std::move(Object);
+bool SceneManager::goToNextDump() {
+  if (Objects.empty() || ObjectGetterIt == Objects.end()) {
+    return false;
+  }
+
+  ObjectGetterIt++;
+  TypeIt = ObjectGetterIt->second.begin();
+  if (ObjectGetterIt == Objects.end()) {
+    return false;
+  }
+  return true;
 }
 
-std::optional<SceneManager::ObjectData> SceneManager::getNextObject() {
-  if (Objects.empty() || ObjectGetterIt == Objects[CurrentDumpName].end()) {
+SceneManager::OneTypeObjects SceneManager::getNextObjects() {
+  if (TypeIt == ObjectGetterIt->second.end()) {
     return {};
   }
 
-  ObjectData Data{
-      .Vertexes = ObjectGetterIt->second->getVertices(),
-      .Position = ObjectGetterIt->second->getPosition(),
-      .DumpName = ObjectGetterIt->second->getDumpName(),
-      .Name = ObjectGetterIt->first,
-      .Type = ObjectGetterIt->second->getType(),
-  };
-
-  ObjectGetterIt++;
-  return {Data};
+  TypeIt++;
+  if (TypeIt == ObjectGetterIt->second.end()) {
+    return {};
+  }
+  OneTypeObjects OneTypeObjectsInstance = TypeIt->second;
+  return OneTypeObjectsInstance;
 }
 
-void SceneManager::resetObjectGetter(const std::string &DumpName) {
-  CurrentDumpName = DumpName;
-  ObjectGetterIt = Objects[DumpName].begin();
+SceneManager::OneTypeObjects SceneManager::getCurrentObjects() const {
+  if (TypeIt == ObjectGetterIt->second.end()) {
+    return {};
+  }
+
+  return TypeIt->second;
+}
+
+void SceneManager::resetObjectGetter() {
+  ObjectGetterIt = Objects.begin();
+  TypeIt = Objects.begin()->second.begin();
 }
 
 SceneManager::CameraData SceneManager::getCamera(glm::vec2 WindowSize) {

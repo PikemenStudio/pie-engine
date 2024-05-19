@@ -19,37 +19,33 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::~SceneManagerBaseImpl() {
 }
 
 template <SceneManagerDependenciesConcept Dep>
-std::string scene_manager_facades::SceneManagerBaseImpl<Dep>::addObject(
-    std::unique_ptr<BaseObject> Object) {
-  return static_cast<SceneManager *>(Data)->addObject(std::move(Object));
-}
-
-template <SceneManagerDependenciesConcept Dep>
 void scene_manager_facades::SceneManagerBaseImpl<Dep>::addObject(
-    std::string Name, std::unique_ptr<BaseObject> Object) {
-  static_cast<SceneManager *>(Data)->addObject(Name, std::move(Object));
+    std::shared_ptr<BaseObject> Object) {
+  static_cast<SceneManager *>(Data)->addObject(std::move(Object));
 }
 
 template <SceneManagerDependenciesConcept Dep>
-std::optional<SceneManagerFacadeStructs::ObjectData>
-scene_manager_facades::SceneManagerBaseImpl<Dep>::getNextObject() {
-  auto LocalObjectData = static_cast<SceneManager *>(Data)->getNextObject();
-  if (LocalObjectData.has_value()) {
-    return {SceneManagerFacadeStructs::ObjectData{
-        .Vertexes = LocalObjectData->Vertexes,
-        .Position = LocalObjectData->Position,
-        .DumpName = LocalObjectData->DumpName,
-        .Name = LocalObjectData->Name,
-        .Type = (SceneManagerFacadeStructs::ObjectTypes)LocalObjectData->Type,
-    }};
-  }
-  return {};
+bool scene_manager_facades::SceneManagerBaseImpl<Dep>::goToNextDump() {
+  return static_cast<SceneManager *>(Data)->goToNextDump();
 }
 
 template <SceneManagerDependenciesConcept Dep>
-void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter(
-    const std::string &DumpName) {
-  static_cast<SceneManager *>(Data)->resetObjectGetter(DumpName);
+SceneManagerFacadeStructs::OneTypeObjects
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getNextObjects() {
+  auto OneTypeObjects = static_cast<SceneManager *>(Data)->getNextObjects();
+  return OneTypeObjects;
+}
+
+template <SceneManagerDependenciesConcept Dep>
+SceneManagerFacadeStructs::OneTypeObjects
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getCurrentObjects() const {
+  auto OneTypeObjects = static_cast<SceneManager *>(Data)->getCurrentObjects();
+  return OneTypeObjects;
+}
+
+template <SceneManagerDependenciesConcept Dep>
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter() {
+  static_cast<SceneManager *>(Data)->resetObjectGetter();
 }
 
 template <SceneManagerDependenciesConcept Dep>
@@ -63,6 +59,12 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::getCamera(
       .Projection = LocalCameraData.Projection,
       .ViewProjection = LocalCameraData.ViewProjection,
   }};
+}
+
+template <SceneManagerDependenciesConcept Dep>
+std::vector<glm::mat4>
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getTransformations() {
+  return static_cast<SceneManager *>(Data)->getTransformations();
 }
 
 template class scene_manager_facades::SceneManagerBaseImpl<

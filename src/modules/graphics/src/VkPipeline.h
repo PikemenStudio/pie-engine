@@ -101,7 +101,12 @@ protected:
     vk::DeviceMemory CameraMemory;
     void *CameraDataWriteLocation;
     vk::DescriptorBufferInfo UniformBufferDescriptor;
+     vk::DescriptorBufferInfo ModelBufferDescriptor;
     vk::DescriptorSet DescriptorSet;
+    std::vector<glm::mat4> ModelTransforms;
+    vk::Buffer ModelBuffer;
+    vk::DeviceMemory ModelMemory;
+    void *ModelDataWriteLocation;
   };
 
   struct SwapChainBundleStruct {
@@ -229,6 +234,8 @@ protected:
   std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions();
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
+  void drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
+                   vk::CommandBuffer CommandBuffer);
 
   void createBuffer(BufferInput Input, MeshDump &Buffer);
   void copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer,
@@ -242,7 +249,7 @@ protected:
   void prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &DumpIndex);
   void prepareFrame(uint32_t ImageIndex);
 
-  void createCameraBuffer(SwapChainFrameStruct &Frame);
+  void createDescriptorBuffer(SwapChainFrameStruct &Frame);
 };
 
 } // namespace vk_core
