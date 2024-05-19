@@ -97,6 +97,11 @@ protected:
     vk::Semaphore ImageAvailableSemaphore = nullptr;
     vk::Semaphore RenderFinishedSemaphore = nullptr;
     vk::Fence InFlightFence = nullptr;
+    vk::Buffer CameraBuffer;
+    vk::DeviceMemory CameraMemory;
+    void *CameraDataWriteLocation;
+    vk::DescriptorBufferInfo UniformBufferDescriptor;
+    vk::DescriptorSet DescriptorSet;
   };
 
   struct SwapChainBundleStruct {
@@ -174,6 +179,17 @@ protected:
     std::map<std::string, MeshDump> Dumps;
   } MeshTypes;
 
+  vk::DescriptorSetLayout DescriptorSetLayout = nullptr;
+  vk::DescriptorPool DescriptorPool = nullptr;
+
+  struct DescriptorSetLayoutInputStruct {
+    int Count;
+    std::vector<int> Indexes;
+    std::vector<vk::DescriptorType> Types;
+    std::vector<int> Counts;
+    std::vector<vk::ShaderStageFlags> Stages;
+  };
+
 protected:
 protected:
   // SwapChain
@@ -195,6 +211,10 @@ protected:
   vk::PipelineLayout createPipelineLayout() const;
   vk::RenderPass createRenderPass() const;
 
+  void createDescriptorSetLayout(DescriptorSetLayoutInputStruct Input);
+  void createDescriptorPool(uint32_t Size,
+                            DescriptorSetLayoutInputStruct &Input);
+  void writeDescriptorSet(SwapChainFrameStruct &Frame);
   void createPipeline(GraphicsPipelineInBundle InBundle);
 
   void createFrameBuffers();
@@ -217,8 +237,12 @@ protected:
   uint32_t findMemoryType(uint32_t TypeFilter,
                           vk::MemoryPropertyFlags Properties);
   void allocateBufferMemory(MeshDump &Mesh);
+  void allocateDescriptorSet(SwapChainFrameStruct &Frame);
 
   void prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &DumpIndex);
+  void prepareFrame(uint32_t ImageIndex);
+
+  void createCameraBuffer(SwapChainFrameStruct &Frame);
 };
 
 } // namespace vk_core

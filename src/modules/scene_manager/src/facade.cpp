@@ -52,5 +52,18 @@ void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter(
   static_cast<SceneManager *>(Data)->resetObjectGetter(DumpName);
 }
 
+template <SceneManagerDependenciesConcept Dep>
+SceneManagerFacadeStructs::CameraData
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getCamera(
+    glm::vec2 WindowSize) {
+  auto LocalCameraData =
+      static_cast<SceneManager *>(Data)->getCamera(WindowSize);
+  return {SceneManagerFacadeStructs::CameraData{
+      .View = LocalCameraData.View,
+      .Projection = LocalCameraData.Projection,
+      .ViewProjection = LocalCameraData.ViewProjection,
+  }};
+}
+
 template class scene_manager_facades::SceneManagerBaseImpl<
     scene_manager_facades::SceneManagerDependencies>;

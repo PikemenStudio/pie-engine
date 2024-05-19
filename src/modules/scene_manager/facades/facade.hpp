@@ -51,6 +51,12 @@ struct SceneManagerFacadeStructs {
       return {.Transformation = Result};
     }
   };
+
+  struct CameraData {
+    glm::mat4 View;
+    glm::mat4 Projection;
+    glm::mat4 ViewProjection;
+  };
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,6 +93,8 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     std::optional<SceneManagerFacadeStructs::ObjectData> getNextObject();      \
     void resetObjectGetter(const std::string &DumpName);                       \
+                                                                               \
+    SceneManagerFacadeStructs::CameraData getCamera(glm::vec2 WindowSize);     \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

@@ -24,6 +24,12 @@ public:
     BaseObject::ObjectTypes Type;
   };
 
+  struct CameraData {
+    glm::mat4 View;
+    glm::mat4 Projection;
+    glm::mat4 ViewProjection;
+  };
+
   SceneManager(SceneManagerProps Props);
 
   std::string addObject(std::unique_ptr<BaseObject> Object);
@@ -31,6 +37,8 @@ public:
 
   std::optional<ObjectData> getNextObject();
   void resetObjectGetter(const std::string &DumpName);
+
+  CameraData getCamera(glm::vec2 WindowSize);
 
 protected:
   using ObjectsDumps = std::map<std::string, std::unique_ptr<BaseObject>>;

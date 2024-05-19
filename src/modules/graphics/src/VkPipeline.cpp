@@ -28,6 +28,11 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   initWindowSurface();
   createSwapChain();
+  createDescriptorSetLayout({.Count = 1,
+                             .Indexes = {0},
+                             .Types = {vk::DescriptorType::eUniformBuffer},
+                             .Counts = {1},
+                             .Stages = {vk::ShaderStageFlagBits::eVertex}});
   createPipeline(
       {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
                            "resources/test.vert",
@@ -64,6 +69,9 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   }
 
   destroySwapChain();
+
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .destroyDescriptorSetLayout(this->DescriptorSetLayout);
 
   static_cast<vk::Instance &>(*NativeComponents.Instance)
       .destroySurfaceKHR(NativeComponents.Surface.value());
@@ -546,10 +554,20 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
         .destroySemaphore(Frame.RenderFinishedSemaphore);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyFence(Frame.InFlightFence);
+
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .unmapMemory(Frame.CameraMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .freeMemory(Frame.CameraMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyBuffer(Frame.CameraBuffer);
   }
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
       .destroySwapchainKHR(SwapChainBundle.value().Swapchain);
+
+  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+      .destroyDescriptorPool(DescriptorPool);
 }
 
 template <>
@@ -623,8 +641,8 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 
   vk::PipelineLayoutCreateInfo CreateInfo{
       .flags = vk::PipelineLayoutCreateFlags(),
-      .setLayoutCount = 0,
-      .pSetLayouts = nullptr,
+      .setLayoutCount = 1,
+      .pSetLayouts = &this->DescriptorSetLayout,
       .pushConstantRangeCount = 1,
       .pPushConstantRanges = &PushConstantRange,
   };
@@ -695,6 +713,89 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
     throw std::runtime_error(std::string("Failed to create render pass ") +
                              E.what());
   }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    createDescriptorSetLayout(DescriptorSetLayoutInputStruct LayoutStruct) {
+  std::vector<vk::DescriptorSetLayoutBinding> Bindings;
+  Bindings.reserve(LayoutStruct.Count);
+
+  for (int I = 0; I < LayoutStruct.Count; ++I) {
+    vk::DescriptorSetLayoutBinding LayoutBinding{
+        .binding = (uint32_t)LayoutStruct.Indexes[I],
+        .descriptorType = LayoutStruct.Types[I],
+        .descriptorCount = (uint32_t)LayoutStruct.Counts[I],
+        .stageFlags = LayoutStruct.Stages[I],
+    };
+    Bindings.push_back(LayoutBinding);
+  }
+
+  vk::DescriptorSetLayoutCreateInfo CreateInfo{
+      .flags = vk::DescriptorSetLayoutCreateFlags(),
+      .bindingCount = (uint32_t)LayoutStruct.Count,
+      .pBindings = Bindings.data(),
+  };
+
+  try {
+    this->DescriptorSetLayout =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createDescriptorSetLayout(CreateInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to create descriptor set layout ") + E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    createDescriptorPool(uint32_t Size,
+                         VkPipeline::DescriptorSetLayoutInputStruct &Input) {
+  std::vector<vk::DescriptorPoolSize> PoolSizes;
+  for (int I = 0; I < Input.Count; ++I) {
+    vk::DescriptorPoolSize PoolSize{
+        .type = Input.Types[I],
+        .descriptorCount = Size,
+    };
+    PoolSizes.push_back(PoolSize);
+  }
+
+  vk::DescriptorPoolCreateInfo PoolInfo{
+      .flags = vk::DescriptorPoolCreateFlags{},
+      .maxSets = Size,
+      .poolSizeCount = (uint32_t)PoolSizes.size(),
+      .pPoolSizes = PoolSizes.data(),
+  };
+
+  try {
+    this->DescriptorPool =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createDescriptorPool(PoolInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to create descriptor pool ") +
+                             E.what());
+  }
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    writeDescriptorSet(SwapChainFrameStruct &Frame) {
+  vk::WriteDescriptorSet WriteDescriptorSet{
+      .dstSet = Frame.DescriptorSet,
+      .dstBinding = 0,
+      .dstArrayElement = 0,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eUniformBuffer,
+      .pBufferInfo = &Frame.UniformBufferDescriptor,
+  };
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .updateDescriptorSets(WriteDescriptorSet, nullptr);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
@@ -989,6 +1090,16 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   vk::FenceCreateInfo CreateInfo{.flags = vk::FenceCreateFlags() |
                                           vk::FenceCreateFlagBits::eSignaled};
 
+  DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
+      .Count = 1,
+      .Indexes = {0},
+      .Types = {vk::DescriptorType::eUniformBuffer},
+      .Counts = {1},
+      .Stages = {vk::ShaderStageFlagBits::eVertex},
+  };
+  createDescriptorPool(this->SwapChainBundle->Frames.size(),
+                       DescriptorSetLayoutInput);
+
   for (auto &Frame : this->SwapChainBundle->Frames) {
     try {
       Frame.InFlightFence =
@@ -998,6 +1109,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       throw std::runtime_error(std::string("Failed to create fence ") +
                                E.what());
     }
+
+    createCameraBuffer(Frame);
   }
 }
 
@@ -1031,6 +1144,9 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   };
 
   CommandBuffer.beginRenderPass(&RenderPassInfo, vk::SubpassContents::eInline);
+  CommandBuffer.bindDescriptorSets(
+      vk::PipelineBindPoint::eGraphics, this->PipelineBundle->Layout, 0,
+      this->SwapChainBundle->Frames[ImageIndex].DescriptorSet, nullptr);
   CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                              this->PipelineBundle->Pipeline);
 
@@ -1187,6 +1303,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       SwapChainBundle->Frames[ImageIndex].CommandBuffer;
   CommandBuffer.reset();
 
+  prepareFrame(ImageIndex);
+
   recordDrawCommands(CommandBuffer, ImageIndex);
 
   vk::Semaphore WaitSemaphores[] = {
@@ -1262,6 +1380,27 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
           .allocateMemory(AllocateInfo);
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .bindBufferMemory(Mesh.Buffer, Mesh.Memory, 0);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    allocateDescriptorSet(VkPipeline::SwapChainFrameStruct &Frame) {
+  vk::DescriptorSetAllocateInfo AllocateInfo{
+      .descriptorPool = this->DescriptorPool,
+      .descriptorSetCount = 1,
+      .pSetLayouts = &this->DescriptorSetLayout,
+  };
+
+  try {
+    Frame.DescriptorSet =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .allocateDescriptorSets(AllocateInfo)[0];
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(std::string("Failed to allocate descriptor set ") +
+                             E.what());
+  }
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
@@ -1373,9 +1512,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   BufferInput.Properties = vk::MemoryPropertyFlagBits::eDeviceLocal;
   createBuffer(BufferInput, NewMeshDump);
 
-  copyBuffer(StagingDump.Buffer, NewMeshDump.Buffer,
-             BufferInput.Size, *this->NativeComponents.GraphicsQueue,
-             this->MainCommandBuffer);
+  copyBuffer(StagingDump.Buffer, NewMeshDump.Buffer, BufferInput.Size,
+             *this->NativeComponents.GraphicsQueue, this->MainCommandBuffer);
 
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .destroyBuffer(StagingDump.Buffer);
@@ -1394,6 +1532,57 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   vk::Buffer Buffers[] = {Dump.Buffer};
   vk::DeviceSize Offsets[] = {0};
   CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+                         SceneManagerImplT>::prepareFrame(uint32_t ImageIndex) {
+  SwapChainFrameStruct &Frame = SwapChainBundle->Frames[ImageIndex];
+  auto [Width, Height] =
+      this->NativeComponents.Facades->Window->ImplInstance.getSize();
+
+  // Get Camera data
+  SceneManagerFacadeStructs::CameraData CameraData =
+      this->NativeComponents.Facades->SceneManager->ImplInstance.getCamera(
+          {Width, Height});
+  std::memcpy(Frame.CameraDataWriteLocation, &CameraData,
+              sizeof(SceneManagerFacadeStructs::CameraData));
+
+  writeDescriptorSet(Frame);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    createCameraBuffer(VkPipeline::SwapChainFrameStruct &Frame) {
+  BufferInput BufferInputInstance{
+      .Size = sizeof(SceneManagerFacadeStructs::CameraData),
+      .Usage = vk::BufferUsageFlagBits::eUniformBuffer,
+      .Properties = vk::MemoryPropertyFlagBits::eHostVisible |
+                    vk::MemoryPropertyFlagBits::eHostCoherent,
+  };
+  MeshDump CameraData{
+      .Buffer = nullptr,
+      .Memory = nullptr,
+      .Meshes = {},
+      .DataCache = {},
+  };
+  createBuffer(BufferInputInstance, CameraData);
+
+  Frame.CameraBuffer = CameraData.Buffer;
+  Frame.CameraMemory = CameraData.Memory;
+  Frame.CameraDataWriteLocation =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .mapMemory(Frame.CameraMemory, 0, BufferInputInstance.Size);
+
+  Frame.UniformBufferDescriptor.buffer = Frame.CameraBuffer;
+  Frame.UniformBufferDescriptor.offset = 0;
+  Frame.UniformBufferDescriptor.range = BufferInputInstance.Size;
+
+  allocateDescriptorSet(Frame);
 }
 
 template class vk_core::VkPipeline<
