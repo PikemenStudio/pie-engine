@@ -5,9 +5,9 @@
 #include "Game.h"
 #include "Background.h"
 #include "LightSource.h"
+#include "Player.h"
 #include "Tunnel.h"
 #include "WorldWindow.h"
-#include "Player.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -61,13 +61,25 @@ void Game::initGameObjects()
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
       TunnelObj->getEndX());
-  PlayerObj = std::make_unique<Player>(
-      sf::Vector2f(0, 0),
-      sf::Vector2f(0.05f, 0.3f),
-      Lantern.get());
+
+  generatePlayer();
 
   SolidObjects.push_back(PlayerObj.get());
   SolidObjects.push_back(TunnelObj.get());
+}
+
+void Game::generatePlayer()
+{
+  do
+  {
+    float XCoord = TunnelObj->getStartX() + WorldWindowObj->getSize().x / 10 +
+                   static_cast<float>(rand() % 1000) / 1000 * WorldWindowObj->getSize().x / 2;
+
+    PlayerObj = std::make_unique<Player>(
+        sf::Vector2f(XCoord, 0),
+        sf::Vector2f(0.05f, 0.3f),
+        Lantern.get());
+  } while (PlayerObj->isCollision(TunnelObj.get()));
 }
 
 void Game::handleUserInput()

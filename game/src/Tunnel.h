@@ -34,8 +34,6 @@ public:
 private:
   void drawTunnelPart(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj,
                       const std::vector<float>& WorldCoordsY, bool IsFloor) const;
-//  void drawFloor(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) const;
-//  void drawCeiling(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) const;
 
   float StartX = 0.0;
   float StepX = 0.1;

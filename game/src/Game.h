@@ -31,6 +31,8 @@ private:
   void initKeyboard();
   void initGameObjects();
 
+  void generatePlayer();
+
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
   void renderScene();
