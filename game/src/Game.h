@@ -47,7 +47,7 @@ private:
   std::unique_ptr<sf::Sprite> ScreenSprite;
 
   // game objects
-  std::unique_ptr<Tunnel> TunnelObj;
+  std::vector<std::unique_ptr<Tunnel>> Tunnels;
   std::vector<std::unique_ptr<Passage>> Passages;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;

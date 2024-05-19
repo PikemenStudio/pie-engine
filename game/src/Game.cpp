@@ -61,29 +61,37 @@ void Game::initGameObjects()
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
   const sf::Vector2f PlSize = {0.05f, 0.3f};
-  TunnelObj = std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
-                                       PlSize.x, PlSize.y);
+  Tunnels.push_back(std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
+                                             PlSize.x, PlSize.y));
+  Tunnels.push_back(std::make_unique<Tunnel>(-4.0f, 4.0f, 0.01f,
+                                             PlSize.x, PlSize.y));
+  Tunnels[1]->setVisible(false);
+
   PlayerObj = std::make_unique<Player>(
       sf::Vector2f(0, 0), PlSize,
-      Lantern.get(), TunnelObj.get());
+      Lantern.get(), Tunnels[0].get());
 
 //  Passages.push_back(std::make_unique<Passage>(TunnelObj.get(), TunnelObj.get(), 0.0));
   Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [](){
     std::cout << "hello world!\n";
   });
   Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), 2.0));
-  Passages.push_back(std::make_unique<Passage>(
-      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), -1.0));
+      Tunnels[0].get(), Tunnels[1].get(), PlayerObj->getCurrTunnel(),
+      Transition.get(), 2.0));
+//  Passages.push_back(std::make_unique<Passage>(
+//      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), -1.0));
 
   WorldWindowObj = std::make_unique<WorldWindow>(
-      sf::Vector2f(0, 0), sf::Vector2f(3, 2), TunnelObj->getStartX(),
-      TunnelObj->getEndX());
+      sf::Vector2f(0, 0), sf::Vector2f(3, 2), Tunnels[0]->getStartX(),
+      Tunnels[0]->getEndX());
 
   positionPlayer();
 
   SolidObjects.push_back(PlayerObj.get());
-  SolidObjects.push_back(TunnelObj.get());
+  for (const auto& T : Tunnels)
+  {
+    SolidObjects.push_back(T.get());
+  }
 
   for (const auto& P : Passages)
     Interactables.push_back(P.get());
@@ -93,10 +101,10 @@ void Game::positionPlayer()
 {
   do
   {
-    float XCoord = TunnelObj->getStartX() + WorldWindowObj->getSize().x / 10 +
+    float XCoord = PlayerObj->getCurrTunnel()->getStartX() + WorldWindowObj->getSize().x / 10 +
                    static_cast<float>(rand() % 1000) / 1000 * WorldWindowObj->getSize().x / 2;
     PlayerObj->setPosition({XCoord, -0.25});
-  } while (PlayerObj->isCollision(TunnelObj.get()));
+  } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
 }
 
 void Game::handleUserInput()
@@ -149,7 +157,7 @@ void Game::renderScene()
     P->draw(*RenderTex, *WorldWindowObj);
 
   PlayerObj->draw(*RenderTex, *WorldWindowObj);
-  TunnelObj->draw(*RenderTex, *WorldWindowObj);
+  PlayerObj->getCurrTunnel()->draw(*RenderTex, *WorldWindowObj);
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
   PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());

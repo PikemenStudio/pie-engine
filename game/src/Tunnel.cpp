@@ -94,6 +94,9 @@ float Tunnel::getFloorYCoord(float XCoord) const
 
 bool Tunnel::isCollision(const SolidObject* Other) const
 {
+  if (!Visible)
+    return false;
+
   if (dynamic_cast<const Tunnel*>(Other))
     return false;
   if (const Player* Pl = dynamic_cast<const Player*>(Other))
@@ -152,6 +155,9 @@ static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
 
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
+  if (!Visible)
+    return false;
+
 //  testLineSegmentsIntersection();
   const auto& PlPos = Pl->getPosition();
   const auto& PlSize = Pl->getSize();
@@ -195,6 +201,9 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 
 void Tunnel::draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj)
 {
+  if (!Visible)
+    return;
+
   drawTunnelPart(Win, WorldWindowObj, WorldCoordsYFloor, true);
   drawTunnelPart(Win, WorldWindowObj, WorldCoordsYCeiling, false);
 }

@@ -24,6 +24,9 @@ public:
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithPlayer(const Player* Pl) const;
 
+  void setVisible(bool V) { Visible = V; }
+  bool isVisible() const { return Visible; }
+
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
   float getStartX() const { return StartX; }
@@ -43,6 +46,8 @@ private:
   float StepX = 0.1;
   std::vector<float> WorldCoordsYFloor;
   std::vector<float> WorldCoordsYCeiling;
+
+  bool Visible = true;
 };
 
 #endif // ENGINE_TUNNEL_H
