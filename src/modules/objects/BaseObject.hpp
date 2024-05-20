@@ -6,6 +6,7 @@
 #define ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_BASEOBJECT_HPP
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include <vector>
 
 class BaseObject {
@@ -38,6 +39,8 @@ public:
   virtual std::string getTextureName() { return TextureName; }
 
   virtual void moveBy(glm::vec3 Vector) = 0;
+  virtual void rotateBy(glm::vec3 Axis, float Angle) = 0;
+  virtual void scaleBy(glm::vec3 Scale) = 0;
 
   virtual glm::mat4 calculateTransformation() = 0;
 

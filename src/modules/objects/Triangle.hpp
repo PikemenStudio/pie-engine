@@ -19,12 +19,16 @@ public:
   std::string getDumpName() override;
 
   void moveBy(glm::vec3 Vector) override;
+  void rotateBy(glm::vec3 Axis, float Angle) override;
+  void scaleBy(glm::vec3 Vector) override;
 
   glm::mat4 calculateTransformation() override;
 
 protected:
   std::array<glm::vec3, 3> Vertexes;
   glm::vec3 Position;
+  glm::mat4 Rotation;
+  glm::vec3 Scale = {1.0f, 123.0f, 12123123.5f};
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_TRIANGLE_HPP

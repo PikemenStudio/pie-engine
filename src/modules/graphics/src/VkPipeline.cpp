@@ -577,13 +577,6 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
       .destroyDescriptorPool(FramePool);
-  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
-      .destroyDescriptorPool(MeshPool);
-
-  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
-      .destroyDescriptorSetLayout(this->FrameSetLayout);
-  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
-      .destroyDescriptorSetLayout(this->MeshSetLayout);
 }
 
 template <>

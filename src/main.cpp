@@ -97,11 +97,13 @@ public:
                 SceneManagerDependencies>{.Dependencies = {}});
     std::unique_ptr<BaseObject> Object = std::unique_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
-    Object->moveBy({0.5, 0.5, 0.5});
+    Object->moveBy({0.0, 0.0, 1.0});
+    Object->rotateBy({0.0f, 0.0f, 1.0f}, 30);
     std::unique_ptr<BaseObject> Object1 = std::unique_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
     std::unique_ptr<BaseObject> Object2 = std::unique_ptr<BaseObject>(
         new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
+
     SceneManagerInstance->ImplInstance.addObject(std::move(Object));
     // SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
     // SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
