@@ -107,8 +107,11 @@ void Game::positionPlayer()
   } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
 }
 
-void Game::transferToTunnel(Tunnel* From, Tunnel* To, Passage* Pass)
+void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 {
+  Tunnel* From = Pass->getCurrTunnel() == T1 ? T1 : T2;
+  Tunnel* To = From == T1 ? T2 : T1;
+
   Pass->setCurrTunnel(To);
   From->setVisible(false);
   To->setVisible(true);

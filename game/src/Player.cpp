@@ -118,7 +118,7 @@ void Player::update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const
 void Player::moveToTunnel(Tunnel* To)
 {
   CurrTunnel = To;
-  setPosition({ Center.x, To->getFloorYCoord(Center.x) + Size.y / 2 });
+  setPosition({ Center.x, To->getFloorYCoord(Center.x) + (Size.y / 2 * 1.2f) });
 }
 
 void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
