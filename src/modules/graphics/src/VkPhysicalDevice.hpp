@@ -126,6 +126,8 @@ public:
                                          SceneManagerImplT>::PublicObjectData>
           &Dump,
       const std::string &DumpName);
+  void addTexture(const std::string &TexturePath,
+                  const std::string &TextureName);
 
 protected:
   static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);

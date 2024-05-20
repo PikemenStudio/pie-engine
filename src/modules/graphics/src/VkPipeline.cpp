@@ -28,13 +28,13 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   initWindowSurface();
   createSwapChain();
-  createDescriptorSetLayout({.Count = 2,
-                             .Indexes = {0, 1},
-                             .Types = {vk::DescriptorType::eUniformBuffer,
-                                       vk::DescriptorType::eStorageBuffer},
-                             .Counts = {1, 1},
-                             .Stages = {vk::ShaderStageFlagBits::eVertex,
-                                        vk::ShaderStageFlagBits::eVertex}});
+  createDescriptorSetLayouts({.Count = 2,
+                              .Indexes = {0, 1},
+                              .Types = {vk::DescriptorType::eUniformBuffer,
+                                        vk::DescriptorType::eStorageBuffer},
+                              .Counts = {1, 1},
+                              .Stages = {vk::ShaderStageFlagBits::eVertex,
+                                         vk::ShaderStageFlagBits::eVertex}});
   createPipeline(
       {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
                            "resources/test.vert",
@@ -73,7 +73,7 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
   destroySwapChain();
 
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-      .destroyDescriptorSetLayout(this->DescriptorSetLayout);
+      .destroyDescriptorSetLayout(this->FrameSetLayout);
 
   static_cast<vk::Instance &>(*NativeComponents.Instance)
       .destroySurfaceKHR(NativeComponents.Surface.value());
@@ -576,7 +576,14 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       .destroySwapchainKHR(SwapChainBundle.value().Swapchain);
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
-      .destroyDescriptorPool(DescriptorPool);
+      .destroyDescriptorPool(FramePool);
+  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+      .destroyDescriptorPool(MeshPool);
+
+  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+      .destroyDescriptorSetLayout(this->FrameSetLayout);
+  static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
+      .destroyDescriptorSetLayout(this->MeshSetLayout);
 }
 
 template <>
@@ -641,17 +648,14 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 vk::PipelineLayout
 vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                     SceneManagerImplT>::createPipelineLayout() const {
-  //  vk::PushConstantRange PushConstantRange{
-  //      .stageFlags = vk::ShaderStageFlagBits::eVertex,
-  //      .offset = 0,
-  //      .size =
-  //          sizeof(SceneManagerFacadeStructs::ObjectData::TransformationStruct),
-  //  };
-
+  std::vector<vk::DescriptorSetLayout> Layouts = {
+      this->FrameSetLayout,
+      this->MeshSetLayout,
+  };
   vk::PipelineLayoutCreateInfo CreateInfo{
       .flags = vk::PipelineLayoutCreateFlags(),
-      .setLayoutCount = 1,
-      .pSetLayouts = &this->DescriptorSetLayout,
+      .setLayoutCount = (uint32_t)Layouts.size(),
+      .pSetLayouts = Layouts.data(),
       .pushConstantRangeCount = 0,
       .pPushConstantRanges = nullptr,
   };
@@ -728,7 +732,7 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createDescriptorSetLayout(DescriptorSetLayoutInputStruct LayoutStruct) {
+    createDescriptorSetLayouts(DescriptorSetLayoutInputStruct LayoutStruct) {
   std::vector<vk::DescriptorSetLayoutBinding> Bindings;
   Bindings.reserve(LayoutStruct.Count);
 
@@ -749,9 +753,39 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   };
 
   try {
-    this->DescriptorSetLayout =
+    this->FrameSetLayout =
         static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
             .createDescriptorSetLayout(CreateInfo);
+  } catch (vk::SystemError &E) {
+    throw std::runtime_error(
+        std::string("Failed to create descriptor set layout ") + E.what());
+  }
+
+  LayoutStruct.Count = 1;
+  LayoutStruct.Indexes[0] = 0;
+  LayoutStruct.Types[0] = vk::DescriptorType::eCombinedImageSampler;
+  LayoutStruct.Counts[0] = 1;
+  LayoutStruct.Stages[0] = vk::ShaderStageFlagBits::eFragment;
+
+  vk::DescriptorSetLayoutBinding LayoutBinding1{
+      .binding = 0,
+      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+      .descriptorCount = 1,
+      .stageFlags = vk::ShaderStageFlagBits::eFragment,
+  };
+
+  std::vector<vk::DescriptorSetLayoutBinding> Bindings1 = {LayoutBinding1};
+
+  vk::DescriptorSetLayoutCreateInfo CreateInfo1{
+      .flags = vk::DescriptorSetLayoutCreateFlags(),
+      .bindingCount = 1,
+      .pBindings = Bindings1.data(),
+  };
+
+  try {
+    this->MeshSetLayout =
+        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+            .createDescriptorSetLayout(CreateInfo1);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(
         std::string("Failed to create descriptor set layout ") + E.what());
@@ -761,7 +795,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+vk::DescriptorPool
+vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     createDescriptorPool(uint32_t Size,
                          VkPipeline::DescriptorSetLayoutInputStruct &Input) {
   std::vector<vk::DescriptorPoolSize> PoolSizes;
@@ -781,9 +816,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   };
 
   try {
-    this->DescriptorPool =
-        static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-            .createDescriptorPool(PoolInfo);
+    return static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .createDescriptorPool(PoolInfo);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to create descriptor pool ") +
                              E.what());
@@ -831,13 +865,13 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   // Vertex Input
   vk::VertexInputBindingDescription BindingDescription =
       getBindingDescription();
-  std::array<vk::VertexInputAttributeDescription, 2> AttributeDescriptions =
+  std::array<vk::VertexInputAttributeDescription, 3> AttributeDescriptions =
       getAttributeDescriptions();
   vk::PipelineVertexInputStateCreateInfo VertexInputInfo = {
       .flags = vk::PipelineVertexInputStateCreateFlags(),
       .vertexBindingDescriptionCount = 1,
       .pVertexBindingDescriptions = &BindingDescription,
-      .vertexAttributeDescriptionCount = 2,
+      .vertexAttributeDescriptionCount = 3,
       .pVertexAttributeDescriptions = AttributeDescriptions.data(),
   };
   CreateInfo.pVertexInputState = &VertexInputInfo;
@@ -1115,8 +1149,8 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
       .Types = {vk::DescriptorType::eUniformBuffer,
                 vk::DescriptorType::eStorageBuffer},
   };
-  createDescriptorPool(this->SwapChainBundle->Frames.size(),
-                       DescriptorSetLayoutInput);
+  FramePool = createDescriptorPool(this->SwapChainBundle->Frames.size(),
+                                   DescriptorSetLayoutInput);
 
   for (auto &Frame : this->SwapChainBundle->Frames) {
     try {
@@ -1172,6 +1206,7 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
 
   SceneManager->resetObjectGetter();
+  uint32_t Offset = 0;
   while (true) {
     SceneManagerFacadeStructs::OneTypeObjects Objects =
         SceneManager->getCurrentObjects();
@@ -1180,15 +1215,18 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     if (Objects.empty()) {
       if (SceneManager->goToNextDump()) {
         // Step to next dump
+        Offset = 0;
         Objects = SceneManager->getCurrentObjects();
-        drawObjects(Objects, CommandBuffer);
+        drawObjects(Objects, CommandBuffer, Offset);
+        Offset += Objects.size();
         continue;
       }
       break;
     }
 
     // if all ok
-    drawObjects(Objects, CommandBuffer);
+    drawObjects(Objects, CommandBuffer, Offset);
+    Offset += Objects.size();
     const auto &Discard = SceneManager->getNextObjects();
   }
 
@@ -1207,16 +1245,19 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
-                vk::CommandBuffer CommandBuffer) {
+                vk::CommandBuffer CommandBuffer, uint32_t Offset) {
   std::string DumpName = Objects[0]->getDumpName();
   prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
 
   BaseObject::ObjectTypes Type = Objects[0]->getType();
   std::string TypeName = BaseObject::toString(Type);
 
+  std::string TextureName = Objects[0]->getTextureName();
+
+  this->Textures[TextureName]->use(CommandBuffer, this->PipelineBundle->Layout);
   CommandBuffer.draw(
       this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Size, Objects.size(),
-      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Offset, 0);
+      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Offset, Offset);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
@@ -1414,9 +1455,9 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     allocateDescriptorSet(VkPipeline::SwapChainFrameStruct &Frame) {
   vk::DescriptorSetAllocateInfo AllocateInfo{
-      .descriptorPool = this->DescriptorPool,
+      .descriptorPool = this->FramePool,
       .descriptorSetCount = 1,
-      .pSetLayouts = &this->DescriptorSetLayout,
+      .pSetLayouts = &this->FrameSetLayout,
   };
 
   try {
@@ -1437,7 +1478,7 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                     SceneManagerImplT>::getBindingDescription() {
   vk::VertexInputBindingDescription BindingDescription{
       .binding = 0,
-      .stride = 5 * sizeof(float),
+      .stride = 7 * sizeof(float),
       .inputRate = vk::VertexInputRate::eVertex,
   };
 
@@ -1447,10 +1488,10 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-std::array<vk::VertexInputAttributeDescription, 2>
+std::array<vk::VertexInputAttributeDescription, 3>
 vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
                     SceneManagerImplT>::getAttributeDescriptions() {
-  std::array<vk::VertexInputAttributeDescription, 2> Attributes{
+  std::array<vk::VertexInputAttributeDescription, 3> Attributes{
       vk::VertexInputAttributeDescription{
           .location = 0,
           .binding = 0,
@@ -1462,6 +1503,12 @@ vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
           .binding = 0,
           .format = vk::Format::eR32G32B32Sfloat,
           .offset = 2 * sizeof(float),
+      },
+      vk::VertexInputAttributeDescription{
+          .location = 2,
+          .binding = 0,
+          .format = vk::Format::eR32G32Sfloat,
+          .offset = 5 * sizeof(float),
       },
   };
 
@@ -1486,20 +1533,23 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   // Create Dump of objects
   for (auto &[Name, ObjectData] : Dump) {
     std::vector<float> MeshArray;
-    for (int IVertex = 0, IColor = 0; IVertex < ObjectData.Vertices.size();
-         IVertex += 2, IColor += 3) {
+    for (int IVertex = 0, IColor = 0, ITexCoord = 0;
+         IVertex < ObjectData.Vertices.size();
+         IVertex += 2, IColor += 3, ITexCoord += 2) {
       MeshArray.push_back(ObjectData.Vertices[IVertex + 0]);
       MeshArray.push_back(ObjectData.Vertices[IVertex + 1]);
       MeshArray.push_back(ObjectData.Colors[IColor + 0]);
       MeshArray.push_back(ObjectData.Colors[IColor + 1]);
       MeshArray.push_back(ObjectData.Colors[IColor + 2]);
+      MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 0]);
+      MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 1]);
     }
 
     size_t ArraySize = MeshArray.size();
     MeshData NewMeshData{
         .Data = std::move(MeshArray),
         .Offset = Offset,
-        .Size = static_cast<int>(ArraySize / 5),
+        .Size = static_cast<int>(ArraySize / 7),
     };
 
     Offset += NewMeshData.Size;
@@ -1559,6 +1609,30 @@ void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   vk::Buffer Buffers[] = {Dump.Buffer};
   vk::DeviceSize Offsets[] = {0};
   CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    addTexture(const std::string &TexturePath, const std::string &TextureName) {
+  DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
+      .Count = 1,
+      .Types = {vk::DescriptorType::eCombinedImageSampler},
+  };
+  MeshPool = createDescriptorPool(1, DescriptorSetLayoutInput);
+  VkTexture::TextureInputChunk TextureInput{
+      .LogicalDevice =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
+      .PhysicalDevice = static_cast<vk::PhysicalDevice &>(
+          *this->NativeComponents.PhysicalDevice),
+      .CommandBuffer = this->MainCommandBuffer,
+      .Queue = *this->NativeComponents.GraphicsQueue,
+      .DescriptorSetLayout = this->MeshSetLayout,
+      .DescriptorPool = this->MeshPool,
+      .FileName = TexturePath,
+  };
+  this->Textures[TextureName] = new VkTexture(TextureInput);
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,

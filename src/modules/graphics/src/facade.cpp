@@ -164,12 +164,22 @@ void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
     ModuleObjectData[Name] = {
         .Vertices = ObjectData.Vertices,
         .Colors = ObjectData.Colors,
+        .TexCoords = ObjectData.TexCoords,
     };
   };
   static_cast<
       DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
                   typename Dep::SceneManagerType>>(Data)
       ->addObject(ModuleObjectData, DumpName);
+}
+
+template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::addTexture(
+    const std::string &TexturePath, const std::string &TextureName) {
+  static_cast<
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
+      ->addTexture(TexturePath, TextureName);
 }
 
 // Explicitly instantiate class

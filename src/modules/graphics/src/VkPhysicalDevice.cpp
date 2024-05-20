@@ -359,14 +359,28 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     addObjectData(
-        const std::map<std::string, typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
-                                           SceneManagerImplT>::PublicObjectData>
-            &Dump, const std::string &DumpName) {
+        const std::map<std::string, typename vk_core::VkPipeline<
+                                        WindowImpl, ShaderLoaderImplT,
+                                        SceneManagerImplT>::PublicObjectData>
+            &Dump,
+        const std::string &DumpName) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
   }
   this->Pipeline->addObjectData(Dump, DumpName);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    addTexture(const std::string &TexturePath, const std::string &TextureName) {
+  if (this->Pipeline == nullptr) {
+    LOG_F(ERROR, "Pipeline is not initialized");
+    throw std::runtime_error("Pipeline is not initialized");
+  }
+  this->Pipeline->addTexture(TexturePath, TextureName);
 }
 
 template class vk_core::VkPhysicalDevice<

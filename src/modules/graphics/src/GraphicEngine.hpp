@@ -65,6 +65,8 @@ public:
                      typename VkPipeline<WindowImpl, ShaderImpl,
                                          SceneImpl>::PublicObjectData> &Dump,
       const std::string &DumpName);
+  void addTexture(const std::string &TexturePath,
+                  const std::string &TextureName);
 
   void render();
 

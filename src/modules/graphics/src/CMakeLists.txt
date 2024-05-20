@@ -7,15 +7,18 @@ set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
         GraphicEngine.cpp
         facade.cpp
         VkPipeline.cpp
-        VkPipeline.h)
+        VkTexture.cpp)
 set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
-        GraphicEngine.hpp ObjectsMemory.hpp)
+        GraphicEngine.hpp ObjectsMemory.hpp VkPipeline.h VkTexture.hpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(loguru CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 add_library(graphics ${SOURCE_ALL} ${HEADER_ALL})
+
+target_include_directories(graphics PRIVATE ${Stb_INCLUDE_DIR})
 
 target_link_libraries(graphics PRIVATE loguru)
 target_link_libraries(graphics PRIVATE scene_manager)

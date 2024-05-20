@@ -18,7 +18,8 @@
       {
         "name": "sfml",
         "platform": "!osx"
-      }
+      },
+      "stb"
     ],
     "overrides":
     [

@@ -66,6 +66,7 @@ struct GraphicFacadeStructs {
   struct ObjectData {
     std::vector<float> Vertices;
     std::vector<float> Colors;
+    std::vector<float> TexCoords;
   };
 
   using ObjectsData = std::map<std::string, ObjectData>;
@@ -126,6 +127,9 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
     void addObjectData(                                                        \
         const std::map<std::string, GraphicFacadeStructs::ObjectData> &Dump,   \
         const std::string &DumpName);                                          \
+                                                                               \
+    void addTexture(const std::string &TexturePath,                            \
+                    const std::string &TextureName);                           \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

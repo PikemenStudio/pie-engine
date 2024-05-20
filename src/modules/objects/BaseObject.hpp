@@ -35,6 +35,7 @@ public:
   virtual ObjectTypes getType() = 0;
   virtual std::string getDumpName() = 0;
   virtual std::string getName() { return Name; }
+  virtual std::string getTextureName() { return TextureName; }
 
   virtual void moveBy(glm::vec3 Vector) = 0;
 
@@ -42,6 +43,7 @@ public:
 
 protected:
   std::string Name;
+  std::string TextureName = "Texture";
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_BASEOBJECT_HPP

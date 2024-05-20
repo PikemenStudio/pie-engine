@@ -10,6 +10,7 @@
 #include "ObjectsMemory.hpp"
 #include "VkInstance.hpp"
 #include "VkPhysicalDevice.hpp"
+#include "VkTexture.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
 #include <map>
@@ -71,6 +72,7 @@ public:
   struct PublicObjectData {
     std::vector<float> Vertices;
     std::vector<float> Colors;
+    std::vector<float> TexCoords;
     std::string ObjectName;
   };
 
@@ -79,6 +81,8 @@ public:
   void
   addObjectData(const std::map<std::string, VkPipeline::PublicObjectData> &Dump,
                 const std::string &DumpName);
+  void addTexture(const std::string &TexturePath,
+                  const std::string &TextureName);
 
   void render();
 
@@ -101,7 +105,7 @@ protected:
     vk::DeviceMemory CameraMemory;
     void *CameraDataWriteLocation;
     vk::DescriptorBufferInfo UniformBufferDescriptor;
-     vk::DescriptorBufferInfo ModelBufferDescriptor;
+    vk::DescriptorBufferInfo ModelBufferDescriptor;
     vk::DescriptorSet DescriptorSet;
     std::vector<glm::mat4> ModelTransforms;
     vk::Buffer ModelBuffer;
@@ -158,6 +162,8 @@ protected:
     int Size;
   };
 
+  std::unordered_map<std::string, VkTexture *> Textures;
+
   struct BufferInput {
     vk::DeviceSize Size;
     vk::BufferUsageFlags Usage;
@@ -184,8 +190,10 @@ protected:
     std::map<std::string, MeshDump> Dumps;
   } MeshTypes;
 
-  vk::DescriptorSetLayout DescriptorSetLayout = nullptr;
-  vk::DescriptorPool DescriptorPool = nullptr;
+  vk::DescriptorSetLayout FrameSetLayout = nullptr;
+  vk::DescriptorPool FramePool = nullptr;
+  vk::DescriptorSetLayout MeshSetLayout = nullptr;
+  vk::DescriptorPool MeshPool = nullptr;
 
   struct DescriptorSetLayoutInputStruct {
     int Count;
@@ -216,8 +224,8 @@ protected:
   vk::PipelineLayout createPipelineLayout() const;
   vk::RenderPass createRenderPass() const;
 
-  void createDescriptorSetLayout(DescriptorSetLayoutInputStruct Input);
-  void createDescriptorPool(uint32_t Size,
+  void createDescriptorSetLayouts(DescriptorSetLayoutInputStruct Input);
+  vk::DescriptorPool createDescriptorPool(uint32_t Size,
                             DescriptorSetLayoutInputStruct &Input);
   void writeDescriptorSet(SwapChainFrameStruct &Frame);
   void createPipeline(GraphicsPipelineInBundle InBundle);
@@ -231,11 +239,11 @@ protected:
   void createFences();
 
   vk::VertexInputBindingDescription getBindingDescription();
-  std::array<vk::VertexInputAttributeDescription, 2> getAttributeDescriptions();
+  std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions();
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
   void drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
-                   vk::CommandBuffer CommandBuffer);
+                   vk::CommandBuffer CommandBuffer, uint32_t Offset);
 
   void createBuffer(BufferInput Input, MeshDump &Buffer);
   void copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer,

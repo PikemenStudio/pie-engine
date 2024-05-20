@@ -103,8 +103,8 @@ public:
     std::unique_ptr<BaseObject> Object2 = std::unique_ptr<BaseObject>(
         new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
     SceneManagerInstance->ImplInstance.addObject(std::move(Object));
-    SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
-    SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
+    // SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
+    // SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
@@ -135,36 +135,38 @@ public:
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
     GraphicFacadeStructs::ObjectsData ObjectsData;
-    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData{
-        .Vertices = {0.0f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f},
-        .Colors = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f}};
-    GraphicFacadeStructs::ObjectsData ObjectsData1;
-    ObjectsData1["Square"] = GraphicFacadeStructs::ObjectData{
-        .Vertices = {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5, 0.5},
-        .Colors = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-                   1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f}};
-    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
-    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData1, "TS1");
+    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData {
+      .Vertices = {0.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
+      .Colors = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+      .TexCoords = {0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}};
 
-    RenderableSceneInstance->ImplInstance.runMainCycle();
-  }
+      GraphicFacadeStructs::ObjectsData ObjectsData1;
+      GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
 
-  void TearDown() {}
+      GraphicAdapterInstance->ImplInstance.addTexture(
+          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/texture.jpg",
+          "Texture");
 
-  std::shared_ptr<GraphicApiFacadeType> GraphicAdapterInstance;
+      RenderableSceneInstance->ImplInstance.runMainCycle();
+    }
 
-  std::shared_ptr<RenderableSceneFacadeType> RenderableSceneInstance;
-};
+    void TearDown() {}
 
-int main(int Argc, char *Argv[]) {
-  loguru::init(Argc, Argv);
-  // clang-format off
+    std::shared_ptr<GraphicApiFacadeType> GraphicAdapterInstance;
+
+    std::shared_ptr<RenderableSceneFacadeType> RenderableSceneInstance;
+  };
+
+  int main(int Argc, char *Argv[]) {
+    loguru::init(Argc, Argv);
+    // clang-format off
   loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
-  // clang-format on
+    // clang-format on
 
-  RenderableSceneTest Test;
-  Test.SetUp();
-  Test.TearDown();
+    RenderableSceneTest Test;
+    Test.SetUp();
+    Test.TearDown();
 
-  return 0;
-}
+    return 0;
+  }
