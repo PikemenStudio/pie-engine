@@ -38,37 +38,37 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float 
 //  float PlDiagSquare = PlWidth * PlWidth + PlHeight * PlHeight;
   float MinHeight = PlHeight * 1.5;
 
-  while (PointsCount--)
+//  while (PointsCount--)
+  for (int I = 0; I < PointsCount; I++)
   {
     float NoiseVal = getNoiseValFrom0To1(NoiseGenFloor, CurrX);
-    float FloorY = FloorBottom + NoiseVal * (FloorTop - FloorBottom);
-    WorldCoordsYFloor.push_back(FloorY);
+
+    float FloorY;
+
+    // close the ends of the tunnel
+    if (I < 10 || I >= PointsCount - 10)
+//      FloorY = -0.7 + NoiseVal * (FloorTop - (-0.7));
+      FloorY = -0.5;
+    else
+      FloorY = FloorBottom + NoiseVal * (FloorTop - FloorBottom);
 
     NoiseVal = getNoiseValFrom0To1(NoiseGenCeiling, CurrX);
-    float CeilY = CeilingBottom + NoiseVal * (CeilingTop - CeilingBottom);
+    float CeilY;
 
-    // the player should always be able to walk through the tunnel
-//    if (!WorldCoordsYCeiling.empty())
-//    {
-//      float& FloorYPrev = WorldCoordsYFloor.back();
-//      float& CeilYPrev = WorldCoordsYCeiling.back();
-//      float PrevX = CurrX - StepX;
-//
-//      float Diag1Square = (CeilY - FloorYPrev) * (CeilY - FloorYPrev) +
-//                          (CurrX - PrevX) * (CurrX - PrevX);
-//      float Diag2Square = (CeilYPrev - FloorY) * (CeilYPrev - FloorY) +
-//                          (CurrX - PrevX) * (CurrX - PrevX);
-//
-//      // Raise y coordinate
-//      if (Diag1Square < PlDiagSquare)
-//        CeilY = FloorYPrev + PlHeight;
-//      if (Diag2Square < PlDiagSquare)
-//        CeilYPrev = FloorY + PlHeight;
-//    }
+    // close the ends of the tunnel
+    if (I < 10 || I >= PointsCount - 10)
+    {
+//      CeilY = CeilingBottom + NoiseVal * (-0.3 - CeilingBottom);
+      CeilY = -0.5;
+    }
+    else
+    {
+      CeilY = CeilingBottom + NoiseVal * (CeilingTop - CeilingBottom);
+      if (CeilY - FloorY < MinHeight)
+        CeilY = FloorY + MinHeight;
+    }
 
-    if (CeilY - FloorY < MinHeight)
-      CeilY = FloorY + MinHeight;
-
+    WorldCoordsYFloor.push_back(FloorY);
     WorldCoordsYCeiling.push_back(CeilY);
 
     CurrX += StepX;
