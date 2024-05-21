@@ -8,17 +8,38 @@
 
 #include "utils.h"
 
-Rat::Rat(const sf::Vector2f& Pos) : Position(Pos)
+Rat::Rat(const sf::Vector2f& Pos, const Tunnel* T) : Position(Pos), CurrTunnel(T)
 {
   Size = {0.1f, 0.065f};
   DxDy = {0, 0};
+  CurrState = State::Idle;
 }
 
 void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects)
 {
+  if (!Visible)
+    return;
+
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
-  DxDy.x = 0.3;
+  switch (CurrState)
+  {
+  case State::Idle:
+    if (IterationsToRunInOneDirection < 1)
+    {
+      TurnedLeft = !TurnedLeft;
+      IterationsToRunInOneDirection = randIntInRange(100, 500);
+    }
+    else
+    {
+      IterationsToRunInOneDirection--;
+      DxDy.x = TurnedLeft ? -0.2f : 0.2f;
+    }
+    break;
+  default:
+    break;
+  }
+
   DxDy.y -= 6 * FrameDrawingTimeS;
   OnGround = false;
 
@@ -65,6 +86,9 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
 
 void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
 {
+  if (!Visible)
+    return;
+
   sf::RectangleShape Rect(worldDeltaToScreen(Size, WorldWindowObj));
 
   auto CenterOnScreen = worldCoordsToScreen(Position, WorldWindowObj);
@@ -76,6 +100,9 @@ void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
 
 bool Rat::isCollision(const SolidObject* Other) const
 {
+  if (!Visible)
+    return false;
+
   if (dynamic_cast<const Rat*>(Other))
     return false;
   if (const Player* P = dynamic_cast<const Player*>(Other))

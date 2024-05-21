@@ -8,12 +8,19 @@
 #include "Drawable.h"
 #include "SolidObject.h"
 
+class Tunnel;
+
 class Rat : public Drawable, public SolidObject
 {
 public:
-  Rat(const sf::Vector2f& Pos);
+  Rat(const sf::Vector2f& Pos, const Tunnel* T);
 
   void update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
+
+  const Tunnel* getCurrTunnel() const { return CurrTunnel; }
+
+  bool isVisible() const { return Visible; }
+  void setVisible(bool V) { Visible = V; }
 
   void setPosition(sf::Vector2f Pos) { Position = Pos; }
   void setSize(sf::Vector2f S) { Size = S; }
@@ -32,6 +39,16 @@ private:
   sf::Vector2f DxDy;
 
   bool OnGround;
+  bool TurnedLeft = false;
+  bool Visible = true;
+  int IterationsToRunInOneDirection = 0;
+
+  const Tunnel* CurrTunnel = nullptr;
+
+  enum class State
+  {
+    Idle,
+  } CurrState;
 };
 
 #endif // ENGINE_RAT_H

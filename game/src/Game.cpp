@@ -169,21 +169,32 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 
   From->setVisible(false);
   To->setVisible(true);
+
+  for (auto& R : Rats)
+  {
+    if (R->getCurrTunnel() == From)
+      R->setVisible(false);
+    else if (R->getCurrTunnel() == To)
+      R->setVisible(true);
+  }
+
   WorldWindowObj->setSceneBorders(To->getStartX(), To->getEndX());
   PlayerObj->moveToTunnel(To);
 }
 
 void Game::generateRats()
 {
-  int RatsCount = 2;
+  int RatsCount = 5;
 
   Tunnel* CurrTunnel = PlayerObj->getCurrTunnel();
   float CurrTunnelLen = CurrTunnel->getEndX() - CurrTunnel->getStartX();
 
   for (int I = 0; I < RatsCount; I++)
   {
-    float RatXCoord = randInRange(0.1, 0.2) * CurrTunnelLen + CurrTunnel->getStartX();
-    auto NewRat = std::make_unique<Rat>(sf::Vector2f(0.0f, 0.0f));
+    float RatXCoord = randInRange(0.1, 0.9) * CurrTunnelLen + CurrTunnel->getStartX();
+    auto NewRat = std::make_unique<Rat>(
+        sf::Vector2f(0.0f, 0.0f),
+        CurrTunnel);
     NewRat->setPosition(
         sf::Vector2f(
             RatXCoord,
