@@ -54,7 +54,7 @@ void moveObject() {
   while (true) {
     static float I = 0.0f;
     Obj->moveBy({I + 0.1, 0.0, 1.0});
-    //Obj->rotateBy({0.0f, 0.0f, 1.0f}, 0);
+    // Obj->rotateBy({0.0f, 0.0f, 1.0f}, 0);
     I += 0.0000001f;
   }
 }
@@ -112,22 +112,21 @@ public:
     Object->setName("Triangle");
     Object->setTextureName("Texture");
     Object->setDumpName("TS");
-    //    Object->moveBy({0.0, 0.0, 1.0});
-    //    Object->rotateBy({0.0f, 0.0f, 1.0f}, 30);
     std::shared_ptr<BaseObject> Object1 = std::shared_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
     Object1->setName("Triangle");
     Object1->setTextureName("Texture");
-    Object1->setDumpName("TS1");
-
-    //Object1->scaleBy({10.0f, 10.0f, 10.0f});
-//    std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
-//        new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
+    Object1->setDumpName("TS");
+    std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
+        new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
+    Object2->setName("Square");
+    Object2->setTextureName("Texture");
+    Object2->setDumpName("TS");
 
     Obj = Object;
     SceneManagerInstance->ImplInstance.addObject(Object);
     SceneManagerInstance->ImplInstance.addObject(Object1);
-    //    SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
+    SceneManagerInstance->ImplInstance.addObject(Object2);
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
@@ -159,9 +158,15 @@ public:
 
     GraphicFacadeStructs::ObjectsData ObjectsData;
     ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData{
-        .Vertices = {0.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
-        .Colors = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-        .TexCoords = {0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}};
+        .Vertices = DefaultData[BaseObject::ObjectTypes::TRIANGLE].Vertexes,
+        .Colors = DefaultData[BaseObject::ObjectTypes::TRIANGLE].Colors,
+        .TexCoords = DefaultData[BaseObject::ObjectTypes::TRIANGLE].TexCoords,
+    };
+    ObjectsData["Square"] = GraphicFacadeStructs::ObjectData{
+        .Vertices = DefaultData[BaseObject::ObjectTypes::SQUARE].Vertexes,
+        .Colors = DefaultData[BaseObject::ObjectTypes::SQUARE].Colors,
+        .TexCoords = DefaultData[BaseObject::ObjectTypes::SQUARE].TexCoords,
+    };
 
     GraphicFacadeStructs::ObjectsData ObjectsData1;
     GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
