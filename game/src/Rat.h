@@ -50,7 +50,8 @@ private:
   enum class State
   {
     Idle,
-    PlayerSpotted
+    PlayerSpotted,
+    ScaredByLight
   } CurrState;
 };
 

@@ -29,6 +29,8 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
   constexpr float Dist2ToSpotBrightLight = 1.0f;
   constexpr float Dist2ToLoseDimLight = 1.5 * 1.5;
   constexpr float Dist2ToLoseBrightLight = 3 * 3;
+  constexpr float Dist2ToGetScared = 0.25 * 0.25;
+  constexpr float Dist2ToStopBeingScared = 1.3 * 1.3;
 
   float Dist2ToPlayer = (PlPos.x - Position.x) * (PlPos.x - Position.x);
   bool BrightLight = Pl->getLightSource()->getBaseIntensity() > 0.45f;
@@ -58,11 +60,20 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
       DxDy.x = TurnedLeft ? -0.1f : 0.1f;
     }
     break;
+
   case State::PlayerSpotted:
     if (BrightLight)
     {
       if (Dist2ToPlayer > Dist2ToLoseBrightLight)
+      {
         CurrState = State::Idle;
+        break;
+      }
+      if (Dist2ToPlayer < Dist2ToGetScared)
+      {
+        CurrState = State::ScaredByLight;
+        break;
+      }
     }
     else
     {
@@ -71,6 +82,17 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
     }
 
     TurnedLeft = PlPos.x < Position.x;
+    DxDy.x = TurnedLeft ? -0.2f : 0.2f;
+    break;
+
+  case State::ScaredByLight:
+    if (Dist2ToPlayer > Dist2ToStopBeingScared)
+    {
+      CurrState = State::Idle;
+      break;
+    }
+
+    TurnedLeft = PlPos.x > Position.x;
     DxDy.x = TurnedLeft ? -0.2f : 0.2f;
     break;
   }
