@@ -49,8 +49,18 @@ using GraphicApiFacadeType = GraphicApiFacade<
     graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependenciesType>>;
 
 std::shared_ptr<BaseObject> Obj;
+std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
 
 void moveObject() {
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+
+  std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
+      new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
+  Object2->setName("Square1");
+  Object2->setTextureName("Texture1");
+  Object2->setDumpName("TS");
+  SceneManagerInstance1->ImplInstance.addObject(Object2);
+
   while (true) {
     static float I = 0.0f;
     Obj->moveBy({I + 0.1, 0.0, 1.0});
@@ -107,6 +117,7 @@ public:
         std::make_shared<SceneManagerFacadeType>(
             SceneManagerFacadeStructs::SceneManagerProps<
                 SceneManagerDependencies>{.Dependencies = {}});
+    SceneManagerInstance1 = SceneManagerInstance;
     std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
     Object->setName("Triangle");
@@ -117,16 +128,10 @@ public:
     Object1->setName("Triangle");
     Object1->setTextureName("Texture");
     Object1->setDumpName("TS");
-    std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
-        new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
-    Object2->setName("Square");
-    Object2->setTextureName("Texture1");
-    Object2->setDumpName("TS");
 
     Obj = Object;
     SceneManagerInstance->ImplInstance.addObject(Object);
     SceneManagerInstance->ImplInstance.addObject(Object1);
-    SceneManagerInstance->ImplInstance.addObject(Object2);
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
