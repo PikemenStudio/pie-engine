@@ -17,7 +17,6 @@ public:
   virtual ~BaseObject() = default;
 
   virtual std::vector<uint8_t> getVertices() = 0;
-  virtual glm::vec3 getPosition() = 0;
 
   enum class ObjectTypes {
     TRIANGLE,
@@ -33,20 +32,37 @@ public:
     }
   }
 
+  // Object data
   virtual ObjectTypes getType() = 0;
-  virtual std::string getDumpName() = 0;
+  virtual std::string getDumpName() { return DumpName; }
   virtual std::string getName() { return Name; }
   virtual std::string getTextureName() { return TextureName; }
 
-  virtual void moveBy(glm::vec3 Vector) = 0;
-  virtual void rotateBy(glm::vec3 Axis, float Angle) = 0;
-  virtual void scaleBy(glm::vec3 Scale) = 0;
+  virtual void setName(std::string NewName) { this->Name = NewName; }
+  virtual void setTextureName(std::string NewTextureName) {
+    this->TextureName = NewTextureName;
+  }
+  virtual void setDumpName(std::string NewDumpName) {
+    this->DumpName = NewDumpName;
+  }
+
+  // Modifications
+  virtual void moveBy(glm::vec3 Vector) { this->Position = Vector; }
+  virtual void rotateBy(glm::vec3 Axis, float Angle) {
+    Rotation = glm::rotate(glm::mat4(1.0f), glm::radians(Angle), Axis);
+  }
+  virtual void scaleBy(glm::vec3 Vector) { this->Scale = Vector; }
 
   virtual glm::mat4 calculateTransformation() = 0;
 
 protected:
   std::string Name;
-  std::string TextureName = "Texture";
+  std::string TextureName;
+  std::string DumpName;
+
+  glm::vec3 Position = {0.0f, 0.0f, 0.0f};
+  glm::mat4 Rotation = glm::mat4(1.0f);
+  glm::vec3 Scale = {1.0f, 1.0f, 1.0f};
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_BASEOBJECT_HPP

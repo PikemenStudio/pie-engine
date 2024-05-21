@@ -20,21 +20,9 @@ std::vector<uint8_t> Square::getVertices() {
   return VertexesVector;
 }
 
-glm::vec3 Square::getPosition() { return this->Position; }
-
 BaseObject::ObjectTypes Square::getType() {
   return BaseObject::ObjectTypes::SQUARE;
 }
-
-std::string Square::getDumpName() { return "TS1"; }
-
-void Square::moveBy(glm::vec3 Vector) { this->Position += Vector; }
-
-void Square::rotateBy(glm::vec3 Axis, float Angle) {
-  this->Rotation = glm::rotate(glm::mat4(), Angle, Axis);
-}
-
-void Square::scaleBy(glm::vec3 Vector) { this->Scale += Vector; }
 
 glm::mat4 Square::calculateTransformation() {
   glm::mat4 Result = glm::mat4(1.0f);
