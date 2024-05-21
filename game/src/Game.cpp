@@ -61,29 +61,11 @@ void Game::initGameObjects()
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
   const sf::Vector2f PlSize = {0.05f, 0.3f};
-  Tunnels.push_back(std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
-                                             PlSize.x, PlSize.y));
-  Tunnels.push_back(std::make_unique<Tunnel>(-4.0f, 4.0f, 0.01f,
-                                             PlSize.x, PlSize.y));
-  Tunnels[1]->setVisible(false);
+  generateTunnels(PlSize);
 
   PlayerObj = std::make_unique<Player>(
       sf::Vector2f(0, 0), PlSize,
       Lantern.get(), Tunnels[0].get());
-
-  Passages.push_back(std::make_unique<Passage>(
-      Tunnels[0].get(), Tunnels[1].get(), PlayerObj->getCurrTunnel(), 2.0));
-  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
-    transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
-  });
-  Passages.back()->setTransition(Transition.get());
-
-//  Passages.push_back(std::make_unique<Passage>(
-//      TunnelObj.get(), TunnelObj.get(), TunnelObj.get(), Transition.get(), -1.0));
-
-  WorldWindowObj = std::make_unique<WorldWindow>(
-      sf::Vector2f(0, 0), sf::Vector2f(3, 2), Tunnels[0]->getStartX(),
-      Tunnels[0]->getEndX());
 
   positionPlayer();
 
@@ -105,6 +87,26 @@ void Game::positionPlayer()
                    static_cast<float>(rand() % 1000) / 1000 * WorldWindowObj->getSize().x / 2;
     PlayerObj->setPosition({XCoord, -0.25});
   } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
+}
+
+void Game::generateTunnels(const sf::Vector2f& PlSize)
+{
+  Tunnels.push_back(std::make_unique<Tunnel>(-3.0f, 3.0f, 0.01f,
+                                             PlSize.x, PlSize.y));
+  Tunnels.push_back(std::make_unique<Tunnel>(-4.0f, 4.0f, 0.01f,
+                                             PlSize.x, PlSize.y));
+  Tunnels[1]->setVisible(false);
+
+  Passages.push_back(std::make_unique<Passage>(
+      Tunnels[0].get(), Tunnels[1].get(), Tunnels[0].get(), 2.0));
+  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
+    transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
+  });
+  Passages.back()->setTransition(Transition.get());
+
+  WorldWindowObj = std::make_unique<WorldWindow>(
+      sf::Vector2f(0, 0), sf::Vector2f(3, 2), Tunnels[0]->getStartX(),
+      Tunnels[0]->getEndX());
 }
 
 void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
