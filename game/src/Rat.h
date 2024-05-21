@@ -9,13 +9,15 @@
 #include "SolidObject.h"
 
 class Tunnel;
+class Player;
 
 class Rat : public Drawable, public SolidObject
 {
 public:
   Rat(const sf::Vector2f& Pos, const Tunnel* T);
 
-  void update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
+  void update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects,
+              const Player* Pl);
 
   const Tunnel* getCurrTunnel() const { return CurrTunnel; }
 
@@ -48,6 +50,7 @@ private:
   enum class State
   {
     Idle,
+    PlayerSpotted
   } CurrState;
 };
 

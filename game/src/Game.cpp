@@ -58,7 +58,7 @@ void Game::initKeyboard()
 
 void Game::initGameObjects()
 {
-  Lantern = std::make_unique<LightSource>(0, 0, 0.5f);
+  Lantern = std::make_unique<LightSource>(0, 0, 0.35f);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
   const sf::Vector2f PlSize = {0.05f, 0.3f};
@@ -112,7 +112,7 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
   float EndX = CurrTunnelLen / 2;
   bool GenPassageInRight = rand01() > 0.5;
 
-  LOG_F(INFO, "GenPassageInRight = %b", GenPassageInRight);
+  LOG_F(INFO, "GenPassageInRight = %d", GenPassageInRight);
 
   auto T = std::make_unique<Tunnel>(
       StartX, EndX, StepX,
@@ -184,7 +184,7 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 
 void Game::generateRats()
 {
-  int RatsCount = 5;
+  int RatsCount = 1;
 
   Tunnel* CurrTunnel = PlayerObj->getCurrTunnel();
   float CurrTunnelLen = CurrTunnel->getEndX() - CurrTunnel->getStartX();
@@ -250,7 +250,7 @@ void Game::processLogic(float FrameDrawingTimeMs)
   Lantern->update();
 
   for (const auto& R : Rats)
-    R->update(FrameDrawingTimeMs, SolidObjects);
+    R->update(FrameDrawingTimeMs, SolidObjects, PlayerObj.get());
   for (const auto& T : Transitions)
     T->update();
 
