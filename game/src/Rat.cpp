@@ -3,6 +3,8 @@
 //
 
 #include "Rat.h"
+#include "Player.h"
+#include "Tunnel.h"
 
 #include "utils.h"
 
@@ -24,5 +26,12 @@ void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
 
 bool Rat::isCollision(const SolidObject* Other) const
 {
+  if (dynamic_cast<const Rat*>(Other))
+    return false;
+  if (const Player* P = dynamic_cast<const Player*>(Other))
+    return P->isCollisionWithRat(this);
+  if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
+    return T->isCollisionWithBoundingBox(Position, Size);
+
   return false;
 }

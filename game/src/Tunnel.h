@@ -25,6 +25,7 @@ public:
 
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithPlayer(const Player* Pl) const;
+  bool isCollisionWithBoundingBox(sf::Vector2f Position, sf::Vector2f Size) const;
 
   void setVisible(bool V) { Visible = V; }
   bool isVisible() const { return Visible; }

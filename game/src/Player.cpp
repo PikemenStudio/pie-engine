@@ -3,6 +3,7 @@
 //
 
 #include "Player.h"
+#include "Rat.h"
 #include "Tunnel.h"
 
 #include <loguru.hpp>
@@ -163,8 +164,18 @@ bool Player::isCollision(const SolidObject* Other) const
 {
   if (dynamic_cast<const Player*>(Other))
     return false;
+  if (const Rat* R = dynamic_cast<const Rat*>(Other))
+    return isCollisionWithRat(R);
   if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
     return T->isCollisionWithPlayer(this);
 
   return false;
+}
+
+bool Player::isCollisionWithRat(const Rat* RatObj) const
+{
+  return
+      std::abs(Center.x - RatObj->getPosition().x) < (RatObj->getSize().x + Size.x) / 2
+      ||
+      std::abs(Center.y - RatObj->getPosition().y) < (RatObj->getSize().y + Size.y) / 2;
 }

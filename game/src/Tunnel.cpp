@@ -4,6 +4,7 @@
 
 #include "Tunnel.h"
 #include "Player.h"
+#include "Rat.h"
 #include "WorldWindow.h"
 #include "utils.h"
 
@@ -103,6 +104,8 @@ bool Tunnel::isCollision(const SolidObject* Other) const
     return false;
   if (const Player* Pl = dynamic_cast<const Player*>(Other))
     return isCollisionWithPlayer(Pl);
+  if (const Rat* R = dynamic_cast<const Rat*>(Other))
+    return R->isCollision(this);
 
   return false;
 }
@@ -157,18 +160,21 @@ static bool isPolylinesIntersection(const std::vector<sf::Vector2f>& Poly1,
 
 bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
 {
+  const auto& PlPos = Pl->getPosition();
+  const auto& PlSize = Pl->getSize();
+  return isCollisionWithBoundingBox(PlPos, PlSize);
+}
+
+bool Tunnel::isCollisionWithBoundingBox(sf::Vector2f Position, sf::Vector2f Size) const
+{
   if (!Visible)
     return false;
 
-//  testLineSegmentsIntersection();
-  const auto& PlPos = Pl->getPosition();
-  const auto& PlSize = Pl->getSize();
-
   // player
-  auto Pt1 = PlPos + sf::Vector2f(-PlSize.x / 2,  PlSize.y / 2);
-  auto Pt2 = PlPos + sf::Vector2f( PlSize.x / 2,  PlSize.y / 2);
-  auto Pt3 = PlPos + sf::Vector2f( PlSize.x / 2, -PlSize.y / 2);
-  auto Pt4 = PlPos + sf::Vector2f(-PlSize.x / 2, -PlSize.y / 2);
+  auto Pt1 = Position + sf::Vector2f(-Size.x / 2,  Size.y / 2);
+  auto Pt2 = Position + sf::Vector2f( Size.x / 2,  Size.y / 2);
+  auto Pt3 = Position + sf::Vector2f( Size.x / 2, -Size.y / 2);
+  auto Pt4 = Position + sf::Vector2f(-Size.x / 2, -Size.y / 2);
   std::vector<sf::Vector2f> PlPoly = {Pt1, Pt2, Pt3, Pt4};
 
   // ceiling
@@ -180,7 +186,7 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
   for (int I = LeftIndex; I <= RightIndex; I++)
   {
     float CurrYCeiling = WorldCoordsYCeiling[I];
-    if (CurrYCeiling < PlPos.y)
+    if (CurrYCeiling < Position.y)
       return true;
     CeilPoly.emplace_back(StartX + I * StepX, CurrYCeiling);
   }
@@ -193,7 +199,7 @@ bool Tunnel::isCollisionWithPlayer(const Player* Pl) const
   for (int I = LeftIndex; I <= RightIndex; I++)
   {
     float CurrYFloor = WorldCoordsYFloor[I];
-    if (CurrYFloor > PlPos.y)
+    if (CurrYFloor > Position.y)
       return true;
     FloorPoly.emplace_back(StartX + I * StepX, CurrYFloor);
   }

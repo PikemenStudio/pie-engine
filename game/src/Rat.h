@@ -13,6 +13,9 @@ class Rat : public Drawable, public SolidObject
 public:
   Rat(const sf::Vector2f& Pos);
 
+  sf::Vector2f getPosition() const { return Position; }
+  sf::Vector2f getSize() const { return Size; }
+
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
   bool isCollision(const SolidObject* Other) const override;
 

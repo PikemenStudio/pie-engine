@@ -16,6 +16,7 @@
 #include "utils.h"
 
 class Tunnel;
+class Rat;
 
 class Player : public SolidObject, public Drawable
 {
@@ -25,6 +26,7 @@ public:
   void update(const KeyboardMap& Keyboard, float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects);
 
   bool isCollision(const SolidObject* Other) const override;
+  bool isCollisionWithRat(const Rat* RatObj) const;
 
   void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) override;
 
