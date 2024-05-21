@@ -24,10 +24,14 @@ public:
 
   void setIntensity(float I) { Intensity = I; }
   float getIntensity() const { return Intensity; }
+
+  void setBaseIntensity(float I) { BaseIntensity = I; }
+  float getBaseIntensity() const { return BaseIntensity; }
 //  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj);
 
 private:
   sf::Vector2f WorldCoords;
+  float BaseIntensity;
   float Intensity;
   float IntensityIntervalMs;
   std::chrono::time_point<std::chrono::high_resolution_clock> IntervalStart;

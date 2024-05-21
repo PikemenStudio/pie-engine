@@ -55,12 +55,12 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
     auto PosBeforeSpaceSearch = Position;
 
     // try to go up and down a little
-    setPosition(Position + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+    setPosition(Position + sf::Vector2f(0, 1.25 * DxDy.x * FrameDrawingTimeS));
 
     if (CollObj->isCollision(this))
     {
       setPosition(PosBeforeSpaceSearch);
-      setPosition(Position - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+      setPosition(Position - sf::Vector2f(0, 1.25 * DxDy.x * FrameDrawingTimeS));
 
       if (CollObj->isCollision(this))
         setPosition(OldPos);

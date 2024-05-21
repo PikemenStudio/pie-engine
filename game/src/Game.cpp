@@ -223,6 +223,17 @@ void Game::handleUserInput()
             Inter->runInteraction();
         }
       }
+      else if (Event.key.code == sf::Keyboard::V)
+      {
+        if (Lantern->getBaseIntensity() > 0.45f)
+        {
+          Lantern->setBaseIntensity(0.35f);
+        }
+        else
+        {
+          Lantern->setBaseIntensity(0.5f);
+        }
+      }
       else
         Key2IsPressed[Event.key.code] = true;
     }

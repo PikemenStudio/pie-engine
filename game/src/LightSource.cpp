@@ -12,7 +12,7 @@
 using namespace std::chrono;
 
 LightSource::LightSource(float X, float Y, float Intens)
-    : WorldCoords(X, Y), Intensity(Intens)
+    : WorldCoords(X, Y), Intensity(Intens), BaseIntensity(Intens)
 {
   IntensityIntervalMs = 300.0f;
   IntervalStart = high_resolution_clock::now();
@@ -26,7 +26,7 @@ void LightSource::update()
   {
     // generate new interval
     // change intensity
-    Intensity = 0.45 + static_cast<float>(rand() % 1000) / 1000 * 0.03;
+    Intensity = BaseIntensity + static_cast<float>(rand() % 1000) / 1000 * 0.03;
     IntensityIntervalMs = 50 + static_cast<float>(rand() % 1000) / 1000 * 250;
     IntervalStart = high_resolution_clock::now();
   }
