@@ -53,6 +53,10 @@ public:
   }
   virtual void scaleBy(glm::vec3 Vector) { this->Scale = Vector; }
 
+  virtual glm::vec3 getPosition() { return Position; }
+  virtual glm::mat4 getRotation() { return Rotation; }
+  virtual glm::vec3 getScale() { return Scale; }
+
   virtual glm::mat4 calculateTransformation() = 0;
 
 protected:
