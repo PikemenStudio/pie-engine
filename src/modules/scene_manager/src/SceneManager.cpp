@@ -9,7 +9,7 @@
 SceneManager::SceneManager(SceneManagerProps Props) {}
 
 void SceneManager::addObject(std::shared_ptr<BaseObject> Object) {
-  Objects[Object->getDumpName()][Object->getType()].push_back(Object);
+  Objects[Object->getDumpName()][Object->getType()][Object->getTextureName()].push_back(Object);
 }
 
 bool SceneManager::goToNextDump() {

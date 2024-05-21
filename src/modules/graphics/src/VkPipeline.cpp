@@ -1239,18 +1239,20 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 void vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
                 vk::CommandBuffer CommandBuffer, uint32_t Offset) {
-  std::string DumpName = Objects[0]->getDumpName();
-  prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
+  // Iterate through textures
+  for (auto &[TextureName, ObjectsSet] : Objects) {
+    std::string DumpName = ObjectsSet[0]->getDumpName();
+    prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
 
-  BaseObject::ObjectTypes Type = Objects[0]->getType();
-  std::string TypeName = BaseObject::toString(Type);
+    BaseObject::ObjectTypes Type = ObjectsSet[0]->getType();
+    std::string TypeName = BaseObject::toString(Type);
 
-  std::string TextureName = Objects[0]->getTextureName();
-
-  this->Textures[TextureName]->use(CommandBuffer, this->PipelineBundle->Layout);
-  CommandBuffer.draw(
-      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Size, Objects.size(),
-      this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Offset, Offset);
+    this->Textures[TextureName]->use(CommandBuffer,
+                                     this->PipelineBundle->Layout);
+    CommandBuffer.draw(
+        this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Size, Objects.size(),
+        this->MeshTypes.Dumps[DumpName].Meshes[TypeName].Offset, Offset);
+  }
 }
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,

@@ -120,7 +120,7 @@ public:
     std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
         new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
     Object2->setName("Square");
-    Object2->setTextureName("Texture");
+    Object2->setTextureName("Texture1");
     Object2->setDumpName("TS");
 
     Obj = Object;
@@ -175,6 +175,10 @@ public:
         "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
         "sources/texture.jpg",
         "Texture");
+    GraphicAdapterInstance->ImplInstance.addTexture(
+        "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+        "sources/OIG3.JiRSM54Q19NgBbSeHmTz.jpeg",
+        "Texture1");
 
     std::thread Thread(moveObject);
     Thread.detach();

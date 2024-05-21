@@ -58,7 +58,8 @@ struct SceneManagerFacadeStructs {
     glm::mat4 ViewProjection;
   };
 
-  using OneTypeObjects = std::vector<std::shared_ptr<BaseObject>>;
+  using OneTextureObjects = std::vector<std::shared_ptr<BaseObject>>;
+  using OneTypeObjects = std::map<std::string, OneTextureObjects>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

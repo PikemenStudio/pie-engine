@@ -14,7 +14,8 @@
 
 class SceneManager {
 public:
-  using OneTypeObjects = std::vector<std::shared_ptr<BaseObject>>;
+  using OneTextureObjects = std::vector<std::shared_ptr<BaseObject>>;
+  using OneTypeObjects = std::map<std::string, OneTextureObjects>;
 
   struct SceneManagerProps {};
 
@@ -40,7 +41,9 @@ public:
     for (auto &[DumpName, MultiTypeObjects] : Objects) {
       for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
         for (auto &Object : OneTypeObjects) {
-          Result.push_back(Object->calculateTransformation());
+          for (auto &ObjectWithTexture : Object.second) {
+            Result.push_back(ObjectWithTexture->calculateTransformation());
+          }
         }
       }
     }
