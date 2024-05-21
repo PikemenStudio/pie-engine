@@ -9,32 +9,36 @@
 #include "Interactable.h"
 
 class Tunnel;
+class Player;
 class DimmingTransition;
 
 class Passage : public Drawable, public Interactable
 {
 public:
-  Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X);
+  Passage(const Tunnel* T1, const Tunnel* T2, const Player* Pl, float X);
 
   void setTransition(DimmingTransition* T)
   {
     this->Transition = T;
   }
 
-  const Tunnel* getCurrTunnel() const { return CurrTunnel; }
-  void setCurrTunnel(const Tunnel* T) { CurrTunnel = T; }
+//  const Tunnel* getCurrTunnel() const { return CurrTunnel; }
+//  void setCurrTunnel(const Tunnel* T) { CurrTunnel = T; }
 
   bool isInInteractZone(const Player* Pl) override;
   void runInteraction() override;
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
 
 private:
-  void computeYCoord();
+  void computeYCoord(const Tunnel* Tnl);
 
-  const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
+//  const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
+  const Tunnel* Tunnel1, * Tunnel2;
+  const Player* PlayerObj;
   DimmingTransition* Transition = nullptr;
   float XCoord;
-  float YCoord;
+  std::map<const Tunnel*, float> YCoords;
+//  float YCoord;
   float Height;
 
   static constexpr float PassageWidth = 0.55f;

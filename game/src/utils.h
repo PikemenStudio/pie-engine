@@ -40,4 +40,6 @@ std::string loadTextFile(const std::string& Name);
 // A random number from 0 to 1
 float rand01();
 
+float randInRange(float From, float To);
+
 #endif // ENGINE_UTILS_H

@@ -33,6 +33,7 @@ public:
 
   void moveToTunnel(Tunnel* To);
 
+  void setCurrTunnel(Tunnel* T) { CurrTunnel = T; }
   Tunnel* getCurrTunnel() const { return CurrTunnel; }
 
   void setPosition(sf::Vector2f C)

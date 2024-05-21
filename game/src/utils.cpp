@@ -45,3 +45,8 @@ float rand01()
 {
   return rand() % 1000000 / 1000000.0f;
 }
+
+float randInRange(float From, float To)
+{
+  return From + (To - From) * rand01();
+}

@@ -11,23 +11,22 @@
 
 #include <iostream>
 
-Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Tunnel* Current, float X)
-  : Tunnel1(T1), Tunnel2(T1), CurrTunnel(Current), XCoord(X)
+Passage::Passage(const Tunnel* T1, const Tunnel* T2, const Player* Pl, float X)
+  : Tunnel1(T1), Tunnel2(T2), PlayerObj(Pl), XCoord(X)
 {
-//  this->Transition = Transition;
-
   Tex.loadFromFile("../../game/resources/cave_entrance_2.png");
 
   Height = static_cast<float>(Tex.getSize().y) / Tex.getSize().x * PassageWidth;
 
-  computeYCoord();
+  computeYCoord(T1);
+  computeYCoord(T2);
 }
 
 bool Passage::isInInteractZone(const Player* Pl)
 {
   Tunnel* PlTunnel = Pl->getCurrTunnel();
 
-  if (PlTunnel != CurrTunnel)
+  if (PlTunnel != Tunnel1 && PlTunnel != Tunnel2)
     return false;
 
   const auto& PlPos = Pl->getPosition();
@@ -40,19 +39,24 @@ void Passage::runInteraction()
     Transition->play();
 }
 
-void Passage::computeYCoord()
+void Passage::computeYCoord(const Tunnel* Tnl)
 {
-  // PassageWidth
-  float LeftBottomYCoord = CurrTunnel->getFloorYCoord(XCoord - PassageWidth / 2);
-  float RightBottomYCoord = CurrTunnel->getFloorYCoord(XCoord + PassageWidth / 2);
+//  Tunnel* CurrTunnel = PlayerObj->getCurrTunnel();
 
-  YCoord = std::min(LeftBottomYCoord, RightBottomYCoord) + Height / 2;
+  float LeftBottomYCoord = Tnl->getFloorYCoord(XCoord - PassageWidth / 2);
+  float RightBottomYCoord = Tnl->getFloorYCoord(XCoord + PassageWidth / 2);
+  YCoords[Tnl] = std::min(LeftBottomYCoord, RightBottomYCoord) + Height / 2;
 }
 
 void Passage::draw(sf::RenderTarget &Win, const WorldWindow &WorldWindowObj)
 {
+  const Tunnel* CurrT = PlayerObj->getCurrTunnel();
+
+  if (CurrT != Tunnel1 && CurrT != Tunnel2)
+    return;
+
   auto CenterScreenCoords = worldCoordsToScreen(
-      {XCoord, YCoord},
+      {XCoord, YCoords[CurrT]},
       WorldWindowObj);
   auto SizePx = worldDeltaToScreen({PassageWidth, Height}, WorldWindowObj);
 
