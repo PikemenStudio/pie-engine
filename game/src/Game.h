@@ -52,11 +52,11 @@ private:
   // game objects
   std::vector<std::unique_ptr<Tunnel>> Tunnels;
   std::vector<std::unique_ptr<Passage>> Passages;
+  std::vector<std::unique_ptr<DimmingTransition>> Transitions;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
   std::unique_ptr<WorldWindow> WorldWindowObj;
-  std::unique_ptr<DimmingTransition> Transition;
 
   std::vector<SolidObject*> SolidObjects;
   std::vector<Interactable*> Interactables;

@@ -99,10 +99,12 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
 
   Passages.push_back(std::make_unique<Passage>(
       Tunnels[0].get(), Tunnels[1].get(), Tunnels[0].get(), 2.0));
-  Transition = std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
+  Transitions.push_back(std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
     transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
-  });
-  Passages.back()->setTransition(Transition.get());
+  }));
+
+  for (int I = 0; I < Passages.size(); I++)
+    Passages[I]->setTransition(Transitions[I].get());
 
   WorldWindowObj = std::make_unique<WorldWindow>(
       sf::Vector2f(0, 0), sf::Vector2f(3, 2), Tunnels[0]->getStartX(),
@@ -154,9 +156,10 @@ void Game::handleUserInput()
 void Game::processLogic(float FrameDrawingTimeMs)
 {
   PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
-
   Lantern->update();
-  Transition->update();
+
+  for (const auto& T : Transitions)
+    T->update();
 
   WorldWindowObj->updateByPlayerPos(PlayerObj->getPosition());
 }
