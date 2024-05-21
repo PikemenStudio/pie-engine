@@ -50,3 +50,8 @@ float randInRange(float From, float To)
 {
   return From + (To - From) * rand01();
 }
+
+int randIntInRange(int From, int To)
+{
+  return From + (To - From + 1) * rand01();
+}

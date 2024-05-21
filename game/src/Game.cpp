@@ -66,7 +66,7 @@ void Game::initGameObjects()
       Lantern.get(), nullptr);
   generateTunnels(PlSize);
 
-  PlayerObj->setCurrTunnel(Tunnels[Tunnels.size() - 1].get());
+  PlayerObj->setCurrTunnel(Tunnels.back().get());
   positionPlayer();
 
   SolidObjects.push_back(PlayerObj.get());
@@ -86,62 +86,79 @@ void Game::positionPlayer()
   } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
 }
 
+void Game::createPassage(Tunnel* T1, Tunnel* T2, float XCoord)
+{
+  auto Pass = std::make_unique<Passage>(T1, T2, PlayerObj.get(), XCoord);
+  Transitions.push_back(
+      std::make_unique<DimmingTransition>(
+          BackgrIntensity,
+          [this, T1, T2, &Pass](){
+            transferToTunnel(T1, T2, Pass.get());
+          }));
+  Passages.push_back(std::move(Pass));
+}
+
 void Game::generateTunnels(const sf::Vector2f& PlSize)
 {
-  constexpr float MinTunnelLen = 5.0f;
-  constexpr float MaxTunnelLen = 10.0f;
+  constexpr float MinTunnelLen = 3.0f;
+  constexpr float MaxTunnelLen = 4.0f;
   constexpr float StepX = 0.01f;
 
   float CurrTunnelLen = MinTunnelLen + rand01() * (MaxTunnelLen - MinTunnelLen);
   float StartX = -CurrTunnelLen / 2;
   float EndX = CurrTunnelLen / 2;
-  bool ClosedRight = rand01() > 0.5;
+  bool GenPassageInRight = rand01() > 0.5;
+
+  LOG_F(INFO, "GenPassageInRight = %b", GenPassageInRight);
+
+//  Tunnel* PrevTunnel, * CurrTunnel;
 
   auto T = std::make_unique<Tunnel>(
       StartX, EndX, StepX,
       PlSize.x, PlSize.y,
-      !ClosedRight, ClosedRight);
+      !GenPassageInRight, GenPassageInRight);
   T->setVisible(false);
   Tunnels.push_back(std::move(T));
+//  PrevTunnel = T.get();
 
-  float PassageX;
-  if (ClosedRight)
-    PassageX = randInRange(EndX - CurrTunnelLen * 0.1f, EndX - CurrTunnelLen * 0.05f);
-  else
-    PassageX = randInRange(StartX + CurrTunnelLen * 0.05f, StartX + CurrTunnelLen * 0.1f);
+//  int NumTunnels = randIntInRange(5, 10);
+  int NumTunnels = 1;
 
-  CurrTunnelLen = randInRange(MinTunnelLen, MaxTunnelLen);
-  StartX = PassageX - rand01() * CurrTunnelLen;
-  EndX = StartX + CurrTunnelLen;
-  Tunnels.push_back(std::make_unique<Tunnel>(StartX, EndX, StepX,
-                                             PlSize.x, PlSize.y,
-                                             true, true));
+  for (int I = 0; I < NumTunnels; I++)
+  {
+    float PassageX;
+    if (GenPassageInRight)
+      PassageX = randInRange(EndX - CurrTunnelLen * 0.2f, EndX - CurrTunnelLen * 0.1f);
+    else
+      PassageX = randInRange(StartX + CurrTunnelLen * 0.1f, StartX + CurrTunnelLen * 0.2f);
 
-  Passages.push_back(std::make_unique<Passage>(
-      Tunnels[0].get(), Tunnels[1].get(), PlayerObj.get(), PassageX));
-  Transitions.push_back(std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
-    transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
-  }));
+    CurrTunnelLen = randInRange(MinTunnelLen, MaxTunnelLen);
+    StartX = PassageX - randInRange(0.1, 0.9) * CurrTunnelLen;
+    EndX = StartX + CurrTunnelLen;
+
+    GenPassageInRight = PassageX - StartX < CurrTunnelLen / 2;
+
+    T = std::make_unique<Tunnel>(StartX, EndX, StepX,
+                                 PlSize.x, PlSize.y,
+                                 true, true);
+    T->setVisible(false);
+    Tunnels.push_back(std::move(T));
+
+    createPassage(Tunnels[Tunnels.size() - 2].get(),
+                  Tunnels[Tunnels.size() - 1].get(),
+                  PassageX);
+  }
+
+  // Finish
+
+  Tunnel* LastTunnel = Tunnels.back().get();
+  LastTunnel->setVisible(true);
 
   for (int I = 0; I < Passages.size(); I++)
     Passages[I]->setTransition(Transitions[I].get());
-//  Tunnels.push_back(std::make_unique<Tunnel>(-4.0f, 4.0f, 0.01f,
-//                                             PlSize.x, PlSize.y,
-//                                             true, false));
-//  Tunnels[1]->setVisible(false);
-//
-//  Passages.push_back(std::make_unique<Passage>(
-//      Tunnels[0].get(), Tunnels[1].get(), Tunnels[0].get(), 2.0));
-//  Transitions.push_back(std::make_unique<DimmingTransition>(BackgrIntensity, [this](){
-//    transferToTunnel(Tunnels[0].get(), Tunnels[1].get(), Passages.back().get());
-//  }));
-//
-//  for (int I = 0; I < Passages.size(); I++)
-//    Passages[I]->setTransition(Transitions[I].get());
-
   WorldWindowObj = std::make_unique<WorldWindow>(
-      sf::Vector2f(0, 0), sf::Vector2f(3, 2), Tunnels[1]->getStartX(),
-      Tunnels[1]->getEndX());
+      sf::Vector2f(0, 0), sf::Vector2f(3, 2),
+      LastTunnel->getStartX(), LastTunnel->getEndX());
 }
 
 void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)

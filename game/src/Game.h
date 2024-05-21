@@ -37,6 +37,7 @@ private:
 
   void positionPlayer();
 
+  void createPassage(Tunnel* T1, Tunnel* T2, float XCoord);
   void generateTunnels(const sf::Vector2f& PlSize);
   void transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass);
 

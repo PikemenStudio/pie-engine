@@ -42,4 +42,7 @@ float rand01();
 
 float randInRange(float From, float To);
 
+// Including From and To
+int randIntInRange(int From, int To);
+
 #endif // ENGINE_UTILS_H

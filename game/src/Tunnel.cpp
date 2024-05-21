@@ -9,7 +9,6 @@
 
 #include <noise/noise.h>
 
-#include <bits/stdc++.h>
 #include <loguru.hpp>
 
 static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float CurrX)
@@ -21,9 +20,9 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float 
                bool ClosedLeft, bool ClosedRight)
 {
   noise::module::Perlin NoiseGenFloor;
-  NoiseGenFloor.SetSeed(time(nullptr));
+  NoiseGenFloor.SetSeed(rand());
   noise::module::Perlin NoiseGenCeiling;
-  NoiseGenCeiling.SetSeed(time(nullptr) + 100);
+  NoiseGenCeiling.SetSeed(rand());
 
   this->StartX = StartX;
   this->StepX = StepX;
