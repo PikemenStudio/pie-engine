@@ -22,6 +22,7 @@ class Passage;
 class Drawable;
 class Interactable;
 class DimmingTransition;
+class Rat;
 
 class Game
 {
@@ -41,6 +42,8 @@ private:
   void generateTunnels(const sf::Vector2f& PlSize);
   void transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass);
 
+  void generateRats();
+
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
   void renderScene();
@@ -57,6 +60,7 @@ private:
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;
   std::unique_ptr<LightSource> Lantern;
+  std::vector<std::unique_ptr<Rat>> Rats;
   std::unique_ptr<WorldWindow> WorldWindowObj;
 
   std::vector<SolidObject*> SolidObjects;

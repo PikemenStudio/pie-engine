@@ -45,4 +45,14 @@ float randInRange(float From, float To);
 // Including From and To
 int randIntInRange(int From, int To);
 
+inline sf::Vector2f operator*(sf::Vector2f A, float B)
+{
+  return sf::Vector2f(A.x * B, A.y * B);
+}
+
+inline sf::Vector2f operator*(float B, sf::Vector2f A)
+{
+  return A * B;
+}
+
 #endif // ENGINE_UTILS_H

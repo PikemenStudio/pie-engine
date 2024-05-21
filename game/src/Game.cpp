@@ -8,6 +8,7 @@
 #include "LightSource.h"
 #include "Passage.h"
 #include "Player.h"
+#include "Rat.h"
 #include "Tunnel.h"
 #include "WorldWindow.h"
 
@@ -68,6 +69,8 @@ void Game::initGameObjects()
 
   PlayerObj->setCurrTunnel(Tunnels.back().get());
   positionPlayer();
+
+  generateRats();
 
   SolidObjects.push_back(PlayerObj.get());
   for (const auto& T : Tunnels)
@@ -170,6 +173,25 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
   PlayerObj->moveToTunnel(To);
 }
 
+void Game::generateRats()
+{
+  int RatsCount = 10;
+
+  Tunnel* CurrTunnel = PlayerObj->getCurrTunnel();
+  float CurrTunnelLen = CurrTunnel->getEndX() - CurrTunnel->getStartX();
+
+  for (int I = 0; I < RatsCount; I++)
+  {
+    float RatXCoord = randInRange(0.1, 0.9) * CurrTunnelLen + CurrTunnel->getStartX();
+    auto NewRat = std::make_unique<Rat>(sf::Vector2f(0.0f, 0.0f));
+    NewRat->setPosition(
+        sf::Vector2f(
+            RatXCoord,
+            CurrTunnel->getFloorYCoord(RatXCoord) + NewRat->getSize().y * 3));
+    Rats.push_back(std::move(NewRat));
+  }
+}
+
 void Game::handleUserInput()
 {
   sf::Event Event;
@@ -205,6 +227,8 @@ void Game::processLogic(float FrameDrawingTimeMs)
   PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
   Lantern->update();
 
+  for (const auto& R : Rats)
+    R->update(FrameDrawingTimeMs, SolidObjects);
   for (const auto& T : Transitions)
     T->update();
 
@@ -221,6 +245,12 @@ void Game::renderScene()
     P->draw(*RenderTex, *WorldWindowObj);
 
   PlayerObj->draw(*RenderTex, *WorldWindowObj);
+
+  for (auto& R : Rats)
+  {
+    R->draw(*RenderTex, *WorldWindowObj);
+  }
+
   PlayerObj->getCurrTunnel()->draw(*RenderTex, *WorldWindowObj);
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
