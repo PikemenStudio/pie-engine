@@ -37,4 +37,7 @@ T vectorLenSquared(const sf::Vector2<T>& Vec)
 
 std::string loadTextFile(const std::string& Name);
 
+// A random number from 0 to 1
+float rand01();
+
 #endif // ENGINE_UTILS_H

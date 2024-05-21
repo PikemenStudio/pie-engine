@@ -40,3 +40,8 @@ std::string loadTextFile(const std::string& Name)
 
   return Buffer.str();
 }
+
+float rand01()
+{
+  return rand() % 1000000 / 1000000.0f;
+}

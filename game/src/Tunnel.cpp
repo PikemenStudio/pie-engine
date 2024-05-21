@@ -17,7 +17,8 @@ static float getNoiseValFrom0To1(const noise::module::Module& NoiseGen, float Cu
   return (std::clamp(NoiseGen.GetValue(CurrX, 0, 0), -1.0, 1.0) + 1) / 2;
 }
 
-Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight)
+Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight,
+               bool ClosedLeft, bool ClosedRight)
 {
   noise::module::Perlin NoiseGenFloor;
   NoiseGenFloor.SetSeed(time(nullptr));
@@ -46,7 +47,7 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float 
     float FloorY;
 
     // close the ends of the tunnel
-    if (I < 10 || I >= PointsCount - 10)
+    if (ClosedLeft && I < 10 || ClosedRight && I >= PointsCount - 10)
 //      FloorY = -0.7 + NoiseVal * (FloorTop - (-0.7));
       FloorY = -0.5;
     else
@@ -56,7 +57,7 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float 
     float CeilY;
 
     // close the ends of the tunnel
-    if (I < 10 || I >= PointsCount - 10)
+    if (ClosedLeft && I < 10 || ClosedRight && I >= PointsCount - 10)
     {
 //      CeilY = CeilingBottom + NoiseVal * (-0.3 - CeilingBottom);
       CeilY = -0.5;
@@ -75,8 +76,10 @@ Tunnel::Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float 
   }
 }
 
-Tunnel::Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight)
-    : Tunnel(StartX, StepX, static_cast<int>((EndX - StartX) / StepX) + 1, PlWidth, PlHeight)
+Tunnel::Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight,
+               bool ClosedLeft, bool ClosedRight)
+    : Tunnel(StartX, StepX, static_cast<int>((EndX - StartX) / StepX) + 1, PlWidth, PlHeight,
+             ClosedLeft, ClosedRight)
 {
 }
 

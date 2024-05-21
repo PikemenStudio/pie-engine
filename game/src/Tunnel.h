@@ -18,8 +18,10 @@ class Player;
 class Tunnel : public SolidObject, public Drawable
 {
 public:
-  Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight);
-  Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight);
+  Tunnel(float StartX, float StepX, int PointsCount, float PlWidth, float PlHeight,
+         bool ClosedLeft, bool ClosedRight);
+  Tunnel(float StartX, float EndX, float StepX, float PlWidth, float PlHeight,
+         bool ClosedLeft, bool ClosedRight);
 
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithPlayer(const Player* Pl) const;
