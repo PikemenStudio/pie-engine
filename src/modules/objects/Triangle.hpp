@@ -28,7 +28,7 @@ protected:
   std::array<glm::vec3, 3> Vertexes;
   glm::vec3 Position;
   glm::mat4 Rotation;
-  glm::vec3 Scale = {1.0f, 123.0f, 12123123.5f};
+  glm::vec3 Scale = {1.0f, 1.0f, 1.0f};
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_OBJECTS_TRIANGLE_HPP

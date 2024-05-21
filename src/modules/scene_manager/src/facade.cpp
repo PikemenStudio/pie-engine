@@ -21,7 +21,7 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::~SceneManagerBaseImpl() {
 template <SceneManagerDependenciesConcept Dep>
 void scene_manager_facades::SceneManagerBaseImpl<Dep>::addObject(
     std::shared_ptr<BaseObject> Object) {
-  static_cast<SceneManager *>(Data)->addObject(std::move(Object));
+  static_cast<SceneManager *>(Data)->addObject(Object);
 }
 
 template <SceneManagerDependenciesConcept Dep>

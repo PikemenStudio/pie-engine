@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <thread>
 
 using WindowType = window_api_impls::WindowApiFacadeGlfwImpl;
 using ShaderLoaderType = shader_loader_impls::ShaderLoaderSimpleImpl;
@@ -46,6 +47,17 @@ using RenderableSceneFacadeType =
 using GraphicApiFacadeType = GraphicApiFacade<
     GraphicDependenciesType,
     graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependenciesType>>;
+
+std::shared_ptr<BaseObject> Obj;
+
+void moveObject() {
+  while (true) {
+    static float I = 0.0f;
+    Obj->moveBy({I + 0.1, 0.0, 1.0});
+    Obj->rotateBy({0.0f, 0.0f, 1.0f}, 30);
+    I += 0.0000001f;
+  }
+}
 
 class RenderableSceneTest {
 public:
@@ -95,18 +107,19 @@ public:
         std::make_shared<SceneManagerFacadeType>(
             SceneManagerFacadeStructs::SceneManagerProps<
                 SceneManagerDependencies>{.Dependencies = {}});
-    std::unique_ptr<BaseObject> Object = std::unique_ptr<BaseObject>(
+    std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
-    Object->moveBy({0.0, 0.0, 1.0});
-    Object->rotateBy({0.0f, 0.0f, 1.0f}, 30);
-    std::unique_ptr<BaseObject> Object1 = std::unique_ptr<BaseObject>(
+    //    Object->moveBy({0.0, 0.0, 1.0});
+    //    Object->rotateBy({0.0f, 0.0f, 1.0f}, 30);
+    std::shared_ptr<BaseObject> Object1 = std::shared_ptr<BaseObject>(
         new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
-    std::unique_ptr<BaseObject> Object2 = std::unique_ptr<BaseObject>(
+    std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
         new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
 
-    SceneManagerInstance->ImplInstance.addObject(std::move(Object));
-    // SceneManagerInstance->ImplInstance.addObject(std::move(Object1));
-    // SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
+    Obj = Object;
+    SceneManagerInstance->ImplInstance.addObject(Object);
+    SceneManagerInstance->ImplInstance.addObject(Object1);
+//    SceneManagerInstance->ImplInstance.addObject(std::move(Object2));
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
@@ -137,38 +150,40 @@ public:
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
     GraphicFacadeStructs::ObjectsData ObjectsData;
-    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData {
-      .Vertices = {0.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
-      .Colors = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-      .TexCoords = {0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}};
+    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData{
+        .Vertices = {0.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
+        .Colors = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+        .TexCoords = {0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}};
 
-      GraphicFacadeStructs::ObjectsData ObjectsData1;
-      GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
+    GraphicFacadeStructs::ObjectsData ObjectsData1;
+    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
 
-      GraphicAdapterInstance->ImplInstance.addTexture(
-          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
-          "sources/texture.jpg",
-          "Texture");
+    GraphicAdapterInstance->ImplInstance.addTexture(
+        "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+        "sources/texture.jpg",
+        "Texture");
 
-      RenderableSceneInstance->ImplInstance.runMainCycle();
-    }
-
-    void TearDown() {}
-
-    std::shared_ptr<GraphicApiFacadeType> GraphicAdapterInstance;
-
-    std::shared_ptr<RenderableSceneFacadeType> RenderableSceneInstance;
-  };
-
-  int main(int Argc, char *Argv[]) {
-    loguru::init(Argc, Argv);
-    // clang-format off
-  loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
-    // clang-format on
-
-    RenderableSceneTest Test;
-    Test.SetUp();
-    Test.TearDown();
-
-    return 0;
+    std::thread Thread(moveObject);
+    Thread.detach();
+    RenderableSceneInstance->ImplInstance.runMainCycle();
   }
+
+  void TearDown() {}
+
+  std::shared_ptr<GraphicApiFacadeType> GraphicAdapterInstance;
+
+  std::shared_ptr<RenderableSceneFacadeType> RenderableSceneInstance;
+};
+
+int main(int Argc, char *Argv[]) {
+  loguru::init(Argc, Argv);
+  // clang-format off
+  loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
+  // clang-format on
+
+  RenderableSceneTest Test;
+  Test.SetUp();
+  Test.TearDown();
+
+  return 0;
+}
