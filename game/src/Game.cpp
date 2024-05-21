@@ -100,8 +100,8 @@ void Game::createPassage(Tunnel* T1, Tunnel* T2, float XCoord)
 
 void Game::generateTunnels(const sf::Vector2f& PlSize)
 {
-  constexpr float MinTunnelLen = 3.0f;
-  constexpr float MaxTunnelLen = 4.0f;
+  constexpr float MinTunnelLen = 5.0f;
+  constexpr float MaxTunnelLen = 10.0f;
   constexpr float StepX = 0.01f;
 
   float CurrTunnelLen = MinTunnelLen + rand01() * (MaxTunnelLen - MinTunnelLen);
@@ -111,8 +111,6 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
 
   LOG_F(INFO, "GenPassageInRight = %b", GenPassageInRight);
 
-//  Tunnel* PrevTunnel, * CurrTunnel;
-
   auto T = std::make_unique<Tunnel>(
       StartX, EndX, StepX,
       PlSize.x, PlSize.y,
@@ -121,8 +119,8 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
   Tunnels.push_back(std::move(T));
 //  PrevTunnel = T.get();
 
-//  int NumTunnels = randIntInRange(5, 10);
-  int NumTunnels = 1;
+  int NumTunnels = randIntInRange(5, 10);
+//  int NumTunnels = 1;
 
   for (int I = 0; I < NumTunnels; I++)
   {
