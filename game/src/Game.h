@@ -46,12 +46,15 @@ private:
 
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);
+
+  void drawHUD();
   void renderScene();
 
   std::unique_ptr<sf::RenderWindow> Window;
   std::unique_ptr<sf::Shader> PostprocessingShader;
   std::unique_ptr<sf::RenderTexture> RenderTex;
   std::unique_ptr<sf::Sprite> ScreenSprite;
+  std::unique_ptr<sf::Font> TextFont;
 
   // game objects
   std::vector<std::unique_ptr<Tunnel>> Tunnels;

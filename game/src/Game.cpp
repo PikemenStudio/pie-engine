@@ -30,6 +30,12 @@ Game::Game()
   RenderTex->create(ScreenWidth, ScreenHeight);
   RenderTex->display();
   ScreenSprite = std::make_unique<sf::Sprite>(RenderTex->getTexture());
+  TextFont = std::make_unique<sf::Font>();
+//  if (!TextFont->loadFromFile("../../game/resources/Fonts/Ubuntu-B.ttf"))
+  if (!TextFont->loadFromFile("../../game/resources/Fonts/Ostrovsky-Bold.otf"))
+  {
+    LOG_F(ERROR, "Cannot load font!");
+  }
 
   initKeyboard();
 
@@ -257,6 +263,56 @@ void Game::processLogic(float FrameDrawingTimeMs)
   WorldWindowObj->updateByPlayerPos(PlayerObj->getPosition());
 }
 
+void Game::drawHUD()
+{
+  sf::Text HealthText, OilText, StaminaText;
+
+  HealthText.setFont(*TextFont.get());
+  OilText.setFont(*TextFont.get());
+  StaminaText.setFont(*TextFont.get());
+
+  HealthText.setString(L"Здоровье: " +
+                       std::to_wstring(static_cast<int>(PlayerObj->getHealth() * 100)));
+  OilText.setString(L"Масло: " +
+                       std::to_wstring(static_cast<int>(PlayerObj->getOil() * 100)));
+  StaminaText.setString(L"Силы: " +
+                       std::to_wstring(static_cast<int>(PlayerObj->getStamina() * 100)));
+
+  // in pixels, not points!
+  constexpr float WorldCharSize = 0.071f;
+  HealthText.setCharacterSize(
+      worldDeltaToScreen(sf::Vector2f(WorldCharSize, WorldCharSize),
+                         *WorldWindowObj).x);
+  OilText.setCharacterSize(
+      worldDeltaToScreen(sf::Vector2f(WorldCharSize, WorldCharSize),
+                         *WorldWindowObj).x);
+  StaminaText.setCharacterSize(
+      worldDeltaToScreen(sf::Vector2f(WorldCharSize, WorldCharSize),
+                         *WorldWindowObj).x);
+
+  const sf::Color TextColor(200, 200, 200);
+  HealthText.setFillColor(TextColor);
+  OilText.setFillColor(TextColor);
+  StaminaText.setFillColor(TextColor);
+
+  constexpr float XCoord = 0.05f;
+
+  HealthText.setPosition(worldDeltaToScreen({XCoord, 0.05f},
+                                            *WorldWindowObj));
+  OilText.setPosition(
+      worldDeltaToScreen(
+          {XCoord, 0.05f + WorldCharSize + 0.01f},
+          *WorldWindowObj));
+  StaminaText.setPosition(
+      worldDeltaToScreen(
+          {XCoord, 0.05f + (WorldCharSize + 0.01f) * 2},
+          *WorldWindowObj));
+
+  Window->draw(HealthText);
+  Window->draw(OilText);
+  Window->draw(StaminaText);
+}
+
 void Game::renderScene()
 {
   Window->clear(sf::Color::Black);
@@ -282,6 +338,7 @@ void Game::renderScene()
   PostprocessingShader->setUniform("backgr_intensity", BackgrIntensity);
 
   Window->draw(*ScreenSprite, PostprocessingShader.get());
+  drawHUD();
   Window->display();
 }
 
