@@ -165,7 +165,8 @@ bool Player::isCollision(const SolidObject* Other) const
   if (dynamic_cast<const Player*>(Other))
     return false;
   if (const Rat* R = dynamic_cast<const Rat*>(Other))
-    return isCollisionWithRat(R);
+    return false;
+//    return isCollisionWithRat(R);
   if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
     return T->isCollisionWithPlayer(this);
 

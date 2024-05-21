@@ -18,7 +18,7 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
 {
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
 
-//  DxDy.x = 0.3;
+  DxDy.x = 0.3;
   DxDy.y -= 6 * FrameDrawingTimeS;
   OnGround = false;
 
@@ -27,24 +27,24 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
 
 void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
 {
-//  auto OldPos = Position;
-//  setPosition(Position + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
-//  if (auto* CollObj = checkCollisionWithObjects(Objects))
-//  {
-//    auto PosBeforeSpaceSearch = Position;
-//
-//    // try to go up and down a little
-//    setPosition(Position + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
-//
-//    if (CollObj->isCollision(this))
-//    {
-//      setPosition(PosBeforeSpaceSearch);
-//      setPosition(Position - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
-//
-//      if (CollObj->isCollision(this))
-//        setPosition(OldPos);
-//    }
-//  }
+  auto OldPos = Position;
+  setPosition(Position + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
+  if (auto* CollObj = checkCollisionWithObjects(Objects))
+  {
+    auto PosBeforeSpaceSearch = Position;
+
+    // try to go up and down a little
+    setPosition(Position + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+
+    if (CollObj->isCollision(this))
+    {
+      setPosition(PosBeforeSpaceSearch);
+      setPosition(Position - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+
+      if (CollObj->isCollision(this))
+        setPosition(OldPos);
+    }
+  }
 
   setPosition(Position + sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
   if (checkCollisionWithObjects(Objects))
@@ -79,7 +79,8 @@ bool Rat::isCollision(const SolidObject* Other) const
   if (dynamic_cast<const Rat*>(Other))
     return false;
   if (const Player* P = dynamic_cast<const Player*>(Other))
-    return P->isCollisionWithRat(this);
+    return false;
+//    return P->isCollisionWithRat(this);
   if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
     return T->isCollisionWithBoundingBox(Position, Size);
 
