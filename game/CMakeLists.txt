@@ -35,7 +35,9 @@ add_executable(game_exe
         src/Passage.h
         src/Drawable.h
         src/DimmingTransition.h
-        src/Interactable.h)
+        src/Interactable.h
+        src/Rat.cpp
+        src/Rat.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
