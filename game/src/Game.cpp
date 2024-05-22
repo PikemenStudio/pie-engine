@@ -139,8 +139,8 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
        Tunnels[0]->getCeilingYCoord(LightPos)) / 2.0f, 0.4f));
   LightSources[1]->setVisible(false);
 
-//  int NumTunnels = randIntInRange(5, 10);
-  int NumTunnels = 1;
+  int NumTunnels = randIntInRange(5, 10);
+//  int NumTunnels = 1;
 
   for (int I = 0; I < NumTunnels; I++)
   {
