@@ -60,6 +60,9 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
       }
     }
 
+    LOG_F(INFO, "State::Idle");
+    LOG_F(INFO, "IterationsToRunInOneDirection: %d", IterationsToRunInOneDirection);
+
     if (IterationsToRunInOneDirection < 1)
     {
       TurnedLeft = !TurnedLeft;
@@ -206,15 +209,13 @@ void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
                      sf::Vector2f(CharacterCenterXPx * SpriteScale,
                                   CharacterCenterYPx * SpriteScale));
 
-  if (DxDy.x < 0 || (TurnedLeft && DxDy.x == 0))
+  if (TurnedLeft)
   {
-    TurnedLeft = true;
     Sprite.scale(-1, 1);
     Sprite.move(CharacterCenterXPx * 2 * SpriteScale, 0);
   }
-  else if (DxDy.x > 0 || (!TurnedLeft && DxDy.x == 0))
+  else
   {
-    TurnedLeft = false;
     Sprite.scale(1, 1);
   }
 
