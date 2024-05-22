@@ -200,8 +200,8 @@ void Game::generateRats()
 
 void Game::generateRatsInTunnel(Tunnel *T)
 {
-//  int RatsCount = randIntInRange(5, 8);
-  int RatsCount = 2;
+  int RatsCount = randIntInRange(5, 8);
+//  int RatsCount = 2;
 
   Tunnel* PlTunnel = PlayerObj->getCurrTunnel();
   Tunnel* CurrTunnel = T;
