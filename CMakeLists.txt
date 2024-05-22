@@ -5,7 +5,7 @@ set(LOGURU_WITH_STREAMS TRUE)
 # Set global flags
 
 if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_COMPILER "/usr/bin/g++-10")
+    set(CMAKE_CXX_COMPILER "/usr/bin/g++-10")
 endif (UNIX AND NOT APPLE)
 
 set(SFML_WARNINGS_AS_ERRORS OFF)
@@ -28,6 +28,7 @@ add_subdirectory(src/modules/shader_loader/src)
 add_subdirectory(src/modules/renderable_scene/src)
 add_subdirectory(src/modules/scene_manager/src)
 add_subdirectory(src/modules/objects)
+add_subdirectory(src/modules/input_manager)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
@@ -35,6 +36,7 @@ set(ADAPTERS ${ADAPTERS}
         src/modules/shader_loader/facades/facade.hpp
         src/modules/renderable_scene/facades/facade.hpp
         src/modules/scene_manager/facades/facade.hpp
+        src/modules/input_manager/InputManager.hpp
 )
 
 add_subdirectory(tests)
@@ -63,6 +65,9 @@ include_directories(src/modules/scene_manager/facades)
 
 target_link_libraries(main PRIVATE objects)
 include_directories(src/modules/objects)
+
+target_link_libraries(main PRIVATE input_manager)
+include_directories(src/modules/input_manager/facades)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)

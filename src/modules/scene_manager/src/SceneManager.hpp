@@ -28,6 +28,7 @@ public:
   SceneManager(SceneManagerProps Props);
 
   void addObject(std::shared_ptr<BaseObject> Object);
+  void removeObject(const std::string &ObjectName);
 
   bool goToNextDump();
   OneTypeObjects getNextObjects();

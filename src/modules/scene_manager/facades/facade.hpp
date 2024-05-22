@@ -92,6 +92,7 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
     ~SceneManager##name##Impl();                                               \
                                                                                \
     void addObject(std::shared_ptr<BaseObject> Object);                        \
+    void removeObject(const std::string &ObjectName);                          \
                                                                                \
     bool goToNextDump();                                                       \
     SceneManagerFacadeStructs::OneTypeObjects getNextObjects();                \

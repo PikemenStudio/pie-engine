@@ -25,6 +25,12 @@ void scene_manager_facades::SceneManagerBaseImpl<Dep>::addObject(
 }
 
 template <SceneManagerDependenciesConcept Dep>
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::removeObject(
+    const std::string &ObjectName) {
+  static_cast<SceneManager *>(Data)->removeObject(ObjectName);
+}
+
+template <SceneManagerDependenciesConcept Dep>
 bool scene_manager_facades::SceneManagerBaseImpl<Dep>::goToNextDump() {
   return static_cast<SceneManager *>(Data)->goToNextDump();
 }

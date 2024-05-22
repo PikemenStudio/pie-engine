@@ -9,6 +9,7 @@
 #include "modules/windows/facades/facade.hpp"
 
 #include "../src/modules/graphics/facades/facade.hpp"
+#include "../src/modules/input_manager/InputManager.hpp"
 #include "../src/modules/renderable_scene//facades/facade.hpp"
 #include "../src/modules/scene_manager/facades/facade.hpp"
 #include <GLFW/glfw3.h>
@@ -52,7 +53,7 @@ std::shared_ptr<BaseObject> Obj;
 std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
 
 void moveObject() {
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+  // std::this_thread::sleep_for(std::chrono::seconds(2));
 
   std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
       new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
@@ -62,10 +63,11 @@ void moveObject() {
   SceneManagerInstance1->ImplInstance.addObject(Object2);
 
   while (true) {
-    static float I = 0.0f;
-    Obj->moveBy({I + 0.1, 0.0, 1.0});
+    static uint64_t I = 0.0f;
+    Obj->moveBy({(float)I / 1000000000, 0.0, 1.0});
+    Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
     // Obj->rotateBy({0.0f, 0.0f, 1.0f}, 0);
-    I += 0.0000001f;
+    I += 1;
   }
 }
 
@@ -184,6 +186,14 @@ public:
         "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
         "sources/OIG3.JiRSM54Q19NgBbSeHmTz.jpeg",
         "Texture1");
+
+    InputManager::NativeType =
+        (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType();
+    InputManager::bindAction(GLFW_KEY_ESCAPE, [&]() {
+      glfwSetWindowShouldClose(
+          (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType(),
+          GLFW_TRUE);
+    });
 
     std::thread Thread(moveObject);
     Thread.detach();

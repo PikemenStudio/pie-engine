@@ -9,7 +9,26 @@
 SceneManager::SceneManager(SceneManagerProps Props) {}
 
 void SceneManager::addObject(std::shared_ptr<BaseObject> Object) {
-  Objects[Object->getDumpName()][Object->getType()][Object->getTextureName()].push_back(Object);
+  Objects[Object->getDumpName()][Object->getType()][Object->getTextureName()]
+      .push_back(Object);
+}
+
+void SceneManager::removeObject(const std::string &ObjectName) {
+  for (auto &[DumpName, MultiTypeObjects] : Objects) {
+    for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+      for (auto &Object : OneTypeObjects) {
+        const auto It =
+            std::find_if(Object.second.begin(), Object.second.end(),
+                         [&](auto &ObjectWithTexture) {
+                           return ObjectWithTexture->getName() == ObjectName;
+                         });
+        if (It != Object.second.end()) {
+          Object.second.erase(It);
+          return;
+        }
+      }
+    }
+  }
 }
 
 bool SceneManager::goToNextDump() {
