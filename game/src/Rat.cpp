@@ -21,7 +21,7 @@ Rat::Rat(const sf::Vector2f& Pos, const Tunnel* T) : Position(Pos), CurrTunnel(T
       "../../game/resources/Rats/RatRun2.png",
   });
   RunAnim->setLoop(true);
-  RunAnim->setFrameTime(0.1);
+  RunAnim->setFrameTime(0.2);
   RunAnim->start();
 }
 
@@ -49,6 +49,8 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
   switch (CurrState)
   {
   case State::Idle:
+    RunAnim->setFrameTime(0.2);
+
     if (TurnedLeft == PlPos.x < Position.x)
     {
       if ((Dist2ToPlayer <= Dist2ToSpotBrightLight) && BrightLight
@@ -161,9 +163,12 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
       LOG_F(INFO, "Collision with Player!");
       setPosition(OldPos);
 
-      Pl->damageByRat();
-      PlayerWasDamagedRecently = true;
-      IterationsToRunInOneDirection = randIntInRange(30, 50);
+      if (!PlayerWasDamagedRecently && CurrState == State::PlayerSpotted)
+      {
+        Pl->damageByRat();
+        PlayerWasDamagedRecently = true;
+        IterationsToRunInOneDirection = randIntInRange(30, 50);
+      }
 
       break;
     }
@@ -219,12 +224,12 @@ void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
     Sprite.scale(1, 1);
   }
 
-  sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
-  Rect.setPosition(ScreenTopLeft);
-  Rect.setOutlineThickness(5);
-  Rect.setOutlineColor(sf::Color::Cyan);
+//  sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
+//  Rect.setPosition(ScreenTopLeft);
+//  Rect.setOutlineThickness(5);
+//  Rect.setOutlineColor(sf::Color::Cyan);
 
-  Win.draw(Rect); // Draw bounding box
+//  Win.draw(Rect); // Draw bounding box
   Win.draw(Sprite);
 }
 

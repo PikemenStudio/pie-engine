@@ -148,16 +148,16 @@ void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTi
           setPosition(OldPos);
       }
     }
-    else
-    {
-      LOG_F(INFO, "Collision with Rat!");
-      setPosition(OldPos);
-      break;
-    }
+//    else
+//    {
+//      LOG_F(INFO, "Collision with Rat!");
+//      setPosition(OldPos);
+//      break;
+//    }
   }
 
   setPosition(Center + sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
-  if (checkCollisionWithObjects(Objects))
+  if (dynamic_cast<Tunnel*>(checkCollisionWithObjects(Objects)))
   {
     setPosition(Center - sf::Vector2f(0, DxDy.y * FrameDrawingTimeS));
 
