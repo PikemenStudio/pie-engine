@@ -43,6 +43,7 @@ private:
   void transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass);
 
   void generateRats();
+  void generateRatsInTunnel(Tunnel* T);
 
   void handleUserInput();
   void processLogic(float FrameDrawingTimeMs);

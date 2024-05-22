@@ -192,9 +192,19 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 
 void Game::generateRats()
 {
-  int RatsCount = 1;
+  for (const auto& T : Tunnels)
+  {
+    generateRatsInTunnel(T.get());
+  }
+}
 
-  Tunnel* CurrTunnel = PlayerObj->getCurrTunnel();
+void Game::generateRatsInTunnel(Tunnel *T)
+{
+//  int RatsCount = randIntInRange(5, 8);
+  int RatsCount = 2;
+
+  Tunnel* PlTunnel = PlayerObj->getCurrTunnel();
+  Tunnel* CurrTunnel = T;
   float CurrTunnelLen = CurrTunnel->getEndX() - CurrTunnel->getStartX();
 
   for (int I = 0; I < RatsCount; I++)
@@ -207,6 +217,7 @@ void Game::generateRats()
         sf::Vector2f(
             RatXCoord,
             CurrTunnel->getFloorYCoord(RatXCoord) + NewRat->getSize().y * 3));
+    NewRat->setVisible(CurrTunnel == PlTunnel);
     Rats.push_back(std::move(NewRat));
   }
 }
