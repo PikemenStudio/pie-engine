@@ -36,6 +36,7 @@ public:
   float getEndX() const { return StartX + (WorldCoordsYFloor.size() - 1) * StepX; }
 
   float getFloorYCoord(float XCoord) const;
+  float getCeilingYCoord(float XCoord) const;
 
 //  float getStepX() const { return StepX; }
 //  const std::vector<float>& getFloorCoords() const { return WorldCoordsYFloor; }

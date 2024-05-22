@@ -95,6 +95,18 @@ float Tunnel::getFloorYCoord(float XCoord) const
          (WorldCoordsYFloor[I + 1] - WorldCoordsYFloor[I]) * (XCoord - (StartX + I * StepX));
 }
 
+float Tunnel::getCeilingYCoord(float XCoord) const
+{
+  XCoord = std::clamp(XCoord, getStartX(), getEndX());
+  int I = static_cast<int>((XCoord - getStartX()) / StepX);
+
+  if (XCoord >= getEndX())
+    return WorldCoordsYCeiling[I];
+
+  return WorldCoordsYCeiling[I] +
+         (WorldCoordsYCeiling[I + 1] - WorldCoordsYCeiling[I]) * (XCoord - (StartX + I * StepX));
+}
+
 bool Tunnel::isCollision(const SolidObject* Other) const
 {
   if (!Visible)

@@ -28,7 +28,7 @@ public:
   bool isCollision(const SolidObject* Other) const override;
   bool isCollisionWithRat(const Rat* RatObj) const;
 
-  const LightSource* getLightSource() const { return LightSrc; }
+  LightSource* getLightSource() const { return LightSrc; }
 
   void draw(sf::RenderTarget &Win, const WorldWindow& WorldWindowObj) override;
 

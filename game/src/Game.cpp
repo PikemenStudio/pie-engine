@@ -64,13 +64,15 @@ void Game::initKeyboard()
 
 void Game::initGameObjects()
 {
-  Lantern = std::make_unique<LightSource>(0, 0, 0.4f);
+  // Player's lantern
+  LightSources.push_back(std::make_unique<LightSource>(0, 0, 0.4f));
+
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
   const sf::Vector2f PlSize = {0.05f, 0.3f};
   PlayerObj = std::make_unique<Player>(
       sf::Vector2f(0, 0), PlSize,
-      Lantern.get(), nullptr);
+      LightSources[0].get(), nullptr);
   generateTunnels(PlSize);
 
   PlayerObj->setCurrTunnel(Tunnels.back().get());
@@ -128,10 +130,17 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
       !GenPassageInRight, GenPassageInRight);
   T->setVisible(false);
   Tunnels.push_back(std::move(T));
-//  PrevTunnel = T.get();
 
-  int NumTunnels = randIntInRange(5, 10);
-//  int NumTunnels = 1;
+  // Exit light
+  float LightPos = GenPassageInRight ? Tunnels[0]->getStartX() : Tunnels[0]->getEndX();
+  LightSources.push_back(std::make_unique<LightSource>(
+      LightPos,
+      (Tunnels[0]->getFloorYCoord(LightPos) +
+       Tunnels[0]->getCeilingYCoord(LightPos)) / 2.0f, 0.4f));
+  LightSources[1]->setVisible(false);
+
+//  int NumTunnels = randIntInRange(5, 10);
+  int NumTunnels = 1;
 
   for (int I = 0; I < NumTunnels; I++)
   {
@@ -174,6 +183,9 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 {
   Tunnel* From = PlayerObj->getCurrTunnel() == T1 ? T1 : T2;
   Tunnel* To = From == T1 ? T2 : T1;
+
+  // Enable exit light in the last tunnel
+  LightSources[1]->setVisible(To == Tunnels[0].get());
 
   From->setVisible(false);
   To->setVisible(true);
@@ -244,13 +256,13 @@ void Game::handleUserInput()
       }
       else if (Event.key.code == sf::Keyboard::V)
       {
-        if (Lantern->getBaseIntensity() > 0.45f)
+        if (PlayerObj->getLightSource()->getBaseIntensity() > 0.45f)
         {
-          Lantern->setBaseIntensity(0.4f);
+          PlayerObj->getLightSource()->setBaseIntensity(0.4f);
         }
         else
         {
-          Lantern->setBaseIntensity(0.5f);
+          PlayerObj->getLightSource()->setBaseIntensity(0.5f);
         }
       }
       else
@@ -266,7 +278,9 @@ void Game::handleUserInput()
 void Game::processLogic(float FrameDrawingTimeMs)
 {
   PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
-  Lantern->update();
+
+  for (const auto& L : LightSources)
+    L->update();
 
   for (const auto& R : Rats)
     R->update(FrameDrawingTimeMs, SolidObjects, PlayerObj.get());
@@ -346,9 +360,20 @@ void Game::renderScene()
 
   PostprocessingShader->setUniform("world_window_center", WorldWindowObj->getCenter());
   PostprocessingShader->setUniform("world_window_dimensions", WorldWindowObj->getSize());
-  PostprocessingShader->setUniform("world_light_pos", Lantern->getPosition());
-  PostprocessingShader->setUniform("light_intensity", Lantern->getIntensity());
   PostprocessingShader->setUniform("backgr_intensity", BackgrIntensity);
+
+  int I;
+  for (I = 0; I < LightSources.size(); I++)
+  {
+    float Intens = LightSources[I]->isVisible() ? LightSources[I]->getIntensity() : 0.0f;
+
+    std::string NumStr = std::to_string(I);
+    PostprocessingShader->setUniform("world_light_positions[" + NumStr + "]",
+                                     LightSources[I]->getPosition());
+    PostprocessingShader->setUniform("light_intensities[" + NumStr + "]",Intens);
+  }
+  PostprocessingShader->setUniform("light_intensities[" + std::to_string(I) + "]",
+                                   -1.0f);
 
   Window->draw(*ScreenSprite, PostprocessingShader.get());
   drawHUD();

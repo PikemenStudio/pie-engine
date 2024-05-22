@@ -48,7 +48,12 @@ public:
 
   float getOil() const { return Oil < 0 ? 0 : Oil; }
 
+  bool isVisible() const { return Visible; }
+  void setVisible(bool V) { Visible = V; }
+
 private:
+  bool Visible = true;
+
   sf::Vector2f WorldCoords;
   float BaseIntensity;
   float Intensity;

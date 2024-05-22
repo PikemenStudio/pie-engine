@@ -61,9 +61,9 @@ private:
   std::vector<std::unique_ptr<Tunnel>> Tunnels;
   std::vector<std::unique_ptr<Passage>> Passages;
   std::vector<std::unique_ptr<DimmingTransition>> Transitions;
+  std::vector<std::unique_ptr<LightSource>> LightSources;
   std::unique_ptr<Background> Backgr;
   std::unique_ptr<Player> PlayerObj;
-  std::unique_ptr<LightSource> Lantern;
   std::vector<std::unique_ptr<Rat>> Rats;
   std::unique_ptr<WorldWindow> WorldWindowObj;
 
