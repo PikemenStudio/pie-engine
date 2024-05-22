@@ -2,7 +2,7 @@
 // Created by anton on 5/13/24.
 //
 
-#include "Game.h"
+#include "CaveScene.h"
 #include "Background.h"
 #include "DimmingTransition.h"
 #include "LightSource.h"
@@ -19,13 +19,14 @@
 #include <chrono>
 #include <iostream>
 
-Game::Game()
+CaveScene::CaveScene(sf::RenderWindow* Win)
+: Window(Win)
 {
   // objects for rendering
-  Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
-                                              Title);
-//                                              sf::Style::Fullscreen);
-  Window->setFramerateLimit(100);
+//  Window = std::make_unique<sf::RenderWindow>(sf::VideoMode(ScreenWidth, ScreenHeight),
+//                                              Title);
+////                                              sf::Style::Fullscreen);
+//  Window->setFramerateLimit(100);
   RenderTex = std::make_unique<sf::RenderTexture>();
   RenderTex->create(ScreenWidth, ScreenHeight);
   RenderTex->display();
@@ -52,9 +53,9 @@ Game::Game()
   PostprocessingShader->setUniform("texture", sf::Shader::CurrentTexture);
 }
 
-Game::~Game() = default;
+CaveScene::~CaveScene() = default;
 
-void Game::initKeyboard()
+void CaveScene::initKeyboard()
 {
   Key2IsPressed[sf::Keyboard::Left] = false;
   Key2IsPressed[sf::Keyboard::Right] = false;
@@ -62,7 +63,7 @@ void Game::initKeyboard()
   Key2IsPressed[sf::Keyboard::Down] = false;
 }
 
-void Game::initGameObjects()
+void CaveScene::initGameObjects()
 {
   // Player's lantern
   LightSources.push_back(std::make_unique<LightSource>(0, 0, 0.4f));
@@ -89,7 +90,7 @@ void Game::initGameObjects()
     Interactables.push_back(P.get());
 }
 
-void Game::positionPlayer()
+void CaveScene::positionPlayer()
 {
   do
   {
@@ -99,7 +100,7 @@ void Game::positionPlayer()
   } while (PlayerObj->isCollision(PlayerObj->getCurrTunnel()));
 }
 
-void Game::createPassage(Tunnel* T1, Tunnel* T2, float XCoord)
+void CaveScene::createPassage(Tunnel* T1, Tunnel* T2, float XCoord)
 {
   auto Pass = std::make_unique<Passage>(T1, T2, PlayerObj.get(), XCoord);
   Transitions.push_back(
@@ -111,7 +112,7 @@ void Game::createPassage(Tunnel* T1, Tunnel* T2, float XCoord)
   Passages.push_back(std::move(Pass));
 }
 
-void Game::generateTunnels(const sf::Vector2f& PlSize)
+void CaveScene::generateTunnels(const sf::Vector2f& PlSize)
 {
   constexpr float MinTunnelLen = 5.0f;
   constexpr float MaxTunnelLen = 10.0f;
@@ -179,7 +180,7 @@ void Game::generateTunnels(const sf::Vector2f& PlSize)
       LastTunnel->getStartX(), LastTunnel->getEndX());
 }
 
-void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
+void CaveScene::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
 {
   Tunnel* From = PlayerObj->getCurrTunnel() == T1 ? T1 : T2;
   Tunnel* To = From == T1 ? T2 : T1;
@@ -202,7 +203,7 @@ void Game::transferToTunnel(Tunnel* T1, Tunnel* T2, Passage* Pass)
   PlayerObj->moveToTunnel(To);
 }
 
-void Game::generateRats()
+void CaveScene::generateRats()
 {
   for (const auto& T : Tunnels)
   {
@@ -210,7 +211,7 @@ void Game::generateRats()
   }
 }
 
-void Game::generateRatsInTunnel(Tunnel *T)
+void CaveScene::generateRatsInTunnel(Tunnel *T)
 {
   int RatsCount = randIntInRange(5, 8);
 //  int RatsCount = 2;
@@ -234,7 +235,7 @@ void Game::generateRatsInTunnel(Tunnel *T)
   }
 }
 
-void Game::handleUserInput()
+void CaveScene::handleUserInput()
 {
   sf::Event Event;
   while (Window->pollEvent(Event))
@@ -275,7 +276,7 @@ void Game::handleUserInput()
   }
 }
 
-void Game::processLogic(float FrameDrawingTimeMs)
+void CaveScene::processLogic(float FrameDrawingTimeMs)
 {
   PlayerObj->update(Key2IsPressed, FrameDrawingTimeMs, SolidObjects);
 
@@ -290,7 +291,7 @@ void Game::processLogic(float FrameDrawingTimeMs)
   WorldWindowObj->updateByPlayerPos(PlayerObj->getPosition());
 }
 
-void Game::drawHUD()
+void CaveScene::drawHUD()
 {
   sf::Text HealthText, OilText, StaminaText;
 
@@ -340,7 +341,7 @@ void Game::drawHUD()
   Window->draw(StaminaText);
 }
 
-void Game::renderScene()
+void CaveScene::renderScene()
 {
   Window->clear(sf::Color::Black);
 
@@ -380,7 +381,7 @@ void Game::renderScene()
   Window->display();
 }
 
-void Game::run()
+void CaveScene::run()
 {
   auto BeginTime = std::chrono::high_resolution_clock::now();
   long long FrameCount = 0;

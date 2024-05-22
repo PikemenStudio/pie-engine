@@ -2,8 +2,8 @@
 // Created by anton on 5/13/24.
 //
 
-#ifndef ENGINE_GAME_H
-#define ENGINE_GAME_H
+#ifndef ENGINE_CAVESCENE_H
+#define ENGINE_CAVESCENE_H
 
 #include <map>
 #include <memory>
@@ -24,11 +24,10 @@ class Interactable;
 class DimmingTransition;
 class Rat;
 
-class Game
-{
+class CaveScene {
 public:
-  Game();
-  ~Game();
+  CaveScene(sf::RenderWindow* Win);
+  ~CaveScene();
 
   void run();
 
@@ -51,7 +50,8 @@ private:
   void drawHUD();
   void renderScene();
 
-  std::unique_ptr<sf::RenderWindow> Window;
+//  std::unique_ptr<sf::RenderWindow> Window;
+  sf::RenderWindow* Window;
   std::unique_ptr<sf::Shader> PostprocessingShader;
   std::unique_ptr<sf::RenderTexture> RenderTex;
   std::unique_ptr<sf::Sprite> ScreenSprite;
@@ -76,7 +76,7 @@ private:
 
   float BackgrIntensity = 1.0f;
 
-  const std::string Title = "Game";
+  const std::string Title = "CaveScene";
 };
 
-#endif // ENGINE_GAME_H
+#endif // ENGINE_CAVESCENE_H

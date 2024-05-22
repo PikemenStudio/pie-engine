@@ -16,8 +16,8 @@ add_executable(game_exe
         src/Tunnel.h
         src/utils.h
         src/utils.cpp
-        src/Game.cpp
-        src/Game.h
+        src/CaveScene.cpp
+        src/CaveScene.h
         src/LightSource.cpp
         src/LightSource.h
         src/Background.cpp
@@ -37,7 +37,9 @@ add_executable(game_exe
         src/DimmingTransition.h
         src/Interactable.h
         src/Rat.cpp
-        src/Rat.h)
+        src/Rat.h
+        src/IntroScreen.cpp
+        src/IntroScreen.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)
