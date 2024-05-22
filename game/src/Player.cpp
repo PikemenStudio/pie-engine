@@ -187,6 +187,9 @@ bool Player::isCollision(const SolidObject* Other) const
 
 bool Player::isCollisionWithRat(const Rat* RatObj) const
 {
+  if (!RatObj->isVisible())
+    return false;
+
   return
       std::abs(Center.x - RatObj->getPosition().x) < (RatObj->getSize().x + Size.x) / 2
       &&

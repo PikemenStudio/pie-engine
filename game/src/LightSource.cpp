@@ -22,8 +22,12 @@ void LightSource::update()
 {
   auto MsFromIntStart = duration_cast<milliseconds>((high_resolution_clock::now() - IntervalStart)).count();
 
+  const float OilConsumptionSpeed = BaseIntensity < 0.45f ? 0.0033f : 0.02f;
+
   if (MsFromIntStart > IntensityIntervalMs)
   {
+    Oil -= IntensityIntervalMs / 1000 * OilConsumptionSpeed;
+
     // generate new interval
     // change intensity
     Intensity = BaseIntensity + static_cast<float>(rand() % 1000) / 1000 * 0.03;

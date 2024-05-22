@@ -14,8 +14,15 @@ Rat::Rat(const sf::Vector2f& Pos, const Tunnel* T) : Position(Pos), CurrTunnel(T
 {
   Size = {0.1f, 0.065f};
   DxDy = {0, 0};
-//  CurrState = State::Idle;
   CurrState = State::Idle;
+
+  RunAnim = std::make_unique<Animation>(std::vector<std::string> {
+      "../../game/resources/Rats/RatRun1.png",
+      "../../game/resources/Rats/RatRun2.png",
+  });
+  RunAnim->setLoop(true);
+  RunAnim->setFrameTime(0.1);
+  RunAnim->start();
 }
 
 void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Objects,
@@ -23,6 +30,8 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
 {
   if (!Visible)
     return;
+
+  RunAnim->update();
 
   float FrameDrawingTimeS = FrameDrawingTimeMs / 1000;
   const auto& PlPos = Pl->getPosition();
@@ -100,6 +109,9 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
     break;
 
   case State::ScaredByLight:
+    LOG_F(INFO, "Dist2ToPlayer: %f", Dist2ToPlayer);
+    LOG_F(INFO, "Dist2ToStopBeingScared: %f", Dist2ToStopBeingScared);
+
     if (Dist2ToPlayer > Dist2ToStopBeingScared)
     {
       CurrState = State::Idle;
@@ -176,13 +188,43 @@ void Rat::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
   if (!Visible)
     return;
 
-  sf::RectangleShape Rect(worldDeltaToScreen(Size, WorldWindowObj));
+  sf::Vector2f WorldTopLeft = Position + sf::Vector2f(-Size.x / 2, Size.y / 2);
+  sf::Vector2f WorldBottomRight = Position + sf::Vector2f(Size.x / 2, -Size.y / 2);
 
-  auto CenterOnScreen = worldCoordsToScreen(Position, WorldWindowObj);
-  Rect.setPosition(CenterOnScreen - sf::Vector2f(Rect.getSize().x / 2, Rect.getSize().y / 2));
-  Rect.setFillColor(sf::Color::Black);
+  sf::Vector2f ScreenTopLeft = worldCoordsToScreen(WorldTopLeft, WorldWindowObj);
+  sf::Vector2f ScreenBottomRight = worldCoordsToScreen(WorldBottomRight, WorldWindowObj);
 
-  Win.draw(Rect);
+  sf::Vector2f CenterScreenCoords = worldCoordsToScreen(Position, WorldWindowObj);
+
+  sf::Vector2f ScreenBBSize = ScreenBottomRight - ScreenTopLeft;
+
+  constexpr float CharacterWidthToBoundingBox = 2.0;
+  float SpriteScale = ScreenBBSize.x / CharacterWidthPx * CharacterWidthToBoundingBox;
+  Sprite.setTexture(*RunAnim->getFrames()[RunAnim->getCurrFrameIndex()]);
+  Sprite.setScale(SpriteScale, SpriteScale);
+  Sprite.setPosition(CenterScreenCoords -
+                     sf::Vector2f(CharacterCenterXPx * SpriteScale,
+                                  CharacterCenterYPx * SpriteScale));
+
+  if (DxDy.x < 0 || (TurnedLeft && DxDy.x == 0))
+  {
+    TurnedLeft = true;
+    Sprite.scale(-1, 1);
+    Sprite.move(CharacterCenterXPx * 2 * SpriteScale, 0);
+  }
+  else if (DxDy.x > 0 || (!TurnedLeft && DxDy.x == 0))
+  {
+    TurnedLeft = false;
+    Sprite.scale(1, 1);
+  }
+
+  sf::RectangleShape Rect(ScreenBottomRight - ScreenTopLeft);
+  Rect.setPosition(ScreenTopLeft);
+  Rect.setOutlineThickness(5);
+  Rect.setOutlineColor(sf::Color::Cyan);
+
+  Win.draw(Rect); // Draw bounding box
+  Win.draw(Sprite);
 }
 
 bool Rat::isCollision(const SolidObject* Other) const

@@ -74,7 +74,7 @@ public:
 
   float getHealth() const { return Health; }
   float getStamina() const { return Stamina; }
-  float getOil() const { return Oil; }
+  float getOil() const { return LightSrc->getOil(); }
 
 private:
   void move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS);
@@ -85,7 +85,7 @@ private:
   // speed is measured in units per second
   sf::Vector2f DxDy = {0, 0};
 
-  float Health = 1.0f, Stamina = 1.0f, Oil = 1.0f;
+  float Health = 1.0f, Stamina = 1.0f;
 
   bool OnGround = false;
   bool TurnedLeft = false;

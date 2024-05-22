@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <SFML/Graphics.hpp>
+#include <loguru.hpp>
 
 class Animation
 {
@@ -22,7 +23,10 @@ public:
     for (const auto& FileName : FramesFiles)
     {
       auto Frame = std::make_unique<sf::Texture>();
-      Frame->loadFromFile(FileName);
+
+      if (!Frame->loadFromFile(FileName))
+        LOG_F(ERROR, "Cannot load file: %s", FileName.c_str());
+
       Frame->setSmooth(false);
       Frames.push_back(std::move(Frame));
     }

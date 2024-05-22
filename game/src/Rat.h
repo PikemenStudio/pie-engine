@@ -10,6 +10,7 @@
 
 class Tunnel;
 class Player;
+class Animation;
 
 class Rat : public Drawable, public SolidObject
 {
@@ -35,6 +36,12 @@ public:
 
 private:
   void move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS);
+
+  std::unique_ptr<Animation> RunAnim;
+  sf::Sprite Sprite;
+  static constexpr float CharacterWidthPx = 42.0f;
+  static constexpr float CharacterCenterXPx = 21.0f;
+  static constexpr float CharacterCenterYPx = 7.0f;
 
   sf::Vector2f Position;
   sf::Vector2f Size;

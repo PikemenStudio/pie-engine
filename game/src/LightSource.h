@@ -22,18 +22,38 @@ public:
   sf::Vector2f getPosition() const { return WorldCoords; }
   void setPosition(sf::Vector2f Pos) { WorldCoords = Pos; }
 
-  void setIntensity(float I) { Intensity = I; }
-  float getIntensity() const { return Intensity; }
+  void setIntensity(float I)
+  {
+    if (Oil < 0)
+      return;
 
-  void setBaseIntensity(float I) { BaseIntensity = I; }
-  float getBaseIntensity() const { return BaseIntensity; }
+    Intensity = I;
+  }
+
+  float getIntensity() const
+  {
+    return Oil < 0 ? 0 : Intensity;
+  }
+
+  void setBaseIntensity(float I)
+  {
+    BaseIntensity = Oil < 0 ? 0 : I;
+  }
+
+  float getBaseIntensity() const
+  {
+    return Oil < 0 ? 0 : BaseIntensity;
+  }
 //  void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj);
+
+  float getOil() const { return Oil < 0 ? 0 : Oil; }
 
 private:
   sf::Vector2f WorldCoords;
   float BaseIntensity;
   float Intensity;
   float IntensityIntervalMs;
+  float Oil = 1.0f;
   std::chrono::time_point<std::chrono::high_resolution_clock> IntervalStart;
 };
 
