@@ -83,8 +83,20 @@ void Rat::update(float FrameDrawingTimeMs, const std::vector<SolidObject*>& Obje
         CurrState = State::Idle;
     }
 
-    TurnedLeft = PlPos.x < Position.x;
-    DxDy.x = TurnedLeft ? -0.2f : 0.2f;
+    if (!PlayerWasDamagedRecently)
+    {
+       TurnedLeft = PlPos.x < Position.x;
+       DxDy.x = TurnedLeft ? -0.2f : 0.2f;
+    }
+    else
+    {
+      TurnedLeft = PlPos.x > Position.x;
+      DxDy.x = TurnedLeft ? -0.2f : 0.2f;
+      IterationsToRunInOneDirection--;
+
+      if (IterationsToRunInOneDirection < 1)
+        PlayerWasDamagedRecently = false;
+    }
     break;
 
   case State::ScaredByLight:
@@ -129,10 +141,15 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
           setPosition(OldPos);
       }
     }
-    else
+    else if (auto* Pl = dynamic_cast<Player*>(CollObj))
     {
       LOG_F(INFO, "Collision with Player!");
       setPosition(OldPos);
+
+      Pl->damageByRat();
+      PlayerWasDamagedRecently = true;
+      IterationsToRunInOneDirection = randIntInRange(100, 200);
+
       break;
     }
   }

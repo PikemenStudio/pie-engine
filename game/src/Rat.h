@@ -44,6 +44,7 @@ private:
   bool TurnedLeft = false;
   bool Visible = true;
   int IterationsToRunInOneDirection = 0;
+  bool PlayerWasDamagedRecently = false;
 
   const Tunnel* CurrTunnel = nullptr;
 

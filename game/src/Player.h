@@ -64,6 +64,14 @@ public:
     }
   }
 
+  void damageByRat()
+  {
+    Health -= randInRange(0.1, 0.3);
+    if (Health < 0)
+      Health = 0;
+    LightSrc->setIntensity(0.3f);
+  }
+
   float getHealth() const { return Health; }
   float getStamina() const { return Stamina; }
   float getOil() const { return Oil; }
