@@ -81,6 +81,8 @@ void Game::initGameObjects()
   SolidObjects.push_back(PlayerObj.get());
   for (const auto& T : Tunnels)
     SolidObjects.push_back(T.get());
+  for (const auto& R : Rats)
+    SolidObjects.push_back(R.get());
   for (const auto& P : Passages)
     Interactables.push_back(P.get());
 }
