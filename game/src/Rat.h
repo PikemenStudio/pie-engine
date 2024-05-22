@@ -39,8 +39,8 @@ private:
 
   std::unique_ptr<Animation> RunAnim;
   sf::Sprite Sprite;
-  static constexpr float CharacterWidthPx = 42.0f;
-  static constexpr float CharacterCenterXPx = 21.0f;
+  static constexpr float CharacterWidthPx = 30.0f;
+  static constexpr float CharacterCenterXPx = 26.0f;
   static constexpr float CharacterCenterYPx = 7.0f;
 
   sf::Vector2f Position;
