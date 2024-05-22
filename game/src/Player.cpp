@@ -126,20 +126,33 @@ void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTi
 {
   auto OldPos = Center;
   setPosition(Center + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
-  if (auto* CollObj = checkCollisionWithObjects(Objects))
+
+  auto CollObjects = getAllObjectsWithCollision(Objects);
+  for (const auto& CollObj : CollObjects)
   {
-    auto PosBeforeSpaceSearch = Center;
+    LOG_F(INFO, "CollObjects.size() == %zu", CollObjects.size());
 
-    // try to go up and down a little
-    setPosition(Center + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
-
-    if (CollObj->isCollision(this))
+    if (dynamic_cast<Tunnel*>(CollObj))
     {
-      setPosition(PosBeforeSpaceSearch);
-      setPosition(Center - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+      auto PosBeforeSpaceSearch = Center;
+
+      // try to go up and down a little
+      setPosition(Center + sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
 
       if (CollObj->isCollision(this))
-        setPosition(OldPos);
+      {
+        setPosition(PosBeforeSpaceSearch);
+        setPosition(Center - sf::Vector2f(0, 2 * DxDy.x * FrameDrawingTimeS));
+
+        if (CollObj->isCollision(this))
+          setPosition(OldPos);
+      }
+    }
+    else
+    {
+      LOG_F(INFO, "Collision with Rat!");
+      setPosition(OldPos);
+      break;
     }
   }
 
@@ -165,8 +178,7 @@ bool Player::isCollision(const SolidObject* Other) const
   if (dynamic_cast<const Player*>(Other))
     return false;
   if (const Rat* R = dynamic_cast<const Rat*>(Other))
-    return false;
-//    return isCollisionWithRat(R);
+    return isCollisionWithRat(R);
   if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
     return T->isCollisionWithPlayer(this);
 
@@ -177,6 +189,6 @@ bool Player::isCollisionWithRat(const Rat* RatObj) const
 {
   return
       std::abs(Center.x - RatObj->getPosition().x) < (RatObj->getSize().x + Size.x) / 2
-      ||
+      &&
       std::abs(Center.y - RatObj->getPosition().y) < (RatObj->getSize().y + Size.y) / 2;
 }

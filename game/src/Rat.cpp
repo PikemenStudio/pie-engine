@@ -8,6 +8,8 @@
 
 #include "utils.h"
 
+#include <loguru.hpp>
+
 Rat::Rat(const sf::Vector2f& Pos, const Tunnel* T) : Position(Pos), CurrTunnel(T)
 {
   Size = {0.1f, 0.065f};
@@ -107,22 +109,31 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
 {
   auto OldPos = Position;
   setPosition(Position + sf::Vector2f(DxDy.x * FrameDrawingTimeS, 0));
-  if (auto* CollObj = checkCollisionWithObjects(Objects))
+
+  auto CollObjects = getAllObjectsWithCollision(Objects);
+  for (const auto& CollObj : CollObjects)
   {
-    auto PosBeforeSpaceSearch = Position;
-
-    // try to go up and down a little
-//    setPosition(Position + sf::Vector2f(0, 1.25 * DxDy.x * FrameDrawingTimeS));
-    setPosition(Position + sf::Vector2f(0, 1.5 * DxDy.x * FrameDrawingTimeS));
-
-    if (CollObj->isCollision(this))
+    if (dynamic_cast<Tunnel*>(CollObj))
     {
-      setPosition(PosBeforeSpaceSearch);
-//      setPosition(Position - sf::Vector2f(0, 1.25 * DxDy.x * FrameDrawingTimeS));
-      setPosition(Position - sf::Vector2f(0, 1.5 * DxDy.x * FrameDrawingTimeS));
+      auto PosBeforeSpaceSearch = Position;
+
+      // try to go up and down a little
+      setPosition(Position + sf::Vector2f(0, 1.5 * DxDy.x * FrameDrawingTimeS));
 
       if (CollObj->isCollision(this))
-        setPosition(OldPos);
+      {
+        setPosition(PosBeforeSpaceSearch);
+        setPosition(Position - sf::Vector2f(0, 1.5 * DxDy.x * FrameDrawingTimeS));
+
+        if (CollObj->isCollision(this))
+          setPosition(OldPos);
+      }
+    }
+    else
+    {
+      LOG_F(INFO, "Collision with Player!");
+      setPosition(OldPos);
+      break;
     }
   }
 
@@ -165,8 +176,7 @@ bool Rat::isCollision(const SolidObject* Other) const
   if (dynamic_cast<const Rat*>(Other))
     return false;
   if (const Player* P = dynamic_cast<const Player*>(Other))
-    return false;
-//    return P->isCollisionWithRat(this);
+    return P->isCollisionWithRat(this);
   if (const Tunnel* T = dynamic_cast<const Tunnel*>(Other))
     return T->isCollisionWithBoundingBox(Position, Size);
 

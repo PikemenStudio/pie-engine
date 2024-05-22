@@ -64,7 +64,7 @@ void Game::initKeyboard()
 
 void Game::initGameObjects()
 {
-  Lantern = std::make_unique<LightSource>(0, 0, 0.35f);
+  Lantern = std::make_unique<LightSource>(0, 0, 0.4f);
   Backgr = std::make_unique<Background>(ScreenWidth, ScreenHeight);
 
   const sf::Vector2f PlSize = {0.05f, 0.3f};

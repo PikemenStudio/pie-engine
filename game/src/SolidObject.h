@@ -6,6 +6,7 @@
 #define ENGINE_SOLIDOBJECT_H
 
 #include <vector>
+#include <set>
 
 // Abstract class of an object with collisions
 class SolidObject
@@ -17,6 +18,8 @@ public:
   // return nullptr if no collisions
   // return object pointer if has collision with object
   SolidObject* checkCollisionWithObjects(const std::vector<SolidObject*>& Objects);
+
+  std::set<SolidObject*> getAllObjectsWithCollision(const std::vector<SolidObject*>& Objects);
 };
 
 #endif // ENGINE_SOLIDOBJECT_H

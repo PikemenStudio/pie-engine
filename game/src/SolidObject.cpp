@@ -14,3 +14,17 @@ SolidObject* SolidObject::checkCollisionWithObjects(const std::vector<SolidObjec
 
   return nullptr;
 }
+
+std::set<SolidObject*> SolidObject::getAllObjectsWithCollision(
+    const std::vector<SolidObject*>& Objects)
+{
+  std::set<SolidObject*> Ret;
+
+  for (auto *Obj : Objects)
+  {
+    if (isCollision(Obj))
+      Ret.insert(Obj);
+  }
+
+  return Ret;
+}
