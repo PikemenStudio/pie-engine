@@ -235,7 +235,7 @@ void Game::handleUserInput()
       {
         if (Lantern->getBaseIntensity() > 0.45f)
         {
-          Lantern->setBaseIntensity(0.35f);
+          Lantern->setBaseIntensity(0.4f);
         }
         else
         {

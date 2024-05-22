@@ -148,7 +148,7 @@ void Rat::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS
 
       Pl->damageByRat();
       PlayerWasDamagedRecently = true;
-      IterationsToRunInOneDirection = randIntInRange(100, 200);
+      IterationsToRunInOneDirection = randIntInRange(30, 50);
 
       break;
     }
