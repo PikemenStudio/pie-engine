@@ -14,9 +14,9 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::setupInstance(
-    VkInstance::VkInstanceProps Props) {
+    VulkanInstance::VkInstanceProps Props) {
   LOG_F(INFO, "Setting up instance");
-  NativeComponents.Instance = std::make_shared<vk_core::VkInstance>(Props);
+  NativeComponents.Instance = std::make_shared<vk_core::VulkanInstance>(Props);
   LOG_F(INFO, "Instance set up");
 }
 
@@ -24,11 +24,11 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::setupPhysicalDevice(
-    typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+    typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                               SceneImpl>::VkPhysicalDeviceProps Props) {
   LOG_F(INFO, "Setting up physical device");
   NativeComponents.PhysicalDevice = std::make_shared<
-      vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>(Props);
+      vk_core::VulkanPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>(Props);
   LOG_F(INFO, "Physical device set up");
 }
 
@@ -44,13 +44,13 @@ GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::GraphicEngine(
                      .ShaderLoader = Props.ShaderLoader,
                      .SceneManager = Props.SceneManager});
 
-  setupInstance(VkInstance::VkInstanceProps(Props.VkInstanceProps));
+  setupInstance(VulkanInstance::VkInstanceProps(Props.VkInstanceProps));
 
   if (Props.VkPhysicalDeviceProps.Instance == nullptr) {
     Props.VkPhysicalDeviceProps.Instance = NativeComponents.Instance;
   }
   setupPhysicalDevice(
-      typename VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>::
+      typename VulkanPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>::
           VkPhysicalDeviceProps(Props.VkPhysicalDeviceProps));
   LOG_F(INFO, "Graphic Engine created");
 }
@@ -68,7 +68,7 @@ GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::~GraphicEngine() {
 template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
-std::vector<typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+std::vector<typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                                       SceneImpl>::PhysicalDeviceLocalProps>
 GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::getLocalPhysicalDevices()
     const {
@@ -85,7 +85,7 @@ template <
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::
     chooseLocalPhysicalDevice(
-        const typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+        const typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                                         SceneImpl>::PhysicalDeviceLocalProps
             &Device) {
   if (NativeComponents.PhysicalDevice == nullptr) {
@@ -149,7 +149,7 @@ template <
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addObject(
     const std::map<std::string,
-                   typename VkPipeline<WindowImpl, ShaderImpl,
+                   typename VulkanPipeline<WindowImpl, ShaderImpl,
                                        SceneImpl>::PublicObjectData> &Dump,
     const std::string &DumpName) {
   if (NativeComponents.PhysicalDevice == nullptr) {

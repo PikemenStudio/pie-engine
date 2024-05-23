@@ -9,8 +9,8 @@
 
 #include "../../scene_manager/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
-#include "VkInstance.hpp"
-#include "VkPipeline.h"
+#include "VulkanInstance.hpp"
+#include "VulkanPipeline.h"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
 #include <map>
@@ -20,25 +20,25 @@ namespace vk_core {
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-class VkPipeline;
+class VulkanPipeline;
 
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-class VkPhysicalDevice {
+class VulkanPhysicalDevice {
 public:
   struct VkPhysicalDeviceProps;
 
-  VkPhysicalDevice(VkPhysicalDeviceProps Props);
-  ~VkPhysicalDevice();
+  VulkanPhysicalDevice(VkPhysicalDeviceProps Props);
+  ~VulkanPhysicalDevice();
 
-  VkPhysicalDevice(const VkPhysicalDevice &PdToCopy) = delete;
-  VkPhysicalDevice(VkPhysicalDevice &&PdToMove);
-  VkPhysicalDevice &operator=(const VkPhysicalDevice &PdToCopy) = delete;
-  VkPhysicalDevice &operator=(VkPhysicalDevice &&PdToMove);
+  VulkanPhysicalDevice(const VulkanPhysicalDevice &PdToCopy) = delete;
+  VulkanPhysicalDevice(VulkanPhysicalDevice &&PdToMove);
+  VulkanPhysicalDevice &operator=(const VulkanPhysicalDevice &PdToCopy) = delete;
+  VulkanPhysicalDevice &operator=(VulkanPhysicalDevice &&PdToMove);
 
   struct VkPhysicalDeviceProps {
-    std::shared_ptr<VkInstance> Instance;
+    std::shared_ptr<VulkanInstance> Instance;
   };
 
   explicit operator vk::PhysicalDevice &() { return PhysicalDevice.value(); }
@@ -113,7 +113,7 @@ public:
     // It's strange, but we need pointer from GraphicEngine and can't just use
     // this
     std::shared_ptr<
-        VkPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
+        VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
         ThisPhysicalDevice;
   };
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
@@ -122,7 +122,7 @@ public:
 
   void addObjectData(
       const std::map<std::string,
-                     typename VkPipeline<WindowImpl, ShaderLoaderImplT,
+                     typename VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                                          SceneManagerImplT>::PublicObjectData>
           &Dump,
       const std::string &DumpName);
@@ -130,13 +130,13 @@ public:
                   const std::string &TextureName);
 
 protected:
-  static void swap(VkPhysicalDevice &Pd1, VkPhysicalDevice &Pd2);
+  static void swap(VulkanPhysicalDevice &Pd1, VulkanPhysicalDevice &Pd2);
 
 protected:
-  std::shared_ptr<VkInstance> Instance;
+  std::shared_ptr<VulkanInstance> Instance;
   std::optional<vk::PhysicalDevice> PhysicalDevice;
   std::optional<vk::Device> LogicalDevice;
-  std::unique_ptr<typename vk_core::VkPipeline<WindowImpl, ShaderLoaderImplT,
+  std::unique_ptr<typename vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                                                SceneManagerImplT>>
       Pipeline;
 

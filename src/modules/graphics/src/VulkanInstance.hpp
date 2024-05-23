@@ -12,17 +12,17 @@
 
 namespace vk_core {
 
-class VkInstance {
+class VulkanInstance {
 public:
   struct VkInstanceProps;
 
-  VkInstance(VkInstanceProps Props);
-  ~VkInstance();
+  VulkanInstance(VkInstanceProps Props);
+  ~VulkanInstance();
 
-  VkInstance(const VkInstance &InstanceToCopy) = delete;
-  VkInstance(VkInstance &&InstanceToMove);
-  VkInstance &operator=(const VkInstance &InstanceToCopy) = delete;
-  VkInstance &operator=(VkInstance &&InstanceToMove);
+  VulkanInstance(const VulkanInstance &InstanceToCopy) = delete;
+  VulkanInstance(VulkanInstance &&InstanceToMove);
+  VulkanInstance &operator=(const VulkanInstance &InstanceToCopy) = delete;
+  VulkanInstance &operator=(VulkanInstance &&InstanceToMove);
 
   struct VkInstanceProps {
     struct Version {
@@ -51,7 +51,7 @@ protected:
   isApiSupportExtensions(const std::vector<const char *> &ExtensionNames) const;
   bool isApiSupportLayers(std::vector<const char *> &LayerNames) const;
 
-  static void swap(VkInstance &I1, VkInstance &I2);
+  static void swap(VulkanInstance &I1, VulkanInstance &I2);
 
   struct DebugMessenger {
     DebugMessenger(vk::Instance *Instance);

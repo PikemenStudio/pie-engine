@@ -8,8 +8,8 @@ set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
         facade.cpp
         VkPipeline.cpp
         VkTexture.cpp)
-set(HEADER_ALL VkInstance.hpp VkPhysicalDevice.hpp
-        GraphicEngine.hpp ObjectsMemory.hpp VkPipeline.h VkTexture.hpp)
+set(HEADER_ALL VulkanInstance.hpp VulkanPhysicalDevice.hpp
+        GraphicEngine.hpp ObjectsMemory.hpp VulkanPipeline.h VkTexture.hpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)
@@ -19,6 +19,7 @@ find_package(Stb REQUIRED)
 add_library(graphics ${SOURCE_ALL} ${HEADER_ALL})
 
 target_include_directories(graphics PRIVATE ${Stb_INCLUDE_DIR})
+target_include_directories(graphics PRIVATE /Users/fullhat/Documents/GitHub/pie-engine/src/modules/imgui_docking)
 
 target_link_libraries(graphics PRIVATE loguru)
 target_link_libraries(graphics PRIVATE scene_manager)
@@ -41,3 +42,5 @@ endif (UNIX AND NOT APPLE)
 
 # glfw
 target_link_libraries(graphics PUBLIC glfw)
+
+target_link_libraries(graphics PRIVATE imgui)

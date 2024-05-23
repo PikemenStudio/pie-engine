@@ -8,9 +8,9 @@
 #include "../../scene_manager/facades/facade.hpp"
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
-#include "VkInstance.hpp"
-#include "VkPhysicalDevice.hpp"
-#include "VkPipeline.h"
+#include "VulkanInstance.hpp"
+#include "VulkanPhysicalDevice.hpp"
+#include "VulkanPipeline.h"
 #include "loguru/loguru.hpp"
 
 namespace vk_core {
@@ -32,23 +32,24 @@ public:
         scene_manager_facades::SceneManagerDependencies, SceneImpl>>
         SceneManager;
 
-    vk_core::VkInstance::VkInstanceProps VkInstanceProps;
-    vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl,
+    vk_core::VulkanInstance::VkInstanceProps VkInstanceProps;
+    vk_core::VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                               SceneImpl>::VkPhysicalDeviceProps
         VkPhysicalDeviceProps;
   };
 
-  void setupInstance(VkInstance::VkInstanceProps Props);
+  void setupInstance(VulkanInstance::VkInstanceProps Props);
   void
-  setupPhysicalDevice(VkPhysicalDevice<WindowImpl, ShaderImpl,
+  setupPhysicalDevice(
+      VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                                        SceneImpl>::VkPhysicalDeviceProps Props);
 
-  std::vector<typename VkPhysicalDevice<WindowImpl, ShaderImpl,
+  std::vector<typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                                         SceneImpl>::PhysicalDeviceLocalProps>
   getLocalPhysicalDevices() const;
 
   void chooseLocalPhysicalDevice(
-      const VkPhysicalDevice<WindowImpl, ShaderImpl,
+      const VulkanPhysicalDevice<WindowImpl, ShaderImpl,
                              SceneImpl>::PhysicalDeviceLocalProps &Device);
 
   enum class DeviceChoosePolicy : uint_fast8_t {
@@ -62,7 +63,7 @@ public:
 
   void addObject(
       const std::map<std::string,
-                     typename VkPipeline<WindowImpl, ShaderImpl,
+                     typename VulkanPipeline<WindowImpl, ShaderImpl,
                                          SceneImpl>::PublicObjectData> &Dump,
       const std::string &DumpName);
   void addTexture(const std::string &TexturePath,
@@ -88,9 +89,9 @@ private:
   struct NativeComponentsStruct {
     std::optional<AdaptersStruct> Adapters;
 
-    std::shared_ptr<vk_core::VkInstance> Instance;
+    std::shared_ptr<vk_core::VulkanInstance> Instance;
     std::shared_ptr<
-        vk_core::VkPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>
+        vk_core::VulkanPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>
         PhysicalDevice;
   } NativeComponents;
 };

@@ -29,6 +29,7 @@ add_subdirectory(src/modules/renderable_scene/src)
 add_subdirectory(src/modules/scene_manager/src)
 add_subdirectory(src/modules/objects)
 add_subdirectory(src/modules/input_manager)
+add_subdirectory(src/modules/imgui_docking)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp

@@ -116,7 +116,7 @@ GraphicApiFacadeVulkanImpl<Dep>::getLocalPhysicalDevices() const {
 template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
     const GraphicFacadeStructs::PhysicalDeviceData &DeviceData) {
-  typename vk_core::VkPhysicalDevice<
+  typename vk_core::VulkanPhysicalDevice<
       typename Dep::WindowType, typename Dep::ShaderLoaderType,
       typename Dep::SceneManagerType>::PhysicalDeviceLocalProps Device{
       .Name = DeviceData.Name,
@@ -124,7 +124,7 @@ void GraphicApiFacadeVulkanImpl<Dep>::chooseGpu(
       .DriverVersion = DeviceData.DriverVersion,
       .VendorId = DeviceData.VendorId,
       .DeviceId = DeviceData.DeviceId,
-      .Type = static_cast<vk_core::VkPhysicalDevice<
+      .Type = static_cast<vk_core::VulkanPhysicalDevice<
           typename Dep::WindowType, typename Dep::ShaderLoaderType,
           typename Dep::SceneManagerType>::PhysicalDeviceLocalProps::TypeEnum>(
           DeviceData.Type),
@@ -156,7 +156,7 @@ template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
     const std::map<std::string, GraphicFacadeStructs::ObjectData> &Dump,
     const std::string &DumpName) {
-  typename vk_core::VkPipeline<
+  typename vk_core::VulkanPipeline<
       typename Dep::WindowType, typename Dep::ShaderLoaderType,
       typename Dep::SceneManagerType>::PublicObjectDataMap ModuleObjectData;
 

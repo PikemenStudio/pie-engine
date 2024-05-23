@@ -2,14 +2,14 @@
 // Created by FullHat on 06/05/2024.
 //
 
-#ifndef ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
-#define ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
+#ifndef ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANPIPELINE_H
+#define ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANPIPELINE_H
 
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include "ObjectsMemory.hpp"
-#include "VkInstance.hpp"
-#include "VkPhysicalDevice.hpp"
+#include "VulkanInstance.hpp"
+#include "VulkanPhysicalDevice.hpp"
 #include "VkTexture.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
@@ -21,7 +21,7 @@ namespace vk_core {
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-class VkPhysicalDevice;
+class VulkanPhysicalDevice;
 
 /*
  * Vulkan wrapper. Operates with Pipeline, SwapChain
@@ -42,7 +42,7 @@ class VkPhysicalDevice;
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-class VkPipeline {
+class VulkanPipeline {
 public:
   struct FacadesStruct {
     std::shared_ptr<WindowApiFacade<WindowImpl>> Window;
@@ -54,14 +54,14 @@ public:
 
   struct VkPipelineProps;
 
-  VkPipeline(VkPipelineProps Props);
-  ~VkPipeline();
+  VulkanPipeline(VkPipelineProps Props);
+  ~VulkanPipeline();
 
   struct VkPipelineProps {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<
+    std::shared_ptr<typename vk_core::VulkanPhysicalDevice<
         WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
         PhysicalDevice;
-    std::shared_ptr<vk_core::VkInstance> Instance;
+    std::shared_ptr<vk_core::VulkanInstance> Instance;
     FacadesStruct Facades;
     std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
 
@@ -79,7 +79,7 @@ public:
   using PublicObjectDataMap = std::map<std::string, PublicObjectData>;
 
   void
-  addObjectData(const std::map<std::string, VkPipeline::PublicObjectData> &Dump,
+  addObjectData(const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
                 const std::string &DumpName);
   void addTexture(const std::string &TexturePath,
                   const std::string &TextureName);
@@ -122,10 +122,10 @@ protected:
   std::optional<SwapChainBundleStruct> SwapChainBundle;
 
   struct NativeComponentsStruct {
-    std::shared_ptr<typename vk_core::VkPhysicalDevice<
+    std::shared_ptr<typename vk_core::VulkanPhysicalDevice<
         WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
         PhysicalDevice;
-    std::shared_ptr<vk_core::VkInstance> Instance;
+    std::shared_ptr<vk_core::VulkanInstance> Instance;
 
     std::optional<FacadesStruct> Facades;
     std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
@@ -262,4 +262,4 @@ protected:
 
 } // namespace vk_core
 
-#endif // ENGINE_SRC_MODULES_GRAPHICS_SRC_VKPIPELINE_H
+#endif // ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANPIPELINE_H
