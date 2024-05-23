@@ -8,9 +8,9 @@
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include "ObjectsMemory.hpp"
+#include "VkTexture.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDevice.hpp"
-#include "VkTexture.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "vulkan/vulkan.hpp"
 #include <map>
@@ -73,14 +73,15 @@ public:
     std::vector<float> Vertices;
     std::vector<float> Colors;
     std::vector<float> TexCoords;
+    std::vector<uint32_t> Indexes;
     std::string ObjectName;
   };
 
   using PublicObjectDataMap = std::map<std::string, PublicObjectData>;
 
-  void
-  addObjectData(const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
-                const std::string &DumpName);
+  void addObjectData(
+      const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
+      const std::string &DumpName);
   void addTexture(const std::string &TexturePath,
                   const std::string &TextureName);
 
@@ -158,8 +159,11 @@ protected:
 
   struct MeshData {
     std::vector<float> Data;
+    std::vector<uint32_t> Indexes;
     int Offset;
     int Size;
+    uint32_t IndexCount;
+    uint32_t FirstIndex;
   };
 
   std::unordered_map<std::string, VkTexture *> Textures;
@@ -173,15 +177,31 @@ protected:
   struct MeshDump {
     vk::Buffer Buffer;
     vk::DeviceMemory Memory;
+    vk::Buffer IndexBuffer;
+    vk::DeviceMemory IndexMemory;
     std::map<std::string, MeshData> Meshes;
     std::vector<float> DataCache;
+    std::vector<uint32_t> IndexLump;
+    std::vector<uint32_t> FirstIndexes;
 
     void recalculateDataCache() {
+      int IndexOffset = 0;
       DataCache.clear();
       for (auto &[Name, Mesh] : Meshes) {
-        DataCache.resize(DataCache.size() + Mesh.Data.size());
-        std::copy(Mesh.Data.begin(), Mesh.Data.end(),
-                  DataCache.end() - Mesh.Data.size());
+        int VertexCount = Mesh.Data.size() / 7;
+        int IndexCount = Mesh.Indexes.size();
+        int LastIndex = IndexLump.size();
+
+        for (const auto &Data : Mesh.Data) {
+            DataCache.push_back(Data);
+        }
+
+        for (const auto &Index : Mesh.Indexes) {
+          IndexLump.push_back(Index + IndexOffset);
+        }
+        IndexOffset += VertexCount;
+
+        FirstIndexes.push_back(LastIndex);
       }
     };
   };
@@ -225,8 +245,8 @@ protected:
   vk::RenderPass createRenderPass() const;
 
   void createDescriptorSetLayouts(DescriptorSetLayoutInputStruct Input);
-  vk::DescriptorPool createDescriptorPool(uint32_t Size,
-                            DescriptorSetLayoutInputStruct &Input);
+  vk::DescriptorPool
+  createDescriptorPool(uint32_t Size, DescriptorSetLayoutInputStruct &Input);
   void writeDescriptorSet(SwapChainFrameStruct &Frame);
   void createPipeline(GraphicsPipelineInBundle InBundle);
 

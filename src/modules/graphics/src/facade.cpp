@@ -165,6 +165,7 @@ void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
         .Vertices = ObjectData.Vertices,
         .Colors = ObjectData.Colors,
         .TexCoords = ObjectData.TexCoords,
+        .Indexes = ObjectData.Indexes,
     };
   };
   static_cast<
