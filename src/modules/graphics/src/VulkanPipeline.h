@@ -12,12 +12,12 @@
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDevice.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
+#include "imgui.h"
 #include "vulkan/vulkan.hpp"
+#include </Users/fullhat/Documents/GitHub/pie-engine/vcpkg/buildtrees/imgui/src/76b6bb5605-ca10468178.clean/backends/imgui_impl_glfw.h>
+#include </Users/fullhat/Documents/GitHub/pie-engine/vcpkg/buildtrees/imgui/src/76b6bb5605-ca10468178.clean/backends/imgui_impl_vulkan.h>
 #include <map>
 #include <vector>
-#include "imgui.h"
-#include </Users/fullhat/Documents/GitHub/pie-engine/src/modules/imgui_docking/backends/imgui_impl_glfw.h>
-#include </Users/fullhat/Documents/GitHub/pie-engine/src/modules/imgui_docking/backends/imgui_impl_vulkan.h>
 
 namespace vk_core {
 
@@ -196,7 +196,7 @@ protected:
         int LastIndex = IndexLump.size();
 
         for (const auto &Data : Mesh.Data) {
-            DataCache.push_back(Data);
+          DataCache.push_back(Data);
         }
 
         for (const auto &Index : Mesh.Indexes) {

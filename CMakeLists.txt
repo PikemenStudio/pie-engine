@@ -29,7 +29,7 @@ add_subdirectory(src/modules/renderable_scene/src)
 add_subdirectory(src/modules/scene_manager/src)
 add_subdirectory(src/modules/objects)
 add_subdirectory(src/modules/input_manager)
-add_subdirectory(src/modules/imgui_docking)
+#add_subdirectory(src/modules/imgui_docking)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
         src/modules/graphics/facades/facade.hpp
@@ -72,9 +72,6 @@ include_directories(src/modules/input_manager/facades)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)
-
-find_package(glm CONFIG REQUIRED)
-target_link_libraries(main PRIVATE glm::glm)
 
 # define path constants
 target_compile_definitions(main PRIVATE VULKAN_SDK_PATH="$ENV{VULKAN_SDK}" PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

@@ -1807,7 +1807,6 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
           this->NativeComponents.FamilyIndexes[vk::QueueFlagBits::eGraphics],
       .Queue = static_cast<VkQueue>(*this->NativeComponents.GraphicsQueue),
       .DescriptorPool = this->MeshPool,
-      .RenderPass = this->PipelineBundle->RenderPass,
       .MinImageCount = 2,
       .ImageCount = (uint32_t)this->SwapChainBundle->Frames.size(),
       .MSAASamples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
@@ -1816,7 +1815,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
       .Allocator = nullptr,
       .CheckVkResultFn = nullptr,
   };
-  ImGui_ImplVulkan_Init(&Info);
+  ImGui_ImplVulkan_Init(&Info, this->PipelineBundle->RenderPass);
 
   VkCommandBufferAllocateInfo AllocInfo{};
   AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1835,7 +1834,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
 
   vkBeginCommandBuffer(CommandBuffer, &BeginInfo);
 
-  ImGui_ImplVulkan_CreateFontsTexture();
+  ImGui_ImplVulkan_CreateFontsTexture(CommandBuffer);
 
   vkEndCommandBuffer(CommandBuffer);
 

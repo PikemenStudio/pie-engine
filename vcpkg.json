@@ -19,7 +19,15 @@
         "name": "sfml",
         "platform": "!osx"
       },
-      "stb"
+      "stb",
+      {
+        "name": "imgui",
+        "version>=": "1.89.7#1",
+        "features": [
+          "docking-experimental"
+        ]
+      },
+      "allegro5"
     ],
     "overrides":
     [
