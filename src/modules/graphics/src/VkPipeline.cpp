@@ -796,14 +796,14 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   for (int I = 0; I < Input.Count; ++I) {
     vk::DescriptorPoolSize PoolSize{
         .type = Input.Types[I],
-        .descriptorCount = Size,
+        .descriptorCount = Size * 10,
     };
     PoolSizes.push_back(PoolSize);
   }
 
   vk::DescriptorPoolCreateInfo PoolInfo{
-      .flags = vk::DescriptorPoolCreateFlags{},
-      .maxSets = Size,
+      .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+      .maxSets = Size * 10,
       .poolSizeCount = (uint32_t)PoolSizes.size(),
       .pPoolSizes = PoolSizes.data(),
   };
@@ -979,6 +979,16 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   // Extra stuff
   CreateInfo.basePipelineHandle = nullptr;
+
+//  std::vector<vk::DynamicState> DynamicStates = {
+//      vk::DynamicState::eViewport,
+//      vk::DynamicState::eScissor,
+//  };
+//  vk::PipelineDynamicStateCreateInfo DynamicState{};
+//  DynamicState.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+//  DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
+//  DynamicState.pDynamicStates = DynamicStates.data();
+//  CreateInfo.pDynamicState = &DynamicState;
 
   // Create Pipeline
   vk::Pipeline Pipeline;
@@ -1223,6 +1233,15 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     const auto &Discard = SceneManager->getNextObjects();
   }
 
+  ImGui_ImplVulkan_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  ImGui::ShowDemoWindow();
+
+  ImGui::Render();
+  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), CommandBuffer);
+
   CommandBuffer.endRenderPass();
 
   try {
@@ -1250,7 +1269,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     this->Textures[TextureName]->use(CommandBuffer,
                                      this->PipelineBundle->Layout);
     CommandBuffer.drawIndexed(
-        this->MeshTypes.Dumps[DumpName].Meshes[TypeName].IndexCount, Objects.size(),
+        this->MeshTypes.Dumps[DumpName].Meshes[TypeName].IndexCount,
+        Objects.size(),
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].FirstIndex, 0, Offset);
   }
 }
@@ -1334,6 +1354,12 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
               SceneManagerImplT>
 void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                              SceneManagerImplT>::render() {
+  static bool Once = false;
+  if (!Once) {
+    initUi();
+    Once = true;
+  }
+
   auto &Device =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
 
@@ -1745,6 +1771,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   Frame.ModelTransforms.reserve(1024);
   for (int I = 0; I < 1024; ++I) {
     Frame.ModelTransforms.push_back(glm::mat4(1.0f));
+    Frame.ModelTransforms.push_back(glm::mat4(1.0f));
   }
 
   Frame.UniformBufferDescriptor.buffer = Frame.CameraBuffer;
@@ -1757,6 +1784,74 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   Frame.ModelBufferDescriptor.range = 1024 * sizeof(glm::mat4);
 
   allocateDescriptorSet(Frame);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
+                             SceneManagerImplT>::initUi() {
+  ImGui::CreateContext();
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  GLFWwindow *Window = (GLFWwindow *)this->NativeComponents.Facades->Window
+                           ->ImplInstance.getNativeType();
+  ImGui_ImplGlfw_InitForVulkan(Window, true);
+
+  ImGui_ImplVulkan_InitInfo Info{
+      .Instance = static_cast<vk::Instance &>(*this->NativeComponents.Instance),
+      .PhysicalDevice = static_cast<vk::PhysicalDevice>(
+          *this->NativeComponents.PhysicalDevice),
+      .Device = static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice),
+      .QueueFamily =
+          this->NativeComponents.FamilyIndexes[vk::QueueFlagBits::eGraphics],
+      .Queue = static_cast<VkQueue>(*this->NativeComponents.GraphicsQueue),
+      .DescriptorPool = this->MeshPool,
+      .RenderPass = this->PipelineBundle->RenderPass,
+      .MinImageCount = 2,
+      .ImageCount = (uint32_t)this->SwapChainBundle->Frames.size(),
+      .MSAASamples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+      .PipelineCache = nullptr,
+      .UseDynamicRendering = false,
+      .Allocator = nullptr,
+      .CheckVkResultFn = nullptr,
+  };
+  ImGui_ImplVulkan_Init(&Info);
+
+  VkCommandBufferAllocateInfo AllocInfo{};
+  AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  AllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  AllocInfo.commandPool = CommandPool;
+  AllocInfo.commandBufferCount = 1;
+
+  VkDevice Device =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice);
+  VkCommandBuffer CommandBuffer;
+  vkAllocateCommandBuffers(Device, &AllocInfo, &CommandBuffer);
+
+  VkCommandBufferBeginInfo BeginInfo{};
+  BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  vkBeginCommandBuffer(CommandBuffer, &BeginInfo);
+
+  ImGui_ImplVulkan_CreateFontsTexture();
+
+  vkEndCommandBuffer(CommandBuffer);
+
+  VkSubmitInfo SubmitInfo{};
+  SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  SubmitInfo.commandBufferCount = 1;
+  SubmitInfo.pCommandBuffers = &CommandBuffer;
+
+  VkQueue GraphicsQueue =
+      static_cast<VkQueue>(*this->NativeComponents.GraphicsQueue);
+  vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, VK_NULL_HANDLE);
+  vkQueueWaitIdle(GraphicsQueue);
+
+  vkFreeCommandBuffers(Device, CommandPool, 1, &CommandBuffer);
+
+  vkDeviceWaitIdle(Device);
 }
 
 template class vk_core::VulkanPipeline<

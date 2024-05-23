@@ -15,6 +15,9 @@
 #include "vulkan/vulkan.hpp"
 #include <map>
 #include <vector>
+#include "imgui.h"
+#include </Users/fullhat/Documents/GitHub/pie-engine/src/modules/imgui_docking/backends/imgui_impl_glfw.h>
+#include </Users/fullhat/Documents/GitHub/pie-engine/src/modules/imgui_docking/backends/imgui_impl_vulkan.h>
 
 namespace vk_core {
 
@@ -278,6 +281,7 @@ protected:
   void prepareFrame(uint32_t ImageIndex);
 
   void createDescriptorBuffer(SwapChainFrameStruct &Frame);
+  void initUi();
 };
 
 } // namespace vk_core
