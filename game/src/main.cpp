@@ -40,11 +40,12 @@ int main(int Argc, char** Argv)
 
   sf::RenderWindow Window(
       sf::VideoMode(ScreenWidth, ScreenHeight),
-      "Nick Cave");
+      "");
   //                                              sf::Style::Fullscreen);
   Window.setFramerateLimit(100);
 
   IntroScreen Intro(&Window);
+  Intro.init();
   Intro.run();
 
   CaveScene Cave(&Window);

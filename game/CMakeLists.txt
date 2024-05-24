@@ -39,7 +39,9 @@ add_executable(game_exe
         src/Rat.cpp
         src/Rat.h
         src/IntroScreen.cpp
-        src/IntroScreen.h)
+        src/IntroScreen.h
+        src/AbstractTextScreen.cpp
+        src/AbstractTextScreen.h)
 
 target_link_libraries(game_exe PRIVATE windows)
 target_link_libraries(game_exe PRIVATE graphics)

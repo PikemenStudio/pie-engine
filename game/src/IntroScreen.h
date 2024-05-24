@@ -10,25 +10,14 @@
 #include <memory>
 #include <vector>
 
-class IntroScreen
+#include "AbstractTextScreen.h"
+
+class IntroScreen : public AbstractTextScreen
 {
 public:
   IntroScreen(sf::RenderWindow* Win);
 
-  void addLine(const std::wstring& LineText);
-
-  void handleUserInput();
-  void drawText();
-  void renderScreen();
-  void run();
-
-private:
-  sf::RenderWindow* Window;
-
-  sf::Font TextFont;
-  bool IsRunning = true;
-
-  std::vector<std::unique_ptr<sf::Text>> Lines;
+  void init() override;
 };
 
 #endif // ENGINE_INTROSCREEN_H
