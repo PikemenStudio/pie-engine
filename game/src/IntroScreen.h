@@ -7,9 +7,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include <memory>
-#include <vector>
-
 #include "AbstractTextScreen.h"
 
 class IntroScreen : public AbstractTextScreen

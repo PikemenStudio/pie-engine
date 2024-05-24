@@ -50,7 +50,6 @@ private:
   void drawHUD();
   void renderScene();
 
-//  std::unique_ptr<sf::RenderWindow> Window;
   sf::RenderWindow* Window;
   std::unique_ptr<sf::Shader> PostprocessingShader;
   std::unique_ptr<sf::RenderTexture> RenderTex;
@@ -75,8 +74,6 @@ private:
   std::map<sf::Keyboard::Key, bool> Key2IsPressed;
 
   float BackgrIntensity = 1.0f;
-
-  const std::string Title = "CaveScene";
 };
 
 #endif // ENGINE_CAVESCENE_H
