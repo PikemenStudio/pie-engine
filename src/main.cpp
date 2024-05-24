@@ -80,7 +80,7 @@ public:
     std::shared_ptr<WindowApiFacade<>> WindowAdapterInstance;
     WindowAdapterInstance = std::shared_ptr<WindowApiFacade<>>(
         new WindowApiFacade<>(WindowFacadeStructs::WindowProps{
-            .Size = {800, 600},
+            .Size = {600, 800},
             .Title = "Test",
             .Mode = WindowFacadeStructs::WindowProps::WINDOWED,
             .IsResizable = true,

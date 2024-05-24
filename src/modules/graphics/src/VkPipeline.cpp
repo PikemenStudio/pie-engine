@@ -898,9 +898,13 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .minDepth = 0.0f,
       .maxDepth = 1.0f,
   };
+  vk::Extent2D HalfExtent = {
+      .width = SwapChainBundle.value().Extent.width,
+      .height = SwapChainBundle.value().Extent.height,
+  };
   vk::Rect2D Scissor = {
       .offset = {0, 0},
-      .extent = SwapChainBundle.value().Extent,
+      .extent = HalfExtent,
   };
   vk::PipelineViewportStateCreateInfo ViewportState = {
       .flags = vk::PipelineViewportStateCreateFlags(),
@@ -980,15 +984,15 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   // Extra stuff
   CreateInfo.basePipelineHandle = nullptr;
 
-//  std::vector<vk::DynamicState> DynamicStates = {
-//      vk::DynamicState::eViewport,
-//      vk::DynamicState::eScissor,
-//  };
-//  vk::PipelineDynamicStateCreateInfo DynamicState{};
-//  DynamicState.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
-//  DynamicState.dynamicStateCount = static_cast<uint32_t>(DynamicStates.size());
-//  DynamicState.pDynamicStates = DynamicStates.data();
-//  CreateInfo.pDynamicState = &DynamicState;
+  //  std::vector<vk::DynamicState> DynamicStates = {
+  //      vk::DynamicState::eViewport,
+  //      vk::DynamicState::eScissor,
+  //  };
+  //  vk::PipelineDynamicStateCreateInfo DynamicState{};
+  //  DynamicState.sType = vk::StructureType::ePipelineDynamicStateCreateInfo;
+  //  DynamicState.dynamicStateCount =
+  //  static_cast<uint32_t>(DynamicStates.size()); DynamicState.pDynamicStates =
+  //  DynamicStates.data(); CreateInfo.pDynamicState = &DynamicState;
 
   // Create Pipeline
   vk::Pipeline Pipeline;
@@ -1185,7 +1189,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 
   vk::ClearValue ClearColor =
-      vk::ClearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f});
+      vk::ClearColorValue(std::array<float, 4>{0.1f, 0.1f, 0.1f, 1.0f});
   vk::RenderPassBeginInfo RenderPassInfo{
       .renderPass = this->PipelineBundle->RenderPass,
       .framebuffer = this->SwapChainBundle->Frames[ImageIndex].FrameBuffer,
@@ -1233,11 +1237,39 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     const auto &Discard = SceneManager->getNextObjects();
   }
 
+  auto [width, height] =
+      this->NativeComponents.Facades->Window->ImplInstance.getSize();
   ImGui_ImplVulkan_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
   ImGui::ShowDemoWindow();
+
+  ImGui::SetNextWindowSize(ImVec2(350, height));
+  ImGui::SetNextWindowPos(ImVec2(0, 0)); // Set the position of the new window
+
+  bool ShowDialog = true;
+  ImGui::Begin("Objects", &ShowDialog, ImGuiWindowFlags_NoCollapse);
+
+  //  ImGui::PushID(0ß);
+  if (ImGui::TreeNode("Root")) {
+    int I = 0;
+    if (ImGui::TreeNode((void *)&I, "Root")) {
+      ImGui::Text("Hello world");
+      ImGui::TreePop();
+    }
+    ImGui::TreePop();
+  }
+
+  if (ImGui::BeginPopup("hiu")) {
+    ImGui::Text("test");
+    ImGui::EndPopup();
+  }
+  ImGui::OpenPopup("hiu");
+
+  //  ImGui::PopID();
+  //  //ImGui::TreePop();
+  ImGui::End();
 
   ImGui::Render();
   ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), CommandBuffer);
@@ -1792,7 +1824,8 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                              SceneManagerImplT>::initUi() {
   ImGui::CreateContext();
-  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  ImGui::GetIO().ConfigFlags |=
+      ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
 
   GLFWwindow *Window = (GLFWwindow *)this->NativeComponents.Facades->Window
                            ->ImplInstance.getNativeType();

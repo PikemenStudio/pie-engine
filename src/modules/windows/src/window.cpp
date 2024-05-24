@@ -14,7 +14,7 @@ void Window::buildWindow() {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_RESIZABLE, Props.IsResizable ? GLFW_TRUE : GLFW_FALSE);
 
-  auto *GlfwWindowPtr = glfwCreateWindow(Props.Size.y, Props.Size.x,
+  auto *GlfwWindowPtr = glfwCreateWindow(Props.Size.x, Props.Size.y,
                                          Props.Title.c_str(), nullptr, nullptr);
 
   if (GlfwWindowPtr == nullptr) {
@@ -33,12 +33,15 @@ std::vector<const char *> Window::getRequiredExtensions() const {
   return {Extensions, Extensions + Size};
 }
 
-std::pair<uint32_t, uint32_t> Window::getSize() const {
+std::pair<uint32_t, uint32_t> Window::getSize() {
+  int Width, Height;
+  glfwGetWindowSize(GlfwWindow.get(), &Width, &Height);
+  this->Props.Size = {(uint32_t)Width, (uint32_t)Height};
   return std::pair<uint32_t, uint32_t>(this->Props.Size.x, this->Props.Size.y);
 }
 
 void Window::setSize(const std::pair<uint32_t, uint32_t> &Size) {
-  this->Props.Size = {Size.second, Size.first};
+  this->Props.Size = {Size.first, Size.second};
   glfwSetWindowSize(GlfwWindow.get(), Size.second, Size.first);
 }
 
