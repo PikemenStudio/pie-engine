@@ -536,6 +536,12 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   this->SwapChainBundle->Format = Format.format;
   this->SwapChainBundle->Extent = Extent;
 
+  for (auto &Frame : this->SwapChainBundle->Frames) {
+    CreateDepthResources(Frame);
+  }
+  this->SwapChainBundle->DepthFormat =
+      this->SwapChainBundle->Frames[0].DepthFormat;
+
   this->MaxFrameInFlight =
       static_cast<int>(this->SwapChainBundle->Frames.size());
 }
@@ -570,6 +576,13 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
         .freeMemory(Frame.ModelMemory);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyBuffer(Frame.ModelBuffer);
+
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyImage(Frame.DepthBuffer);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .freeMemory(Frame.DepthBufferMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyImageView(Frame.DepthBufferView);
   }
 
   static_cast<vk::Device &>(*NativeComponents.PhysicalDevice)
@@ -668,28 +681,50 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
 vk::RenderPass
 vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                         SceneManagerImplT>::createRenderPass() const {
-  vk::AttachmentDescription ColorAttachment{
-      .flags = vk::AttachmentDescriptionFlags(),
-      .format = SwapChainBundle.value().Format,
-      .samples = vk::SampleCountFlagBits::e1,
-      .loadOp = vk::AttachmentLoadOp::eClear,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-      .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-      .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-      .initialLayout = vk::ImageLayout::eUndefined,
-      .finalLayout = vk::ImageLayout::ePresentSrcKHR,
+  std::vector<vk::AttachmentDescription> Attachments{
+      {
+          // Color
+          .flags = vk::AttachmentDescriptionFlags(),
+          .format = SwapChainBundle.value().Format,
+          .samples = vk::SampleCountFlagBits::e1,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+          .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+          .initialLayout = vk::ImageLayout::eUndefined,
+          .finalLayout = vk::ImageLayout::ePresentSrcKHR,
+      },
+      {
+          // Depth
+          .flags = vk::AttachmentDescriptionFlags(),
+          .format = SwapChainBundle.value().DepthFormat,
+          .samples = vk::SampleCountFlagBits::e1,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+          .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+          .initialLayout = vk::ImageLayout::eUndefined,
+          .finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+      },
   };
 
-  vk::AttachmentReference ColorAttachmentRef{
-      .attachment = 0,
-      .layout = vk::ImageLayout::eColorAttachmentOptimal,
+  std::vector<vk::AttachmentReference> AttachmentRefs{
+      {
+          .attachment = 0,
+          .layout = vk::ImageLayout::eColorAttachmentOptimal,
+      },
+      {
+          .attachment = 1,
+          .layout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+      },
   };
 
   vk::SubpassDescription Subpass{
       .flags = vk::SubpassDescriptionFlags(),
       .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
       .colorAttachmentCount = 1,
-      .pColorAttachments = &ColorAttachmentRef,
+      .pColorAttachments = &AttachmentRefs[0],
+      .pDepthStencilAttachment = &AttachmentRefs[1],
   };
 
   vk::SubpassDependency Dependency{
@@ -704,8 +739,8 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
 
   vk::RenderPassCreateInfo CreateInfo{
       .flags = vk::RenderPassCreateFlags(),
-      .attachmentCount = 1,
-      .pAttachments = &ColorAttachment,
+      .attachmentCount = (uint32_t)Attachments.size(),
+      .pAttachments = Attachments.data(),
       .subpassCount = 1,
       .pSubpasses = &Subpass,
       .dependencyCount = 1,
@@ -942,6 +977,17 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   CreateInfo.stageCount = ShaderStages.size();
   CreateInfo.pStages = ShaderStages.data();
 
+  // Depth Stencil
+  vk::PipelineDepthStencilStateCreateInfo DepthStencil{
+      .flags = vk::PipelineDepthStencilStateCreateFlags(),
+      .depthTestEnable = VK_TRUE,
+      .depthWriteEnable = VK_TRUE,
+      .depthCompareOp = vk::CompareOp::eLess,
+      .depthBoundsTestEnable = VK_FALSE,
+      .stencilTestEnable = VK_FALSE,
+  };
+  CreateInfo.pDepthStencilState = &DepthStencil;
+
   // Multisampling
   vk::PipelineMultisampleStateCreateInfo Multisampling = {
       .flags = vk::PipelineMultisampleStateCreateFlags(),
@@ -1029,6 +1075,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   for (int I = 0; I < this->SwapChainBundle->Frames.size(); ++I) {
     std::vector<vk::ImageView> Attachments = {
         this->SwapChainBundle->Frames[I].ImageView,
+        this->SwapChainBundle->Frames[I].DepthBufferView,
     };
 
     vk::FramebufferCreateInfo FramebufferCreateInfo{
@@ -1188,8 +1235,13 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
         E.what());
   }
 
-  vk::ClearValue ClearColor =
-      vk::ClearColorValue(std::array<float, 4>{0.1f, 0.1f, 0.1f, 1.0f});
+  vk::ClearValue Clear{std::array<float, 4>{0.1f, 0.1f, 0.1f, 1.0f}};
+  vk::ClearValue DepthClear;
+  DepthClear.depthStencil = vk::ClearDepthStencilValue{1.0f, 0};
+  std::vector<vk::ClearValue> ClearValues{{
+      Clear,
+      DepthClear,
+  }};
   vk::RenderPassBeginInfo RenderPassInfo{
       .renderPass = this->PipelineBundle->RenderPass,
       .framebuffer = this->SwapChainBundle->Frames[ImageIndex].FrameBuffer,
@@ -1198,8 +1250,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
               .offset = {0, 0},
               .extent = this->SwapChainBundle->Extent,
           },
-      .clearValueCount = 1,
-      .pClearValues = &ClearColor,
+      .clearValueCount = (uint32_t)ClearValues.size(),
+      .pClearValues = ClearValues.data(),
   };
 
   CommandBuffer.beginRenderPass(&RenderPassInfo, vk::SubpassContents::eInline);
@@ -1884,6 +1936,66 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   vkFreeCommandBuffers(Device, CommandPool, 1, &CommandBuffer);
 
   vkDeviceWaitIdle(Device);
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+vk::Format VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    findSupportedFormat(const std::vector<vk::Format> &Candidates,
+                        vk::ImageTiling Tiling,
+                        vk::FormatFeatureFlags Features) {
+  for (vk::Format Format : Candidates) {
+    vk::FormatProperties Props = static_cast<vk::PhysicalDevice &>(
+                                     *this->NativeComponents.PhysicalDevice)
+                                     .getFormatProperties(Format);
+
+    if (Tiling == vk::ImageTiling::eLinear &&
+        (Props.linearTilingFeatures & Features) == Features) {
+      return Format;
+    }
+
+    if (Tiling == vk::ImageTiling::eOptimal &&
+        (Props.optimalTilingFeatures & Features) == Features) {
+      return Format;
+    }
+  }
+
+  throw std::runtime_error("Failed to find supported format");
+}
+
+template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
+          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
+              SceneManagerImplT>
+void VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
+    CreateDepthResources(SwapChainFrameStruct &Frame) {
+  Frame.DepthFormat = findSupportedFormat(
+      {
+          vk::Format::eD32Sfloat,
+          vk::Format::eD24UnormS8Uint,
+      },
+      vk::ImageTiling::eOptimal,
+      vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+
+  auto [Width, Height] =
+      this->NativeComponents.Facades->Window->ImplInstance.getSize();
+  VkTexture::ImageInputChunk ImageCreateInfo{
+      .LogicalDevice =
+          static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
+      .PhysicalDevice = static_cast<vk::PhysicalDevice &>(
+          *this->NativeComponents.PhysicalDevice),
+      .Size = {SwapChainBundle->Extent.width, SwapChainBundle->Extent.height},
+      .Tiling = vk::ImageTiling::eOptimal,
+      .Usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+      .MemoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal,
+      .Format = Frame.DepthFormat,
+  };
+  Frame.DepthBuffer = VkTexture::createImage(ImageCreateInfo);
+  Frame.DepthBufferMemory =
+      VkTexture::createImageMemory(ImageCreateInfo, Frame.DepthBuffer);
+  Frame.DepthBufferView = VkTexture::createImageView(
+      static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice),
+      Frame.DepthBuffer, Frame.DepthFormat, vk::ImageAspectFlagBits::eDepth);
 }
 
 template class vk_core::VulkanPipeline<

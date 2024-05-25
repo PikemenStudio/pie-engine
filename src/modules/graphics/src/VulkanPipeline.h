@@ -102,6 +102,10 @@ protected:
     vk::ImageView ImageView;
     vk::Framebuffer FrameBuffer;
     vk::CommandBuffer CommandBuffer;
+    vk::Image DepthBuffer;
+    vk::DeviceMemory DepthBufferMemory;
+    vk::ImageView DepthBufferView;
+    vk::Format DepthFormat;
     vk::Semaphore ImageAvailableSemaphore = nullptr;
     vk::Semaphore RenderFinishedSemaphore = nullptr;
     vk::Fence InFlightFence = nullptr;
@@ -120,7 +124,7 @@ protected:
   struct SwapChainBundleStruct {
     vk::SwapchainKHR Swapchain;
     std::vector<SwapChainFrameStruct> Frames;
-    vk::Format Format;
+    vk::Format Format, DepthFormat;
     vk::Extent2D Extent;
   };
   std::optional<SwapChainBundleStruct> SwapChainBundle;
@@ -282,6 +286,12 @@ protected:
 
   void createDescriptorBuffer(SwapChainFrameStruct &Frame);
   void initUi();
+
+  vk::Format findSupportedFormat(const std::vector<vk::Format> &Candidates,
+                                 vk::ImageTiling Tiling,
+                                 vk::FormatFeatureFlags Features);
+
+  void CreateDepthResources(SwapChainFrameStruct &Frame);
 };
 
 } // namespace vk_core

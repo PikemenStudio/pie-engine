@@ -26,6 +26,7 @@ vk_core::VkTexture::VkTexture(
       .Usage = vk::ImageUsageFlagBits::eTransferDst |
                vk::ImageUsageFlagBits::eSampled,
       .MemoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal,
+      .Format = vk::Format::eR8G8B8A8Unorm,
   };
 
   Image = createImage(ImageInputChunkInstance);
@@ -237,7 +238,7 @@ vk::Image vk_core::VkTexture::createImage(
   vk::ImageCreateInfo ImageCreateInfo{
       .flags = vk::ImageCreateFlags(),
       .imageType = vk::ImageType::e2D,
-      .format = vk::Format::eR8G8B8A8Unorm,
+      .format = InputChunk.Format,
       .extent = {(uint32_t)InputChunk.Size.x, (uint32_t)InputChunk.Size.y, 1},
       .mipLevels = 1,
       .arrayLayers = 1,
@@ -389,9 +390,10 @@ void vk_core::VkTexture::copyBufferToImage(
   Job.Queue.waitIdle();
 }
 
-vk::ImageView vk_core::VkTexture::createImageView(vk::Device LogicalDevice,
-                                                  vk::Image Image,
-                                                  vk::Format Format) {
+vk::ImageView
+vk_core::VkTexture::createImageView(vk::Device LogicalDevice, vk::Image Image,
+                                    vk::Format Format,
+                                    vk::ImageAspectFlags AspectFlags) {
   vk::ImageViewCreateInfo ImageViewCreateInfo{
       .image = Image,
       .viewType = vk::ImageViewType::e2D,
@@ -405,7 +407,7 @@ vk::ImageView vk_core::VkTexture::createImageView(vk::Device LogicalDevice,
           },
       .subresourceRange =
           {
-              .aspectMask = vk::ImageAspectFlagBits::eColor,
+              .aspectMask = AspectFlags,
               .baseMipLevel = 0,
               .levelCount = 1,
               .baseArrayLayer = 0,

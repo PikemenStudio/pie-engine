@@ -31,6 +31,7 @@ public:
     vk::ImageTiling Tiling;
     vk::ImageUsageFlags Usage;
     vk::MemoryPropertyFlags MemoryProperties;
+    vk::Format Format;
   };
 
   struct ImageTransitionJob {
@@ -59,14 +60,15 @@ public:
   void createSampler();
   void createDescriptorSet();
 
-protected:
+public:
   static vk::Image createImage(ImageInputChunk InputChunk);
   static vk::DeviceMemory createImageMemory(ImageInputChunk InputChunk,
                                             vk::Image Image);
   static void transitionLayout(ImageTransitionJob Job);
   static void copyBufferToImage(BufferImageCopyJob Job);
   static vk::ImageView createImageView(vk::Device LogicalDevice,
-                                       vk::Image Image, vk::Format Format);
+                                       vk::Image Image, vk::Format Format,
+                                       vk::ImageAspectFlags AspectFlags);
 
 protected:
   struct BufferInput {
