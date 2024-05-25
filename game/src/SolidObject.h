@@ -5,8 +5,8 @@
 #ifndef ENGINE_SOLIDOBJECT_H
 #define ENGINE_SOLIDOBJECT_H
 
-#include <vector>
 #include <set>
+#include <vector>
 
 // Abstract class of an object with collisions
 class SolidObject

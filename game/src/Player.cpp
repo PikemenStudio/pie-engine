@@ -122,6 +122,38 @@ void Player::moveToTunnel(Tunnel* To)
   setPosition({ Center.x, To->getFloorYCoord(Center.x) + (Size.y / 2 * 1.2f) });
 }
 
+void Player::setPosition(sf::Vector2f C)
+{
+  this->Center = C;
+
+  if (LightSrc)
+    LightSrc->setPosition(C);
+}
+
+void Player::setPositionWithCollisionCheck(sf::Vector2f Pos,
+                                   const std::vector<SolidObject*>& Objects)
+{
+  auto OldPos = Center;
+  setPosition(Pos);
+
+  for (auto* Obj : Objects)
+  {
+    if (isCollision(Obj))
+    {
+      setPosition(OldPos);
+      break;
+    }
+  }
+}
+
+void Player::damageByRat()
+{
+  Health -= randInRange(0.1, 0.3);
+  if (Health < 0)
+    Health = 0;
+  LightSrc->setIntensity(0.3f);
+}
+
 void Player::move(const std::vector<SolidObject*>& Objects, float FrameDrawingTimeS)
 {
   auto OldPos = Center;

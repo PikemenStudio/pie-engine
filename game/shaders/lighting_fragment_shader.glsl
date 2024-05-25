@@ -13,7 +13,7 @@ float computeIntensity(float light_intens, vec2 light_world_pos)
 {
     vec2 world_pos = vert_pos.xy * (world_window_dimensions / 2.0) + world_window_center;
 
-    vec2 delta = world_pos.xy - light_world_pos; // for now, the light source is always at the center
+    vec2 delta = world_pos.xy - light_world_pos;
     float delta_len_squared = dot(delta, delta);
     float intensity = clamp(light_intens / (delta_len_squared + 0.5), 0.0, 1.0);
     return intensity;
@@ -23,9 +23,6 @@ void main()
 {
     // lookup the pixel in the texture
     vec4 pixel = texture2D(texture, gl_TexCoord[0].xy);
-
-//    float intensity = computeIntensity(light_intensity, world_light_pos);
-//    float intens2 = computeIntensity(1.0, vec2(0, 0));
 
     float total_lights_intens = 0.0;
     for (int i = 0; i < 5; i++)
@@ -40,7 +37,6 @@ void main()
     }
 
     total_lights_intens = clamp(total_lights_intens, 0.0, 1.0);
-//    float total_lights_intens = clamp(intensity + intens2, 0.0, 1.0);
 
     // multiply it by the color
     gl_FragColor = gl_Color * pixel * total_lights_intens * backgr_intensity;

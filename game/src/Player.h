@@ -40,37 +40,11 @@ public:
   void setCurrTunnel(Tunnel* T) { CurrTunnel = T; }
   Tunnel* getCurrTunnel() const { return CurrTunnel; }
 
-  void setPosition(sf::Vector2f C)
-  {
-    this->Center = C;
-
-    if (LightSrc)
-      LightSrc->setPosition(C);
-  }
+  void setPosition(sf::Vector2f C);
 
   void setPositionWithCollisionCheck(sf::Vector2f Pos,
-                                     const std::vector<SolidObject*>& Objects)
-  {
-    auto OldPos = Center;
-    setPosition(Pos);
-
-    for (auto* Obj : Objects)
-    {
-      if (isCollision(Obj))
-      {
-        setPosition(OldPos);
-        break;
-      }
-    }
-  }
-
-  void damageByRat()
-  {
-    Health -= randInRange(0.1, 0.3);
-    if (Health < 0)
-      Health = 0;
-    LightSrc->setIntensity(0.3f);
-  }
+                                     const std::vector<SolidObject*>& Objects);
+  void damageByRat();
 
   float getHealth() const { return Health; }
   float getStamina() const { return Stamina; }
