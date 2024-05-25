@@ -926,9 +926,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   // Viewport and Scissor
   vk::Viewport Viewport = {
-      .x = 0.0f,
+      .x = 350.0f,
       .y = 0.0f,
-      .width = static_cast<float>(SwapChainBundle.value().Extent.width),
+      .width = static_cast<float>(SwapChainBundle.value().Extent.width) - 350,
       .height = static_cast<float>(SwapChainBundle.value().Extent.height),
       .minDepth = 0.0f,
       .maxDepth = 1.0f,
@@ -1583,7 +1583,7 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                         SceneManagerImplT>::getBindingDescription() {
   vk::VertexInputBindingDescription BindingDescription{
       .binding = 0,
-      .stride = 7 * sizeof(float),
+      .stride = 8 * sizeof(float),
       .inputRate = vk::VertexInputRate::eVertex,
   };
 
@@ -1600,20 +1600,20 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
       vk::VertexInputAttributeDescription{
           .location = 0,
           .binding = 0,
-          .format = vk::Format::eR32G32Sfloat,
+          .format = vk::Format::eR32G32B32Sfloat,
           .offset = 0,
       },
       vk::VertexInputAttributeDescription{
           .location = 1,
           .binding = 0,
           .format = vk::Format::eR32G32B32Sfloat,
-          .offset = 2 * sizeof(float),
+          .offset = 3 * sizeof(float),
       },
       vk::VertexInputAttributeDescription{
           .location = 2,
           .binding = 0,
           .format = vk::Format::eR32G32Sfloat,
-          .offset = 5 * sizeof(float),
+          .offset = 6 * sizeof(float),
       },
   };
 
@@ -1641,9 +1641,10 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
     std::vector<float> MeshArray;
     for (int IVertex = 0, IColor = 0, ITexCoord = 0;
          IVertex < ObjectData.Vertices.size();
-         IVertex += 2, IColor += 3, ITexCoord += 2) {
+         IVertex += 3, IColor += 3, ITexCoord += 2) {
       MeshArray.push_back(ObjectData.Vertices[IVertex + 0]);
       MeshArray.push_back(ObjectData.Vertices[IVertex + 1]);
+      MeshArray.push_back(ObjectData.Vertices[IVertex + 2]);
       MeshArray.push_back(ObjectData.Colors[IColor + 0]);
       MeshArray.push_back(ObjectData.Colors[IColor + 1]);
       MeshArray.push_back(ObjectData.Colors[IColor + 2]);
@@ -1656,7 +1657,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
         .Data = std::move(MeshArray),
         .Indexes = ObjectData.Indexes,
         .Offset = Offset,
-        .Size = static_cast<int>(ArraySize / 7),
+        .Size = static_cast<int>(ArraySize / 8),
         .IndexCount = (uint32_t)ObjectData.Indexes.size(),
         .FirstIndex = (uint32_t)IndexOffset,
     };

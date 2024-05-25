@@ -8,6 +8,7 @@
 #include "BaseObject.hpp"
 #include "Square.hpp"
 #include "Triangle.hpp"
+#include "Actor.hpp"
 #include <map>
 
 struct ObjectData {
@@ -18,12 +19,12 @@ struct ObjectData {
 
 static std::map<BaseObject::ObjectTypes, ObjectData> DefaultData{
     {BaseObject::ObjectTypes::TRIANGLE,
-     {{0.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f},
+     {{0.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f},
       {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
       {0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f}}},
     {BaseObject::ObjectTypes::SQUARE,
-     {{{-0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f,
-        0.5f}},
+     {{{-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.5f, -0.5f,
+        0.5f, 0.0f}},
       {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
       {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,

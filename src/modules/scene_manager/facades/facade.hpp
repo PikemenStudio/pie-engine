@@ -23,35 +23,6 @@ struct SceneManagerFacadeStructs {
     DependencyStructT Dependencies;
   };
 
-  enum class ObjectTypes {
-    TRIANGLE,
-    SQUARE,
-  };
-  static std::string toString(ObjectTypes Type) {
-    switch (Type) {
-    case ObjectTypes::TRIANGLE:
-      return "Triangle";
-    case ObjectTypes::SQUARE:
-      return "Square";
-    }
-  }
-
-  struct ObjectData {
-    std::vector<uint8_t> Vertexes;
-    glm::vec3 Position;
-    std::string DumpName;
-    std::string Name;
-
-    ObjectTypes Type;
-    struct TransformationStruct {
-      glm::mat4 Transformation;
-    };
-    TransformationStruct calculateTransformation() {
-      glm::mat4 Result = glm::translate(glm::mat4(1.0f), Position);
-      return {.Transformation = Result};
-    }
-  };
-
   struct CameraData {
     glm::mat4 View;
     glm::mat4 Projection;

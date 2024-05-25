@@ -55,12 +55,12 @@ std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
 void moveObject() {
   // std::this_thread::sleep_for(std::chrono::seconds(2));
 
-//  std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
-//      new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
-//  Object2->setName("Square1");
-//  Object2->setTextureName("Texture1");
-//  Object2->setDumpName("TS");
-//  SceneManagerInstance1->ImplInstance.addObject(Object2);
+  //  std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
+  //      new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
+  //  Object2->setName("Square1");
+  //  Object2->setTextureName("Texture1");
+  //  Object2->setDumpName("TS");
+  //  SceneManagerInstance1->ImplInstance.addObject(Object2);
 
   while (true) {
     static uint64_t I = 0.0f;
@@ -130,10 +130,15 @@ public:
     Object1->setName("Triangle");
     Object1->setTextureName("Texture");
     Object1->setDumpName("TS");
+    std::shared_ptr<BaseObject> Object2 =
+        std::shared_ptr<BaseObject>(new Actor("/Users/fullhat/Documents/cube_triangulated.obj"));
+    Object2->setName("Actor");
+    Object2->setTextureName("Texture");
+    Object2->setDumpName("TS");
 
     Obj = Object;
     SceneManagerInstance->ImplInstance.addObject(Object);
-    SceneManagerInstance->ImplInstance.addObject(Object1);
+    SceneManagerInstance->ImplInstance.addObject(Object2);
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
@@ -170,12 +175,13 @@ public:
         .TexCoords = DefaultData[BaseObject::ObjectTypes::TRIANGLE].TexCoords,
         .Indexes = {2, 1, 0},
     };
-//    ObjectsData["Square"] = GraphicFacadeStructs::ObjectData{
-//        .Vertices = DefaultData[BaseObject::ObjectTypes::SQUARE].Vertexes,
-//        .Colors = DefaultData[BaseObject::ObjectTypes::SQUARE].Colors,
-//        .TexCoords = DefaultData[BaseObject::ObjectTypes::SQUARE].TexCoords,
-//        .Indexes = {0, 1, 2, 2, 3, 0},
-//    };
+    Actor *A = (Actor *)Object2.get();
+    ObjectsData["Actor"] = GraphicFacadeStructs::ObjectData{
+        .Vertices = A->getVertices(),
+        .Colors = A->getColors(),
+        .TexCoords = A->getTextureCoords(),
+        .Indexes = A->getIndexes(),
+    };
 
     GraphicFacadeStructs::ObjectsData ObjectsData1;
     GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");

@@ -13,7 +13,7 @@ public:
   Square(std::array<glm::vec3, 4> &&Vertexes);
   ~Square() = default;
 
-  std::vector<uint8_t> getVertices() override;
+  std::vector<float> getVertices() override;
   ObjectTypes getType() override;
 
   glm::mat4 calculateTransformation() override;

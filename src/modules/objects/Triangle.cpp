@@ -6,8 +6,8 @@
 Triangle::Triangle(std::array<glm::vec3, 3> &&Vertexes) {
   this->Vertexes = std::move(Vertexes);
 }
-std::vector<uint8_t> Triangle::getVertices() {
-  std::vector<uint8_t> VertexesVector;
+std::vector<float> Triangle::getVertices() {
+  std::vector<float> VertexesVector;
 
   for (auto &Vertex : this->Vertexes) {
     VertexesVector.push_back(Vertex.x);

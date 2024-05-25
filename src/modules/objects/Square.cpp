@@ -8,8 +8,8 @@ Square::Square(std::array<glm::vec3, 4> &&Vertexes) {
   this->Vertexes = std::move(Vertexes);
 }
 
-std::vector<uint8_t> Square::getVertices() {
-  std::vector<uint8_t> VertexesVector;
+std::vector<float> Square::getVertices() {
+  std::vector<float> VertexesVector;
 
   for (auto &Vertex : this->Vertexes) {
     VertexesVector.push_back(Vertex.x);

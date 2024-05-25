@@ -13,7 +13,7 @@ public:
   Triangle(std::array<glm::vec3, 3> &&Vertexes);
   ~Triangle() = default;
 
-  std::vector<uint8_t> getVertices() override;
+  std::vector<float> getVertices() override;
   ObjectTypes getType() override;
 
   glm::mat4 calculateTransformation() override;

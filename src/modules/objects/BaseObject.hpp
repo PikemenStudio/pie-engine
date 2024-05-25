@@ -16,11 +16,14 @@ public:
   BaseObject(BaseObject &) = default;
   virtual ~BaseObject() = default;
 
-  virtual std::vector<uint8_t> getVertices() = 0;
+  virtual std::vector<float> getVertices() = 0;
+  virtual std::vector<float> getColors() { return {}; }
+  virtual std::vector<float> getTextureCoords() { return {}; }
 
   enum class ObjectTypes {
     TRIANGLE,
     SQUARE,
+    ACTOR,
   };
 
   static std::string toString(ObjectTypes Type) {
@@ -29,6 +32,8 @@ public:
       return "Triangle";
     case ObjectTypes::SQUARE:
       return "Square";
+    case ObjectTypes::ACTOR:
+      return "Actor";
     }
   }
 
