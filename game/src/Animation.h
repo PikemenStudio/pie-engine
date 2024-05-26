@@ -18,77 +18,17 @@ class Animation
 public:
   using FramesContainer = std::vector<std::unique_ptr<sf::Texture>>;
 
-  Animation(const std::vector<std::string>& FramesFiles)
-  {
-    for (const auto& FileName : FramesFiles)
-    {
-      auto Frame = std::make_unique<sf::Texture>();
+  Animation(const std::vector<std::string>& FramesFiles);
 
-      if (!Frame->loadFromFile(FileName))
-        LOG_F(ERROR, "Cannot load file: %s", FileName.c_str());
+  void update();
+  void start();
+  void stop();
 
-      Frame->setSmooth(false);
-      Frames.push_back(std::move(Frame));
-    }
+  void setLoop(bool L);
+  void setFrameTime(float Time);
 
-    AnimDuration = Frames.size() * FrameTime;
-  }
-
-  void update()
-  {
-    if (!Playing)
-      return;
-
-    auto Duration = std::chrono::high_resolution_clock::now() - OldNow;
-    auto DurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(Duration);
-    float PassedTimeSec = DurationMs.count() / 1000.0f;
-    OldNow = std::chrono::high_resolution_clock::now();
-
-    CurrAnimTime += PassedTimeSec;
-    if (CurrAnimTime >= AnimDuration)
-    {
-      if (Loop)
-        CurrAnimTime = 0;
-      else
-      {
-        CurrAnimTime -= PassedTimeSec;
-        stop();
-      }
-    }
-  }
-
-  void start()
-  {
-    Playing = true;
-    CurrAnimTime = 0;
-    OldNow = std::chrono::high_resolution_clock::now();
-  }
-
-  void stop()
-  {
-    Playing = false;
-  }
-
-  void setLoop(bool L)
-  {
-    Loop = L;
-  }
-
-  void setFrameTime(float Time)
-  {
-    FrameTime = Time;
-    AnimDuration = FrameTime * Frames.size();
-  }
-
-  const FramesContainer& getFrames() const
-  {
-    return Frames;
-  }
-
-  int getCurrFrameIndex() const
-  {
-    return static_cast<int>(CurrAnimTime / FrameTime);
-  }
+  const FramesContainer& getFrames() const;
+  int getCurrFrameIndex() const;
 
 private:
   std::vector<std::unique_ptr<sf::Texture>> Frames;

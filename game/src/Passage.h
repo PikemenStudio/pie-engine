@@ -22,9 +22,6 @@ public:
     this->Transition = T;
   }
 
-//  const Tunnel* getCurrTunnel() const { return CurrTunnel; }
-//  void setCurrTunnel(const Tunnel* T) { CurrTunnel = T; }
-
   bool isInInteractZone(const Player* Pl) override;
   void runInteraction() override;
   void draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj) override;
@@ -32,17 +29,15 @@ public:
 private:
   void computeYCoord(const Tunnel* Tnl);
 
-//  const Tunnel* Tunnel1, * Tunnel2, * CurrTunnel;
   const Tunnel* Tunnel1, * Tunnel2;
   const Player* PlayerObj;
   DimmingTransition* Transition = nullptr;
   float XCoord;
   std::map<const Tunnel*, float> YCoords;
-//  float YCoord;
   float Height;
 
   static constexpr float PassageWidth = 0.55f;
-  static constexpr float ScaleFactor = 0.5f;
+//  static constexpr float ScaleFactor = 0.5f;
 
   sf::Texture Tex;
   sf::Sprite Sprite;
