@@ -35,16 +35,3 @@ void LightSource::update()
     IntervalStart = high_resolution_clock::now();
   }
 }
-
-//void LightSource::draw(sf::RenderTarget& Win, const WorldWindow& WorldWindowObj)
-//{
-//  sf::CircleShape DummySource(25);
-//
-//  auto ScreenCoords = worldCoordsToScreen(WorldCoords, WorldWindowObj);
-//  DummySource.setPosition(ScreenCoords - sf::Vector2f(25, 25));
-//  DummySource.setFillColor(sf::Color::White);
-//  DummySource.setOutlineThickness(5);
-//  DummySource.setOutlineColor(sf::Color::Black);
-//
-//  Win.draw(DummySource);
-//}

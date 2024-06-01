@@ -26,12 +26,6 @@ sf::Vector2f worldDeltaToScreen(const sf::Vector2f& WorldDelta, const WorldWindo
   return {WorldDelta.x * PixelsInUnitX, WorldDelta.y * PixelsInUnitY};
 }
 
-//sf::Vector2f screenCoordsToWorld(const sf::Vector2f& ScreenCoords)
-//{
-//  return sf::Vector2f((ScreenCoords.x - HalfScreenWidth) / HalfScreenWidth,
-//                      -(ScreenCoords.y - HalfScreenHeight) / HalfScreenHeight);
-//}
-
 std::string loadTextFile(const std::string& Name)
 {
   std::ifstream Stream(Name);

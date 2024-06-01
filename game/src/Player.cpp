@@ -148,7 +148,7 @@ void Player::setPositionWithCollisionCheck(sf::Vector2f Pos,
 
 void Player::damageByRat()
 {
-  return;
+//  return;
   Health -= randInRange(0.1, 0.3);
   if (Health < 0)
     Health = 0;
