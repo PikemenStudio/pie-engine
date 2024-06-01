@@ -68,6 +68,7 @@ struct GraphicFacadeStructs {
     std::vector<float> Colors;
     std::vector<float> TexCoords;
     std::vector<uint32_t> Indexes;
+    std::vector<float> Normals;
   };
 
   using ObjectsData = std::map<std::string, ObjectData>;

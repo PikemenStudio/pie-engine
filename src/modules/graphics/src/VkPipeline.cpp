@@ -893,13 +893,13 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   // Vertex Input
   vk::VertexInputBindingDescription BindingDescription =
       getBindingDescription();
-  std::array<vk::VertexInputAttributeDescription, 3> AttributeDescriptions =
+  std::array<vk::VertexInputAttributeDescription, 4> AttributeDescriptions =
       getAttributeDescriptions();
   vk::PipelineVertexInputStateCreateInfo VertexInputInfo = {
       .flags = vk::PipelineVertexInputStateCreateFlags(),
       .vertexBindingDescriptionCount = 1,
       .pVertexBindingDescriptions = &BindingDescription,
-      .vertexAttributeDescriptionCount = 3,
+      .vertexAttributeDescriptionCount = AttributeDescriptions.size(),
       .pVertexAttributeDescriptions = AttributeDescriptions.data(),
   };
   CreateInfo.pVertexInputState = &VertexInputInfo;
@@ -1216,7 +1216,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                                E.what());
     }
 
-    createDescriptorBuffer(Frame);
+    createDescriptorBuffer(Frame, 8192);
   }
 }
 
@@ -1295,29 +1295,141 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
 
-  ImGui::SetNextWindowSize(ImVec2(350, height));
+  ImGui::SetNextWindowSize(ImVec2(350, height - 300));
   ImGui::SetNextWindowPos(ImVec2(0, 0)); // Set the position of the new window
 
   bool ShowDialog = true;
-  ImGui::Begin("Objects", &ShowDialog, ImGuiWindowFlags_NoCollapse);
+  ImGui::Begin("Objects", &ShowDialog, ImGuiWindowFlags_MenuBar);
+
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("Scene")) {
+      if (ImGui::MenuItem("Open", "Ctrl+O")) {
+      }
+      if (ImGui::MenuItem("Save", "Ctrl+S")) {
+      }
+      if (ImGui::MenuItem("Delete", "Ctrl+D")) {
+      }
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Edit")) {
+      if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
+      }
+      if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
 
   //  ImGui::PushID(0ß);
-  if (ImGui::TreeNode("Root")) {
+  if (ImGui::TreeNode("Objects")) {
     int I = 0;
-    if (ImGui::TreeNode((void *)&I, "Root")) {
-      ImGui::Text("Hello world");
-      ImGui::TreePop();
+    for (; I < 200; ++I) {
+      ImGui::Text("Object %d", I);
     }
     ImGui::TreePop();
   }
+  ImGui::End();
 
-  if (ImGui::BeginPopup("hiu")) {
-    ImGui::Text("test");
-    ImGui::EndPopup();
+  char textureName[128] = "Texture";
+  char texturePath[256] = "";
+  bool showWindow = true;
+  ImGui::Begin("Texture Input", &showWindow);
+
+  // Input field for texture name
+  ImGui::InputText("Texture Name", textureName, IM_ARRAYSIZE(textureName));
+
+  // Input field for texture path
+  ImGui::InputText("Texture Path", texturePath, IM_ARRAYSIZE(texturePath));
+
+  // Buttons for confirm and cancel
+  if (ImGui::Button("Confirm")) {
+    // Handle confirm action (e.g., save texture information)
+    // You can use textureName and texturePath here
+    showWindow = false; // Close the window after confirming
   }
-  ImGui::OpenPopup("hiu");
+  ImGui::SameLine();
+  if (ImGui::Button("Cancel")) {
+    // Handle cancel action
+    showWindow = false; // Close the window
+  }
+
+  ImGui::End();
+
+  bool showDeleteWindow = true;
+  ImGui::Begin("Delete Texture", &showDeleteWindow);
+
+  // Dropdown list for selecting texture
+  if (ImGui::BeginCombo("Select Texture", "A")) {
+    if (ImGui::Selectable("Texture1", true)) {
+    }
+    ImGui::SetItemDefaultFocus();
+    if (ImGui::Selectable("Texture2", true)) {
+    }
+    ImGui::SetItemDefaultFocus();
+    ImGui::EndCombo();
+  }
+
+  // Buttons for delete and cancel
+  if (ImGui::Button("Delete")) {
+
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Cancel")) {
+    // Handle cancel action
+    showDeleteWindow = false; // Close the window
+  }
+  ImGui::End();
+
+  // Настройка и создание окна для модификации объекта
+  ImGui::SetNextWindowSize(ImVec2(350, 300));
+  ImGui::SetNextWindowPos(
+      ImVec2(0, height - 300)); // Установка позиции нового окна
+  ImGui::Begin("Object Modification", &ShowDialog, ImGuiWindowFlags_NoResize);
+
+  char objectName[128] = "Object Name";
+  float rotation[3] = {0.0f, 0.0f, 0.0f};
+  float translation[3] = {0.0f, 0.0f, 0.0f};
+  float scale[3] = {1.0f, 1.0f, 1.0f};
+  std::vector<std::string> textures = {"BlueMiddleSoft", "Red", "Texture3"};
+  int currentTexture = 0;
+
+  // Ввод имени объекта
+  ImGui::InputText("Object Name", objectName, IM_ARRAYSIZE(objectName));
+
+  // Ввод для вращения
+  ImGui::InputFloat3("Rotation", rotation);
+
+  // Ввод для перемещения
+  ImGui::InputFloat3("Translation", translation);
+
+  // Ввод для масштабирования
+  ImGui::InputFloat3("Scale", scale);
+
+  // Выпадающий список для выбора текстуры
+  if (ImGui::BeginCombo("Texture", textures[currentTexture].c_str())) {
+    for (int n = 0; n < textures.size(); n++) {
+      bool is_selected = (currentTexture == n);
+      if (ImGui::Selectable(textures[n].c_str(), is_selected))
+        currentTexture = n;
+      if (is_selected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  // Кнопка для удаления объекта
+  if (ImGui::Button("Delete Object")) {
+    // Действие при нажатии кнопки удаления объекта
+  }
+
+  //    if (ImGui::BeginPopup("hiu")) {
+  //      ImGui::Button("Add object");
+  //      ImGui::EndPopup();
+  //    }
+  //    ImGui::OpenPopup("hiu");
 
   //  ImGui::PopID();
   //  //ImGui::TreePop();
@@ -1354,7 +1466,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
                                      this->PipelineBundle->Layout);
     CommandBuffer.drawIndexed(
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].IndexCount,
-        Objects.size(),
+        Objects[TextureName].size(),
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].FirstIndex, 0, Offset);
   }
 }
@@ -1583,7 +1695,7 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                         SceneManagerImplT>::getBindingDescription() {
   vk::VertexInputBindingDescription BindingDescription{
       .binding = 0,
-      .stride = 8 * sizeof(float),
+      .stride = 11 * sizeof(float),
       .inputRate = vk::VertexInputRate::eVertex,
   };
 
@@ -1593,10 +1705,10 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
 template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
-std::array<vk::VertexInputAttributeDescription, 3>
+std::array<vk::VertexInputAttributeDescription, 4>
 vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                         SceneManagerImplT>::getAttributeDescriptions() {
-  std::array<vk::VertexInputAttributeDescription, 3> Attributes{
+  std::array<vk::VertexInputAttributeDescription, 4> Attributes{
       vk::VertexInputAttributeDescription{
           .location = 0,
           .binding = 0,
@@ -1614,6 +1726,12 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
           .binding = 0,
           .format = vk::Format::eR32G32Sfloat,
           .offset = 6 * sizeof(float),
+      },
+      vk::VertexInputAttributeDescription{
+          .location = 3,
+          .binding = 0,
+          .format = vk::Format::eR32G32B32Sfloat,
+          .offset = 8 * sizeof(float),
       },
   };
 
@@ -1639,9 +1757,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   // Create Dump of objects
   for (auto &[Name, ObjectData] : Dump) {
     std::vector<float> MeshArray;
-    for (int IVertex = 0, IColor = 0, ITexCoord = 0;
+    for (int IVertex = 0, IColor = 0, ITexCoord = 0, INormal = 0;
          IVertex < ObjectData.Vertices.size();
-         IVertex += 3, IColor += 3, ITexCoord += 2) {
+         IVertex += 3, IColor += 3, ITexCoord += 2, INormal += 3) {
       MeshArray.push_back(ObjectData.Vertices[IVertex + 0]);
       MeshArray.push_back(ObjectData.Vertices[IVertex + 1]);
       MeshArray.push_back(ObjectData.Vertices[IVertex + 2]);
@@ -1650,6 +1768,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       MeshArray.push_back(ObjectData.Colors[IColor + 2]);
       MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 0]);
       MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 1]);
+      MeshArray.push_back(ObjectData.Normals[ITexCoord + 0]);
+      MeshArray.push_back(ObjectData.Normals[ITexCoord + 1]);
+      MeshArray.push_back(ObjectData.Normals[ITexCoord + 2]);
     }
 
     size_t ArraySize = MeshArray.size();
@@ -1657,7 +1778,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
         .Data = std::move(MeshArray),
         .Indexes = ObjectData.Indexes,
         .Offset = Offset,
-        .Size = static_cast<int>(ArraySize / 8),
+        .Size = static_cast<int>(ArraySize / 11),
         .IndexCount = (uint32_t)ObjectData.Indexes.size(),
         .FirstIndex = (uint32_t)IndexOffset,
     };
@@ -1815,7 +1936,7 @@ template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
           SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
               SceneManagerImplT>
 void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createDescriptorBuffer(SwapChainFrameStruct &Frame) {
+    createDescriptorBuffer(SwapChainFrameStruct &Frame, size_t ModelsNumber) {
   BufferInput BufferInputInstance{
       .Size = sizeof(SceneManagerFacadeStructs::CameraData),
       .Usage = vk::BufferUsageFlagBits::eUniformBuffer,
@@ -1836,7 +1957,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .mapMemory(Frame.CameraMemory, 0, BufferInputInstance.Size);
 
-  BufferInputInstance.Size = 1024 * sizeof(glm::mat4);
+  BufferInputInstance.Size = ModelsNumber * sizeof(glm::mat4);
   BufferInputInstance.Usage = vk::BufferUsageFlagBits::eStorageBuffer;
 
   MeshDump UniformBuffer{
@@ -1853,8 +1974,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .mapMemory(Frame.ModelMemory, 0, BufferInputInstance.Size);
 
-  Frame.ModelTransforms.reserve(1024);
-  for (int I = 0; I < 1024; ++I) {
+  Frame.ModelTransforms.reserve(ModelsNumber);
+  for (int I = 0; I < ModelsNumber; ++I) {
     Frame.ModelTransforms.push_back(glm::mat4(1.0f));
     Frame.ModelTransforms.push_back(glm::mat4(1.0f));
   }
@@ -1866,7 +1987,7 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   Frame.ModelBufferDescriptor.buffer = Frame.ModelBuffer;
   Frame.ModelBufferDescriptor.offset = 0;
-  Frame.ModelBufferDescriptor.range = 1024 * sizeof(glm::mat4);
+  Frame.ModelBufferDescriptor.range = ModelsNumber * sizeof(glm::mat4);
 
   allocateDescriptorSet(Frame);
 }

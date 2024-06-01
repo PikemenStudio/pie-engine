@@ -77,6 +77,7 @@ public:
     std::vector<float> Colors;
     std::vector<float> TexCoords;
     std::vector<uint32_t> Indexes;
+    std::vector<float> Normals;
     std::string ObjectName;
   };
 
@@ -266,7 +267,7 @@ protected:
   void createFences();
 
   vk::VertexInputBindingDescription getBindingDescription();
-  std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions();
+  std::array<vk::VertexInputAttributeDescription, 4> getAttributeDescriptions();
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
   void drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
@@ -284,7 +285,7 @@ protected:
   void prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &DumpIndex);
   void prepareFrame(uint32_t ImageIndex);
 
-  void createDescriptorBuffer(SwapChainFrameStruct &Frame);
+  void createDescriptorBuffer(SwapChainFrameStruct &Frame, size_t ModelsNumber);
   void initUi();
 
   vk::Format findSupportedFormat(const std::vector<vk::Format> &Candidates,

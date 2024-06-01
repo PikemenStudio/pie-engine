@@ -95,6 +95,10 @@ Actor::Actor(const std::string &FileName) {
 
         TextureCoords.push_back(Vertex.Uv.x);
         TextureCoords.push_back(Vertex.Uv.y);
+
+        Normals.push_back(Vertex.Normal.x);
+        Normals.push_back(Vertex.Normal.y);
+        Normals.push_back(Vertex.Normal.z);
       }
       Indexes.push_back(UniqueVertices[Vertex]);
     }
@@ -104,3 +108,11 @@ std::vector<float> Actor::getVertices() { return Vertexes; }
 std::vector<float> Actor::getColors() { return Colors; }
 std::vector<float> Actor::getTextureCoords() { return TextureCoords; }
 std::vector<uint32_t> Actor::getIndexes() { return Indexes; }
+std::vector<float> Actor::getNormals() { return Normals; }
+glm::mat4 Actor::calculateTransformation() {
+  glm::mat4 Result = glm::mat4(1.0f);
+  Result *= Rotation;
+  Result *= glm::translate(Result, this->Position);
+  //Result = Result * glm::scale(Result, this->Scale);
+  return Result;
+}

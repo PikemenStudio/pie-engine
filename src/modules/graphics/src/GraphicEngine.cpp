@@ -1,4 +1,4 @@
-//
+  //
 // Created by FullHat on 03/04/2024.
 //
 
@@ -175,9 +175,9 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::render() {
-  LOG_F(INFO, "Rendering");
+//  LOG_F(INFO, "Rendering");
   NativeComponents.PhysicalDevice->render();
-  LOG_F(INFO, "Rendered");
+//  LOG_F(INFO, "Rendered");
 }
 
 template class vk_core::GraphicEngine<

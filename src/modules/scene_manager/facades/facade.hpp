@@ -71,6 +71,7 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
     void resetObjectGetter();                                                  \
                                                                                \
     SceneManagerFacadeStructs::CameraData getCamera(glm::vec2 WindowSize);     \
+    void setCamera(glm::vec3 From, glm::vec3 To);                              \
                                                                                \
     std::vector<glm::mat4> getTransformations();                               \
                                                                                \

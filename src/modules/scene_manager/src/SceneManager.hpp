@@ -36,6 +36,7 @@ public:
   void resetObjectGetter();
 
   CameraData getCamera(glm::vec2 WindowSize);
+  void setCamera(glm::vec3 From, glm::vec3 To);
 
   std::vector<glm::mat4> getTransformations() {
     std::vector<glm::mat4> Result;
@@ -57,6 +58,8 @@ protected:
 
   std::map<std::string, MultiTypeObjects>::iterator ObjectGetterIt;
   MultiTypeObjects::iterator TypeIt;
+  glm::vec3 From = {10.0f, -60.0f, -20.0f};
+  glm::vec3 To = {20.0f, 0.0f, 10.0f};
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_SCENEMANAGER_HPP

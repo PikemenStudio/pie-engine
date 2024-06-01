@@ -24,9 +24,9 @@ BaseObject::ObjectTypes Triangle::getType() {
 
 glm::mat4 Triangle::calculateTransformation() {
   glm::mat4 Result = glm::mat4(1.0f);
-  Result = Rotation * Result;
-  Result = glm::scale(Result, this->Scale);
   Result = glm::translate(Result, this->Position);
+  Result = Result * Rotation;
+  Result = Result * glm::scale(Result, this->Scale);
 
   return Result;
 }

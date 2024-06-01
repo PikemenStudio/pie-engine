@@ -8,8 +8,6 @@
 #include <memory>
 #include <string>
 
-#include "types.hpp"
-
 struct SoundStructs {
   using SoundID = unsigned int;
   using SoundSourceID = unsigned int;

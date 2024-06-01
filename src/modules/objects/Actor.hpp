@@ -16,10 +16,11 @@ public:
   std::vector<float> getVertices() override;
   std::vector<float> getColors() override;
   std::vector<float> getTextureCoords() override;
+  std::vector<float> getNormals();
   std::vector<uint32_t> getIndexes();
   ObjectTypes getType() override { return ObjectTypes::ACTOR; }
 
-  glm::mat4 calculateTransformation() override { return glm::mat4(1.0f); }
+  glm::mat4 calculateTransformation() override;
 
 protected:
   std::vector<float> Vertexes, Normals, Colors;

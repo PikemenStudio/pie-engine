@@ -52,21 +52,30 @@ using GraphicApiFacadeType = GraphicApiFacade<
 std::shared_ptr<BaseObject> Obj;
 std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
 
+auto addObjects() {
+  std::vector<std::shared_ptr<BaseObject>> Objects;
+
+  std::vector<std::vector<bool>> TetrisScene {};
+  for (size_t Width = 0; Width < 10; ++Width) {
+    for (size_t Height = 0; Height < 20; ++Height) {
+      for (size_t Depth = 0; Depth < 40; ++Depth) {
+      std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
+          new Actor("/Users/fullhat/Documents/tetrice_cube_no_mods.obj"));
+      Object->setName(std::string("Actor") + std::to_string(Width) + std::to_string(Height));
+      Object->setTextureName("Texture");
+      Object->setDumpName("TS");
+      Object->moveBy({4 * Width, 4 * Depth, 4 * Height});
+      Objects.push_back(Object);
+      }
+    }
+  }
+  Obj = Objects[0];
+  return Objects;
+}
 void moveObject() {
-  // std::this_thread::sleep_for(std::chrono::seconds(2));
-
-  //  std::shared_ptr<BaseObject> Object2 = std::shared_ptr<BaseObject>(
-  //      new Square({glm::vec3(), glm::vec3(), glm::vec3(), glm::vec3()}));
-  //  Object2->setName("Square1");
-  //  Object2->setTextureName("Texture1");
-  //  Object2->setDumpName("TS");
-  //  SceneManagerInstance1->ImplInstance.addObject(Object2);
-
   while (true) {
     static uint64_t I = 0.0f;
-    Obj->moveBy({(float)I / 1000000000, 0.0, 1.0});
-    Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
-    // Obj->rotateBy({0.0f, 0.0f, 1.0f}, 0);
+    //Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
     I += 1;
   }
 }
@@ -80,9 +89,9 @@ public:
     std::shared_ptr<WindowApiFacade<>> WindowAdapterInstance;
     WindowAdapterInstance = std::shared_ptr<WindowApiFacade<>>(
         new WindowApiFacade<>(WindowFacadeStructs::WindowProps{
-            .Size = {600, 800},
+            .Size = {3456, 2234},
             .Title = "Test",
-            .Mode = WindowFacadeStructs::WindowProps::WINDOWED,
+            .Mode = WindowFacadeStructs::WindowProps::FULLSCREEN,
             .IsResizable = true,
         }));
 
@@ -130,15 +139,10 @@ public:
     Object1->setName("Triangle");
     Object1->setTextureName("Texture");
     Object1->setDumpName("TS");
-    std::shared_ptr<BaseObject> Object2 =
-        std::shared_ptr<BaseObject>(new Actor("/Users/fullhat/Documents/cube_triangulated.obj"));
-    Object2->setName("Actor");
-    Object2->setTextureName("Texture");
-    Object2->setDumpName("TS");
 
-    Obj = Object;
-    SceneManagerInstance->ImplInstance.addObject(Object);
-    SceneManagerInstance->ImplInstance.addObject(Object2);
+    for (auto Object : addObjects()) {
+      SceneManagerInstance->ImplInstance.addObject(Object);
+    }
 
     auto FacadeProps =
         GraphicFacadeStructs::GraphicEngineProps<GraphicDependenciesType>{
@@ -169,18 +173,13 @@ public:
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
     GraphicFacadeStructs::ObjectsData ObjectsData;
-    ObjectsData["Triangle"] = GraphicFacadeStructs::ObjectData{
-        .Vertices = DefaultData[BaseObject::ObjectTypes::TRIANGLE].Vertexes,
-        .Colors = DefaultData[BaseObject::ObjectTypes::TRIANGLE].Colors,
-        .TexCoords = DefaultData[BaseObject::ObjectTypes::TRIANGLE].TexCoords,
-        .Indexes = {2, 1, 0},
-    };
-    Actor *A = (Actor *)Object2.get();
+    Actor *A = (Actor *)Obj.get();
     ObjectsData["Actor"] = GraphicFacadeStructs::ObjectData{
         .Vertices = A->getVertices(),
         .Colors = A->getColors(),
         .TexCoords = A->getTextureCoords(),
         .Indexes = A->getIndexes(),
+        .Normals = A->getNormals(),
     };
 
     GraphicFacadeStructs::ObjectsData ObjectsData1;

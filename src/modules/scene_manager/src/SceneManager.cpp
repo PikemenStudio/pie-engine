@@ -71,9 +71,9 @@ void SceneManager::resetObjectGetter() {
 }
 
 SceneManager::CameraData SceneManager::getCamera(glm::vec2 WindowSize) {
-  glm::vec3 Eye(0.0f, 0.0f, 10.0f);
-  glm::vec3 Center(0.0f, 0.0f, 0.0f);
-  glm::vec3 Up(0.0f, 1.0f, 0.0f);
+  glm::vec3 Eye(From);
+  glm::vec3 Center(To);
+  glm::vec3 Up(0.0f, 0.0f, 1.0f);
   glm::mat4 View = glm::lookAt(Eye, Center, Up);
 
   glm::mat4 Projection =
@@ -84,4 +84,8 @@ SceneManager::CameraData SceneManager::getCamera(glm::vec2 WindowSize) {
       .Projection = Projection,
       .ViewProjection = Projection * View,
   };
+}
+void SceneManager::setCamera(glm::vec3 From, glm::vec3 To) {
+  this->From = From;
+  this->To = To;
 }
