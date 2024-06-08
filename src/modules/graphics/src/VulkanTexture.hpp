@@ -2,8 +2,8 @@
 // Created by FullHat on 19/05/2024.
 //
 
-#ifndef ENGINE_SRC_MODULES_GRAPHICS_SRC_VKTEXTURE_HPP
-#define ENGINE_SRC_MODULES_GRAPHICS_SRC_VKTEXTURE_HPP
+#ifndef ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANTEXTURE_HPP
+#define ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANTEXTURE_HPP
 
 #include "glm/glm.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -12,7 +12,7 @@
 
 namespace vk_core {
 
-class VkTexture {
+class VulkanTexture {
 public:
   struct TextureInputChunk {
     vk::Device LogicalDevice;
@@ -49,8 +49,8 @@ public:
     glm::vec<2, int> Size;
   };
 
-  VkTexture(TextureInputChunk InputChunk);
-  ~VkTexture();
+  VulkanTexture(TextureInputChunk InputChunk);
+  ~VulkanTexture();
 
   void use(vk::CommandBuffer CommandBuffer, vk::PipelineLayout PipelineLayout);
 
@@ -100,4 +100,4 @@ protected:
 
 } // namespace vk_core
 
-#endif // ENGINE_SRC_MODULES_GRAPHICS_SRC_VKTEXTURE_HPP
+#endif // ENGINE_SRC_MODULES_GRAPHICS_SRC_VULKANTEXTURE_HPP

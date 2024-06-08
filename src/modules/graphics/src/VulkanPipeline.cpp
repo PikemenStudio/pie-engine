@@ -12,11 +12,16 @@
 
 using namespace vk_core;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    VulkanPipeline(VulkanPipeline::VkPipelineProps Props) {
+#define PIPELINE_ALL_DEPS WindowImpl, ShaderLoaderImplT, SceneManagerImplT
+
+#define PIPELINE_TEMPLATES_NO_SPEC                                             \
+  template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,      \
+            SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>  \
+                SceneManagerImplT>
+
+PIPELINE_TEMPLATES_NO_SPEC
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::VulkanPipeline(
+    VulkanPipeline::VkPipelineProps Props) {
   this->NativeComponents.PhysicalDevice = Props.PhysicalDevice;
   this->NativeComponents.Instance = Props.Instance;
   this->NativeComponents.Facades = {.Window = Props.Facades.Window,
@@ -49,11 +54,8 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   LOG_F(INFO, "Init pipeline, GOOD");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::~VulkanPipeline() {
+PIPELINE_TEMPLATES_NO_SPEC
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::~VulkanPipeline() {
   if (this->NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(ERROR, "Device is null");
   }
@@ -102,11 +104,8 @@ void vk_core::VulkanPipeline<
   this->NativeComponents.Surface = CStyleSurface;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::querySwapChainSupport() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::querySwapChainSupport() {
   if (NativeComponents.PhysicalDevice == nullptr || !NativeComponents.Surface) {
     LOG_F(ERROR, "Physical device or surface is not initialized");
     throw std::runtime_error("Physical device or surface is not initialized");
@@ -129,12 +128,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   logSwapChainInfo();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::SurfaceFormatKHR
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::chooseSwapChainSurfaceFormat() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::chooseSwapChainSurfaceFormat() {
   for (vk::SurfaceFormatKHR Format :
        this->NativeComponents.SwapChainSupport.value().Formats) {
     if (Format.format == vk::Format::eB8G8R8A8Unorm &&
@@ -146,12 +142,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   return this->NativeComponents.SwapChainSupport.value().Formats[0];
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::PresentModeKHR
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::chooseSwapChainPresentFormat() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::chooseSwapChainPresentFormat() {
   for (vk::PresentModeKHR PresentMode :
        this->NativeComponents.SwapChainSupport.value().PresentModes) {
     if (PresentMode == vk::PresentModeKHR::eMailbox) {
@@ -162,12 +155,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   return vk::PresentModeKHR::eFifo;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-vk::Extent2D
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    chooseSwapChainExtent(std::pair<uint32_t, uint32_t> SizeWH) {
+PIPELINE_TEMPLATES_NO_SPEC
+vk::Extent2D vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::chooseSwapChainExtent(
+    std::pair<uint32_t, uint32_t> SizeWH) {
   const auto Capabilities =
       this->NativeComponents.SwapChainSupport.value().Capabilities;
 
@@ -188,11 +178,8 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   return Extent;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::logSwapChainInfo() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::logSwapChainInfo() {
   auto &Support = this->NativeComponents.SwapChainSupport.value();
   LOG_F(INFO, "Swapchain can support the following surface capabilities:\n");
 
@@ -240,11 +227,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    logPresentMode(vk::PresentModeKHR Mode) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::logPresentMode(
+    vk::PresentModeKHR Mode) {
   switch (Mode) {
   case vk::PresentModeKHR::eImmediate:
     LOG_F(
@@ -312,11 +297,9 @@ This mode may result in visible tearing if rendering to the image is not timed c
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    logTransformBits(vk::SurfaceTransformFlagsKHR Transform) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::logTransformBits(
+    vk::SurfaceTransformFlagsKHR Transform) {
   if (Transform & vk::SurfaceTransformFlagBitsKHR::eIdentity) {
     LOG_F(INFO, "identity");
   }
@@ -346,11 +329,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    logAlphaBits(vk::CompositeAlphaFlagsKHR Alpha) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::logAlphaBits(
+    vk::CompositeAlphaFlagsKHR Alpha) {
   if (Alpha & vk::CompositeAlphaFlagBitsKHR::eOpaque) {
     LOG_F(INFO, "opaque (alpha ignored)");
   }
@@ -366,11 +347,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    logImageBits(vk::ImageUsageFlags ImageFlags) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::logImageBits(
+    vk::ImageUsageFlags ImageFlags) {
   if (ImageFlags & vk::ImageUsageFlagBits::eTransferSrc) {
     LOG_F(
         INFO,
@@ -433,11 +412,8 @@ suitable for use as a fragment shading rate attachment or shading rate image");
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createSwapChain() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createSwapChain() {
   querySwapChainSupport();
   auto Format = chooseSwapChainSurfaceFormat();
   auto PresentMode = chooseSwapChainPresentFormat();
@@ -546,11 +522,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
       static_cast<int>(this->SwapChainBundle->Frames.size());
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::destroySwapChain() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::destroySwapChain() {
   for (auto &Frame : SwapChainBundle.value().Frames) {
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyImageView(Frame.ImageView);
@@ -619,12 +592,9 @@ void vk_core::VulkanPipeline<
   createFrameCommandBuffers();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-vk::ShaderModule
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createShaderModule(std::string ShaderPath) const {
+PIPELINE_TEMPLATES_NO_SPEC
+vk::ShaderModule vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createShaderModule(
+    std::string ShaderPath) const {
   std::vector<ShaderLoaderFacadeStructs::ShaderData> ShaderData =
       this->NativeComponents.Facades->ShaderLoader->ImplInstance
           .loadAndCompileShaders(ShaderLoaderFacadeStructs::ShadersLocations{
@@ -648,12 +618,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::PipelineLayout
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::createPipelineLayout() const {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipelineLayout() const {
   std::vector<vk::DescriptorSetLayout> Layouts = {
       this->FrameSetLayout,
       this->MeshSetLayout,
@@ -675,12 +642,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::RenderPass
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::createRenderPass() const {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createRenderPass() const {
   std::vector<vk::AttachmentDescription> Attachments{
       {
           // Color
@@ -756,11 +720,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createDescriptorSetLayouts(DescriptorSetLayoutInputStruct LayoutStruct) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
+    DescriptorSetLayoutInputStruct LayoutStruct) {
   std::vector<vk::DescriptorSetLayoutBinding> Bindings;
   Bindings.reserve(LayoutStruct.Count);
 
@@ -820,13 +782,10 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::DescriptorPool
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createDescriptorPool(
-        uint32_t Size, VulkanPipeline::DescriptorSetLayoutInputStruct &Input) {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorPool(
+    uint32_t Size, VulkanPipeline::DescriptorSetLayoutInputStruct &Input) {
   std::vector<vk::DescriptorPoolSize> PoolSizes;
   for (int I = 0; I < Input.Count; ++I) {
     vk::DescriptorPoolSize PoolSize{
@@ -852,11 +811,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    writeDescriptorSet(SwapChainFrameStruct &Frame) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::writeDescriptorSet(
+    SwapChainFrameStruct &Frame) {
   vk::WriteDescriptorSet WriteDescriptorSet{
       .dstSet = Frame.DescriptorSet,
       .dstBinding = 0,
@@ -880,11 +837,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .updateDescriptorSets(WriteDescriptorSet1, nullptr);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createPipeline(VulkanPipeline::GraphicsPipelineInBundle InBundle) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipeline(
+    VulkanPipeline::GraphicsPipelineInBundle InBundle) {
   vk::GraphicsPipelineCreateInfo CreateInfo;
   CreateInfo.flags = vk::PipelineCreateFlags();
 
@@ -1067,11 +1022,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   LOG_F(INFO, "Pipeline created successfully");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createFrameBuffers() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFrameBuffers() {
   for (int I = 0; I < this->SwapChainBundle->Frames.size(); ++I) {
     std::vector<vk::ImageView> Attachments = {
         this->SwapChainBundle->Frames[I].ImageView,
@@ -1099,11 +1051,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createCommandPool() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createCommandPool() {
   auto Indexes = this->NativeComponents.FamilyIndexes;
 
   vk::CommandPoolCreateInfo CreateInfo{
@@ -1122,11 +1071,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createMainCommandBuffer() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createMainCommandBuffer() {
   vk::CommandBufferAllocateInfo AllocateInfo{
       .commandPool = this->CommandPool,
       .level = vk::CommandBufferLevel::ePrimary,
@@ -1144,11 +1090,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createFrameCommandBuffers() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFrameCommandBuffers() {
   vk::CommandBufferAllocateInfo AllocateInfo{
       .commandPool = this->CommandPool,
       .level = vk::CommandBufferLevel::ePrimary,
@@ -1168,11 +1111,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createSemaphores() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createSemaphores() {
   vk::SemaphoreCreateInfo CreateInfo{};
 
   try {
@@ -1190,11 +1130,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::createFences() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFences() {
   vk::FenceCreateInfo CreateInfo{.flags = vk::FenceCreateFlags() |
                                           vk::FenceCreateFlagBits::eSignaled};
 
@@ -1220,11 +1157,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
+    vk::CommandBuffer CommandBuffer, uint32_t ImageIndex) {
   vk::CommandBufferBeginInfo BeginInfo;
 
   try {
@@ -1374,7 +1309,6 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   // Buttons for delete and cancel
   if (ImGui::Button("Delete")) {
-
   }
   ImGui::SameLine();
   if (ImGui::Button("Cancel")) {
@@ -1448,12 +1382,10 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
-                vk::CommandBuffer CommandBuffer, uint32_t Offset) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
+    SceneManagerFacadeStructs::OneTypeObjects Objects,
+    vk::CommandBuffer CommandBuffer, uint32_t Offset) {
   // Iterate through textures
   for (auto &[TextureName, ObjectsSet] : Objects) {
     std::string DumpName = ObjectsSet[0]->getDumpName();
@@ -1471,11 +1403,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createBuffer(BufferInput Input, MeshDump &MeshData) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createBuffer(
+    BufferInput Input, MeshDump &MeshData) {
   vk::BufferCreateInfo BufferInfo{
       .flags = vk::BufferCreateFlags(),
       .size = Input.Size,
@@ -1495,12 +1425,10 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   allocateBufferMemory(MeshData);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer, vk::DeviceSize Size,
-               vk::Queue Queue, vk::CommandBuffer CommandBuffer) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::copyBuffer(
+    vk::Buffer SrcBuffer, vk::Buffer DstBuffer, vk::DeviceSize Size,
+    vk::Queue Queue, vk::CommandBuffer CommandBuffer) {
   CommandBuffer.reset();
 
   vk::CommandBufferBeginInfo BeginInfo{
@@ -1524,12 +1452,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   Queue.waitIdle();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-uint32_t
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    findMemoryType(uint32_t TypeFilter, vk::MemoryPropertyFlags Properties) {
+PIPELINE_TEMPLATES_NO_SPEC
+uint32_t vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::findMemoryType(
+    uint32_t TypeFilter, vk::MemoryPropertyFlags Properties) {
   vk::PhysicalDeviceMemoryProperties MemoryProperties =
       static_cast<vk::PhysicalDevice &>(*this->NativeComponents.PhysicalDevice)
           .getMemoryProperties();
@@ -1545,11 +1470,8 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   throw std::runtime_error("Failed to find suitable memory type");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::render() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::render() {
   static bool Once = false;
   if (!Once) {
     initUi();
@@ -1642,11 +1564,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   FrameNumber = (FrameNumber + 1) % MaxFrameInFlight;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    allocateBufferMemory(VulkanPipeline::MeshDump &Mesh) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::allocateBufferMemory(
+    VulkanPipeline::MeshDump &Mesh) {
   vk::MemoryRequirements MemoryRequirements =
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .getBufferMemoryRequirements(Mesh.Buffer);
@@ -1666,11 +1586,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .bindBufferMemory(Mesh.Buffer, Mesh.Memory, 0);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    allocateDescriptorSet(VulkanPipeline::SwapChainFrameStruct &Frame) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::allocateDescriptorSet(
+    VulkanPipeline::SwapChainFrameStruct &Frame) {
   vk::DescriptorSetAllocateInfo AllocateInfo{
       .descriptorPool = this->FramePool,
       .descriptorSetCount = 1,
@@ -1687,12 +1605,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 vk::VertexInputBindingDescription
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::getBindingDescription() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getBindingDescription() {
   vk::VertexInputBindingDescription BindingDescription{
       .binding = 0,
       .stride = 11 * sizeof(float),
@@ -1702,12 +1617,9 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   return BindingDescription;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+PIPELINE_TEMPLATES_NO_SPEC
 std::array<vk::VertexInputAttributeDescription, 4>
-vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                        SceneManagerImplT>::getAttributeDescriptions() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getAttributeDescriptions() {
   std::array<vk::VertexInputAttributeDescription, 4> Attributes{
       vk::VertexInputAttributeDescription{
           .location = 0,
@@ -1738,13 +1650,10 @@ vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   return Attributes;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    addObjectData(
-        const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
-        const std::string &DumpName) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addObjectData(
+    const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
+    const std::string &DumpName) {
   MeshDump StagingDump{
       .Buffer = nullptr,
       .Memory = nullptr,
@@ -1868,28 +1777,24 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   MeshTypes.Dumps[DumpName].IndexMemory = NewMeshDump.Memory;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &Dump) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareScene(
+    vk::CommandBuffer CommandBuffer, MeshDump &Dump) {
   vk::Buffer Buffers[] = {Dump.Buffer};
   vk::DeviceSize Offsets[] = {0};
   CommandBuffer.bindVertexBuffers(0, 1, Buffers, Offsets);
   CommandBuffer.bindIndexBuffer(Dump.IndexBuffer, 0, vk::IndexType::eUint32);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    addTexture(const std::string &TexturePath, const std::string &TextureName) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addTexture(
+    const std::string &TexturePath, const std::string &TextureName) {
   DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
       .Count = 1,
       .Types = {vk::DescriptorType::eCombinedImageSampler},
   };
   MeshPool = createDescriptorPool(1, DescriptorSetLayoutInput);
-  VkTexture::TextureInputChunk TextureInput{
+  VulkanTexture::TextureInputChunk TextureInput{
       .LogicalDevice =
           static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
       .PhysicalDevice = static_cast<vk::PhysicalDevice &>(
@@ -1900,14 +1805,12 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .DescriptorPool = this->MeshPool,
       .FileName = TexturePath,
   };
-  this->Textures[TextureName] = new VkTexture(TextureInput);
+  this->Textures[TextureName] = new VulkanTexture(TextureInput);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    prepareFrame(uint32_t ImageIndex) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareFrame(
+    uint32_t ImageIndex) {
   SwapChainFrameStruct &Frame = SwapChainBundle->Frames[ImageIndex];
   auto [Width, Height] =
       this->NativeComponents.Facades->Window->ImplInstance.getSize();
@@ -1932,11 +1835,9 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   writeDescriptorSet(Frame);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    createDescriptorBuffer(SwapChainFrameStruct &Frame, size_t ModelsNumber) {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorBuffer(
+    SwapChainFrameStruct &Frame, size_t ModelsNumber) {
   BufferInput BufferInputInstance{
       .Size = sizeof(SceneManagerFacadeStructs::CameraData),
       .Usage = vk::BufferUsageFlagBits::eUniformBuffer,
@@ -1992,11 +1893,8 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   allocateDescriptorSet(Frame);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                             SceneManagerImplT>::initUi() {
+PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::initUi() {
   ImGui::CreateContext();
   ImGui::GetIO().ConfigFlags |=
       ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_NavEnableKeyboard;
@@ -2060,13 +1958,10 @@ void vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
   vkDeviceWaitIdle(Device);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-vk::Format VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    findSupportedFormat(const std::vector<vk::Format> &Candidates,
-                        vk::ImageTiling Tiling,
-                        vk::FormatFeatureFlags Features) {
+PIPELINE_TEMPLATES_NO_SPEC
+vk::Format VulkanPipeline<PIPELINE_ALL_DEPS>::findSupportedFormat(
+    const std::vector<vk::Format> &Candidates, vk::ImageTiling Tiling,
+    vk::FormatFeatureFlags Features) {
   for (vk::Format Format : Candidates) {
     vk::FormatProperties Props = static_cast<vk::PhysicalDevice &>(
                                      *this->NativeComponents.PhysicalDevice)
@@ -2086,11 +1981,9 @@ vk::Format VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   throw std::runtime_error("Failed to find supported format");
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    CreateDepthResources(SwapChainFrameStruct &Frame) {
+PIPELINE_TEMPLATES_NO_SPEC
+void VulkanPipeline<PIPELINE_ALL_DEPS>::CreateDepthResources(
+    SwapChainFrameStruct &Frame) {
   Frame.DepthFormat = findSupportedFormat(
       {
           vk::Format::eD32Sfloat,
@@ -2101,7 +1994,7 @@ void VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
 
   auto [Width, Height] =
       this->NativeComponents.Facades->Window->ImplInstance.getSize();
-  VkTexture::ImageInputChunk ImageCreateInfo{
+  VulkanTexture::ImageInputChunk ImageCreateInfo{
       .LogicalDevice =
           static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
       .PhysicalDevice = static_cast<vk::PhysicalDevice &>(
@@ -2112,10 +2005,10 @@ void VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .MemoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal,
       .Format = Frame.DepthFormat,
   };
-  Frame.DepthBuffer = VkTexture::createImage(ImageCreateInfo);
+  Frame.DepthBuffer = VulkanTexture::createImage(ImageCreateInfo);
   Frame.DepthBufferMemory =
-      VkTexture::createImageMemory(ImageCreateInfo, Frame.DepthBuffer);
-  Frame.DepthBufferView = VkTexture::createImageView(
+      VulkanTexture::createImageMemory(ImageCreateInfo, Frame.DepthBuffer);
+  Frame.DepthBufferView = VulkanTexture::createImageView(
       static_cast<vk::Device>(*this->NativeComponents.PhysicalDevice),
       Frame.DepthBuffer, Frame.DepthFormat, vk::ImageAspectFlagBits::eDepth);
 }

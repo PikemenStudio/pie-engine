@@ -17,14 +17,15 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+#define VULKAN_PHYSICAL_DEVICE_TEMPLATES                                       \
+  template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,      \
+            SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>  \
+                SceneManagerImplT>
+
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
 class VulkanPipeline;
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
 class VulkanPhysicalDevice {
 public:
   struct VkPhysicalDeviceProps;
@@ -34,7 +35,8 @@ public:
 
   VulkanPhysicalDevice(const VulkanPhysicalDevice &PdToCopy) = delete;
   VulkanPhysicalDevice(VulkanPhysicalDevice &&PdToMove);
-  VulkanPhysicalDevice &operator=(const VulkanPhysicalDevice &PdToCopy) = delete;
+  VulkanPhysicalDevice &
+  operator=(const VulkanPhysicalDevice &PdToCopy) = delete;
   VulkanPhysicalDevice &operator=(VulkanPhysicalDevice &&PdToMove);
 
   struct VkPhysicalDeviceProps {
@@ -121,10 +123,10 @@ public:
   void render();
 
   void addObjectData(
-      const std::map<std::string,
-                     typename VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                                         SceneManagerImplT>::PublicObjectData>
-          &Dump,
+      const std::map<
+          std::string,
+          typename VulkanPipeline<WindowImpl, ShaderLoaderImplT,
+                                  SceneManagerImplT>::PublicObjectData> &Dump,
       const std::string &DumpName);
   void addTexture(const std::string &TexturePath,
                   const std::string &TextureName);
@@ -136,8 +138,8 @@ protected:
   std::shared_ptr<VulkanInstance> Instance;
   std::optional<vk::PhysicalDevice> PhysicalDevice;
   std::optional<vk::Device> LogicalDevice;
-  std::unique_ptr<typename vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                                               SceneManagerImplT>>
+  std::unique_ptr<typename vk_core::VulkanPipeline<
+      WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>
       Pipeline;
 
   struct QueueIndexes {

@@ -2,12 +2,12 @@
 // Created by FullHat on 19/05/2024.
 //
 
-#include "VkTexture.hpp"
+#include "VulkanTexture.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-vk_core::VkTexture::VkTexture(
-    vk_core::VkTexture::TextureInputChunk InputChunk) {
+vk_core::VulkanTexture::VulkanTexture(
+    vk_core::VulkanTexture::TextureInputChunk InputChunk) {
   LogicalDevice = InputChunk.LogicalDevice;
   PhysicalDevice = InputChunk.PhysicalDevice;
   CommandBuffer = InputChunk.CommandBuffer;
@@ -40,20 +40,20 @@ vk_core::VkTexture::VkTexture(
   createDescriptorSet();
 }
 
-vk_core::VkTexture::~VkTexture() {
+vk_core::VulkanTexture::~VulkanTexture() {
   LogicalDevice.freeMemory(ImageMemory);
   LogicalDevice.destroyImage(Image);
   LogicalDevice.destroyImageView(ImageView);
   LogicalDevice.destroySampler(Sampler);
 }
 
-void vk_core::VkTexture::use(vk::CommandBuffer CommandBuffer,
+void vk_core::VulkanTexture::use(vk::CommandBuffer CommandBuffer,
                              vk::PipelineLayout PipelineLayout) {
   CommandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                    PipelineLayout, 1, DescriptorSet, nullptr);
 }
 
-void vk_core::VkTexture::load() {
+void vk_core::VulkanTexture::load() {
   Pixels =
       stbi_load(FileName.c_str(), &Size.x, &Size.y, &Channels, STBI_rgb_alpha);
 
@@ -62,7 +62,7 @@ void vk_core::VkTexture::load() {
   }
 }
 
-void vk_core::VkTexture::populate() {
+void vk_core::VulkanTexture::populate() {
   BufferInput Input{
       .Size = static_cast<uint32_t>(Size.x * Size.y * 4),
       .Usage = vk::BufferUsageFlagBits::eTransferSrc,
@@ -144,7 +144,7 @@ void vk_core::VkTexture::populate() {
   LogicalDevice.destroyBuffer(StagingBuffer);
 }
 
-void vk_core::VkTexture::makeView() {
+void vk_core::VulkanTexture::makeView() {
   vk::ImageViewCreateInfo ViewCreateInfo{
       .image = Image,
       .viewType = vk::ImageViewType::e2D,
@@ -174,7 +174,7 @@ void vk_core::VkTexture::makeView() {
   }
 }
 
-void vk_core::VkTexture::createSampler() {
+void vk_core::VulkanTexture::createSampler() {
   vk::SamplerCreateInfo SamplerCreateInfo{
       .magFilter = vk::Filter::eNearest,
       .minFilter = vk::Filter::eLinear,
@@ -201,7 +201,7 @@ void vk_core::VkTexture::createSampler() {
   }
 }
 
-void vk_core::VkTexture::createDescriptorSet() {
+void vk_core::VulkanTexture::createDescriptorSet() {
   vk::DescriptorSetAllocateInfo AllocateInfo{
       .descriptorPool = DescriptorPool,
       .descriptorSetCount = 1,
@@ -233,8 +233,8 @@ void vk_core::VkTexture::createDescriptorSet() {
   LogicalDevice.updateDescriptorSets(WriteDescriptorSet, nullptr);
 }
 
-vk::Image vk_core::VkTexture::createImage(
-    vk_core::VkTexture::ImageInputChunk InputChunk) {
+vk::Image vk_core::VulkanTexture::createImage(
+    vk_core::VulkanTexture::ImageInputChunk InputChunk) {
   vk::ImageCreateInfo ImageCreateInfo{
       .flags = vk::ImageCreateFlags(),
       .imageType = vk::ImageType::e2D,
@@ -256,8 +256,8 @@ vk::Image vk_core::VkTexture::createImage(
   }
 }
 
-vk::DeviceMemory vk_core::VkTexture::createImageMemory(
-    vk_core::VkTexture::ImageInputChunk InputChunk, vk::Image Image) {
+vk::DeviceMemory vk_core::VulkanTexture::createImageMemory(
+    vk_core::VulkanTexture::ImageInputChunk InputChunk, vk::Image Image) {
   vk::MemoryRequirements MemoryRequirements =
       InputChunk.LogicalDevice.getImageMemoryRequirements(Image);
 
@@ -291,8 +291,8 @@ vk::DeviceMemory vk_core::VkTexture::createImageMemory(
   }
 }
 
-void vk_core::VkTexture::transitionLayout(
-    vk_core::VkTexture::ImageTransitionJob Job) {
+void vk_core::VulkanTexture::transitionLayout(
+    vk_core::VulkanTexture::ImageTransitionJob Job) {
   Job.CommandBuffer.reset();
 
   vk::CommandBufferBeginInfo BeginInfo{
@@ -351,8 +351,8 @@ void vk_core::VkTexture::transitionLayout(
   Job.Queue.waitIdle();
 }
 
-void vk_core::VkTexture::copyBufferToImage(
-    vk_core::VkTexture::BufferImageCopyJob Job) {
+void vk_core::VulkanTexture::copyBufferToImage(
+    vk_core::VulkanTexture::BufferImageCopyJob Job) {
   Job.CommandBuffer.reset();
 
   vk::CommandBufferBeginInfo BeginInfo{
@@ -391,7 +391,7 @@ void vk_core::VkTexture::copyBufferToImage(
 }
 
 vk::ImageView
-vk_core::VkTexture::createImageView(vk::Device LogicalDevice, vk::Image Image,
+vk_core::VulkanTexture::createImageView(vk::Device LogicalDevice, vk::Image Image,
                                     vk::Format Format,
                                     vk::ImageAspectFlags AspectFlags) {
   vk::ImageViewCreateInfo ImageViewCreateInfo{

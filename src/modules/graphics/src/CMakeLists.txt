@@ -13,15 +13,15 @@ set(IMGUI_SOURCE ${IMGUI_BACKENDS_PATH}/imgui_impl_glfw.cpp ${IMGUI_BACKENDS_PAT
 message("Source " ${IMGUI_SOURCE})
 
 # source files
-set(SOURCE_ALL VkInstance.cpp VkPhysicalDevice.cpp
+set(SOURCE_ALL VulkanInstance.cpp VulkanPhysicalDevice.cpp
         GraphicEngine.cpp
         facade.cpp
-        VkPipeline.cpp
-        VkTexture.cpp
+        VulkanPipeline.cpp
+        VulkanTexture.cpp
         ${IMGUI_BACKENDS_SOURCE}
         ${IMGUI_SOURCE})
 set(HEADER_ALL VulkanInstance.hpp VulkanPhysicalDevice.hpp
-        GraphicEngine.hpp ObjectsMemory.hpp VulkanPipeline.h VkTexture.hpp)
+        GraphicEngine.hpp ObjectsMemory.hpp VulkanPipeline.h VulkanTexture.hpp)
 
 find_package(VulkanHeaders CONFIG)
 find_package(glfw3 CONFIG REQUIRED)

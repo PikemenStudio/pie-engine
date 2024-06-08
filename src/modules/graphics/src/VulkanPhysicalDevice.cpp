@@ -10,20 +10,19 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    VulkanPhysicalDevice(VulkanPhysicalDevice::VkPhysicalDeviceProps Props) {
+#define PHYSICAL_DEVICE_ALL_DEPS                                               \
+  WindowImpl, ShaderLoaderImplT, SceneManagerImplT
+
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::VulkanPhysicalDevice(
+    VulkanPhysicalDevice::VkPhysicalDeviceProps Props) {
   Instance = Props.Instance;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
 std::vector<vk::PhysicalDevice>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                 SceneManagerImplT>::getNativePhysicalDevices() const {
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::getNativePhysicalDevices()
+    const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -55,47 +54,37 @@ VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   return Devices;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                 SceneManagerImplT>::~VulkanPhysicalDevice() {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::~VulkanPhysicalDevice() {
   this->Pipeline.reset();
   this->LogicalDevice->destroy();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::swap(VulkanPhysicalDevice &Pd1,
-                                                   VulkanPhysicalDevice &Pd2) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::swap(
+    VulkanPhysicalDevice &Pd1, VulkanPhysicalDevice &Pd2) {
   std::swap(Pd1.Instance, Pd2.Instance);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    VulkanPhysicalDevice(VulkanPhysicalDevice &&PdToMove) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::VulkanPhysicalDevice(
+    VulkanPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT> &
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::operator=(VulkanPhysicalDevice &&PdToMove) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS> &
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::operator=(
+    VulkanPhysicalDevice &&PdToMove) {
   swap(*this, PdToMove);
   return *this;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
 std::vector<typename VulkanPhysicalDevice<
-    WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::PhysicalDeviceLocalProps>
-VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                 SceneManagerImplT>::getLocalPhysicalDevices() const {
+    PHYSICAL_DEVICE_ALL_DEPS>::PhysicalDeviceLocalProps>
+VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::getLocalPhysicalDevices()
+    const {
   if (Instance == nullptr) {
     LOG_F(ERROR, "Instance is not initialized");
     throw std::runtime_error("Instance is not initialized");
@@ -137,11 +126,9 @@ VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   return LocalDevices;
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                      SceneManagerImplT>::findQueueIndexesAndSetup() {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<
+    PHYSICAL_DEVICE_ALL_DEPS>::findQueueIndexesAndSetup() {
   LOG_F(INFO, "Finding queue indexes");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -172,12 +159,9 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    chooseDeviceAndSetup(
-        std::function<bool(const vk::PhysicalDevice &)> Predicate) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::chooseDeviceAndSetup(
+    std::function<bool(const vk::PhysicalDevice &)> Predicate) {
   std::vector<vk::PhysicalDevice> AvailableDevices =
       static_cast<vk::Instance &>(*Instance.get()).enumeratePhysicalDevices();
 
@@ -202,11 +186,8 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                      SceneManagerImplT>::setupLogicalDevice() {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::setupLogicalDevice() {
   LOG_F(INFO, "Setting up logical device");
   if (!PhysicalDevice.has_value()) {
     LOG_F(ERROR, "Physical device is not initialized");
@@ -272,11 +253,8 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                      SceneManagerImplT>::setupQueues() {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::setupQueues() {
   if (!LogicalDevice.has_value()) {
     LOG_F(ERROR, "Logical device is not initialized");
     throw std::runtime_error("Logical device is not initialized");
@@ -299,12 +277,9 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   }
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    setupPipeline(
-        const VulkanPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::setupPipeline(
+    const VulkanPhysicalDevice::PipelineInitDataStruct &&PipelineInitData) {
   std::map<vk::QueueFlagBits, uint32_t> FamilyIndexes;
   if (QueueIndexesInstance.Graphics.has_value()) {
     LOG_F(INFO, "Graphics family index: %d",
@@ -326,7 +301,7 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   }
 
   typename vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT,
-                               SceneManagerImplT>::VkPipelineProps Props{
+                                   SceneManagerImplT>::VkPipelineProps Props{
       .PhysicalDevice = PipelineInitData.ThisPhysicalDevice,
       .Instance = this->Instance,
       .Facades = {.Window = PipelineInitData.Window,
@@ -336,16 +311,13 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
       .GraphicsQueue = PipelineInitData.ThisPhysicalDevice->GraphicsQueue,
       .PresentQueue = PipelineInitData.ThisPhysicalDevice->PresentQueue,
   };
-  this->Pipeline = std::make_unique<
-      vk_core::VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>>(
-      std::move(Props));
+  this->Pipeline =
+      std::make_unique<vk_core::VulkanPipeline<PHYSICAL_DEVICE_ALL_DEPS>>(
+          std::move(Props));
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
-                      SceneManagerImplT>::render() {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::render() {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
@@ -353,16 +325,12 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT,
   this->Pipeline->render();
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    addObjectData(
-        const std::map<std::string, typename vk_core::VulkanPipeline<
-                                        WindowImpl, ShaderLoaderImplT,
-                                        SceneManagerImplT>::PublicObjectData>
-            &Dump,
-        const std::string &DumpName) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addObjectData(
+    const std::map<std::string, typename vk_core::VulkanPipeline<
+                                    WindowImpl, ShaderLoaderImplT,
+                                    SceneManagerImplT>::PublicObjectData> &Dump,
+    const std::string &DumpName) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
@@ -370,11 +338,9 @@ void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
   this->Pipeline->addObjectData(Dump, DumpName);
 }
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
-void VulkanPhysicalDevice<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>::
-    addTexture(const std::string &TexturePath, const std::string &TextureName) {
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addTexture(
+    const std::string &TexturePath, const std::string &TextureName) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");

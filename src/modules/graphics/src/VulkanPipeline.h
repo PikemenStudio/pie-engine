@@ -8,9 +8,9 @@
 #include "../../shader_loader/facades/facade.hpp"
 #include "../../windows/facades/facade.hpp"
 #include "ObjectsMemory.hpp"
-#include "VkTexture.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDevice.hpp"
+#include "VulkanTexture.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include "imgui.h"
 #include "vulkan/vulkan.hpp"
@@ -21,9 +21,12 @@
 
 namespace vk_core {
 
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+#define VULKAN_PIPELINE_TEMPLATES                                              \
+  template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,      \
+            SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>  \
+                SceneManagerImplT>
+
+VULKAN_PIPELINE_TEMPLATES
 class VulkanPhysicalDevice;
 
 /*
@@ -42,9 +45,8 @@ class VulkanPhysicalDevice;
  *  1) Initialize by constructor(Props) -> no return params, can throw exception
  *
  */
-template <WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderLoaderImplT,
-          SceneManagerImpl<scene_manager_facades::SceneManagerDependencies>
-              SceneManagerImplT>
+
+VULKAN_PIPELINE_TEMPLATES
 class VulkanPipeline {
 public:
   struct FacadesStruct {
@@ -174,7 +176,7 @@ protected:
     uint32_t FirstIndex;
   };
 
-  std::unordered_map<std::string, VkTexture *> Textures;
+  std::unordered_map<std::string, VulkanTexture *> Textures;
 
   struct BufferInput {
     vk::DeviceSize Size;
