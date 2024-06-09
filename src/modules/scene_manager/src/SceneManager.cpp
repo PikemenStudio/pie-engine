@@ -9,65 +9,29 @@
 SceneManager::SceneManager(SceneManagerProps Props) {}
 
 void SceneManager::addObject(std::shared_ptr<BaseObject> Object) {
-  Objects[Object->getDumpName()][Object->getType()][Object->getTextureName()]
-      .push_back(Object);
+  MultiShaderSetObjects[Object->getShaderSetName()][Object->getDumpName()]
+                       [Object->getType()][Object->getTextureName()]
+                           .push_back(Object);
 }
 
 void SceneManager::removeObject(const std::string &ObjectName) {
-  for (auto &[DumpName, MultiTypeObjects] : Objects) {
-    for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
-      for (auto &Object : OneTypeObjects) {
-        const auto It =
-            std::find_if(Object.second.begin(), Object.second.end(),
-                         [&](auto &ObjectWithTexture) {
-                           return ObjectWithTexture->getName() == ObjectName;
-                         });
-        if (It != Object.second.end()) {
-          Object.second.erase(It);
-          return;
+  for (auto &[ShaderSetName, Objects] : MultiShaderSetObjects) {
+    for (auto &[DumpName, MultiTypeObjects] : Objects) {
+      for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+        for (auto &Object : OneTypeObjects) {
+          const auto It =
+              std::find_if(Object.second.begin(), Object.second.end(),
+                           [&](auto &ObjectWithTexture) {
+                             return ObjectWithTexture->getName() == ObjectName;
+                           });
+          if (It != Object.second.end()) {
+            Object.second.erase(It);
+            return;
+          }
         }
       }
     }
   }
-}
-
-bool SceneManager::goToNextDump() {
-  if (Objects.empty() || ObjectGetterIt == Objects.end()) {
-    return false;
-  }
-
-  ObjectGetterIt++;
-  TypeIt = ObjectGetterIt->second.begin();
-  if (ObjectGetterIt == Objects.end()) {
-    return false;
-  }
-  return true;
-}
-
-SceneManager::OneTypeObjects SceneManager::getNextObjects() {
-  if (TypeIt == ObjectGetterIt->second.end()) {
-    return {};
-  }
-
-  TypeIt++;
-  if (TypeIt == ObjectGetterIt->second.end()) {
-    return {};
-  }
-  OneTypeObjects OneTypeObjectsInstance = TypeIt->second;
-  return OneTypeObjectsInstance;
-}
-
-SceneManager::OneTypeObjects SceneManager::getCurrentObjects() const {
-  if (TypeIt == ObjectGetterIt->second.end()) {
-    return {};
-  }
-
-  return TypeIt->second;
-}
-
-void SceneManager::resetObjectGetter() {
-  ObjectGetterIt = Objects.begin();
-  TypeIt = Objects.begin()->second.begin();
 }
 
 SceneManager::CameraData SceneManager::getCamera(glm::vec2 WindowSize) {

@@ -120,6 +120,9 @@ public:
   };
   void setupPipeline(const PipelineInitDataStruct &&PipelineInitData);
 
+  void addShaderSet(const std::string &VertexPath,
+                    const std::string &FragmentPath, const std::string &Name);
+
   void render();
 
   void addObjectData(

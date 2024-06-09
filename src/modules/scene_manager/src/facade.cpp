@@ -31,27 +31,9 @@ void scene_manager_facades::SceneManagerBaseImpl<Dep>::removeObject(
 }
 
 template <SceneManagerDependenciesConcept Dep>
-bool scene_manager_facades::SceneManagerBaseImpl<Dep>::goToNextDump() {
-  return static_cast<SceneManager *>(Data)->goToNextDump();
-}
-
-template <SceneManagerDependenciesConcept Dep>
-SceneManagerFacadeStructs::OneTypeObjects
-scene_manager_facades::SceneManagerBaseImpl<Dep>::getNextObjects() {
-  auto OneTypeObjects = static_cast<SceneManager *>(Data)->getNextObjects();
-  return OneTypeObjects;
-}
-
-template <SceneManagerDependenciesConcept Dep>
-SceneManagerFacadeStructs::OneTypeObjects
-scene_manager_facades::SceneManagerBaseImpl<Dep>::getCurrentObjects() const {
-  auto OneTypeObjects = static_cast<SceneManager *>(Data)->getCurrentObjects();
-  return OneTypeObjects;
-}
-
-template <SceneManagerDependenciesConcept Dep>
-void scene_manager_facades::SceneManagerBaseImpl<Dep>::resetObjectGetter() {
-  static_cast<SceneManager *>(Data)->resetObjectGetter();
+std::unique_ptr<BaseIterator>
+scene_manager_facades::SceneManagerBaseImpl<Dep>::begin() {
+  return static_cast<SceneManager *>(Data)->begin();
 }
 
 template <SceneManagerDependenciesConcept Dep>

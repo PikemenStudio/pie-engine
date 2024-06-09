@@ -33,6 +33,38 @@ struct SceneManagerFacadeStructs {
   using OneTypeObjects = std::map<std::string, OneTextureObjects>;
 };
 
+class BaseIterator {
+protected:
+  using OneTextureObjects = std::vector<std::shared_ptr<BaseObject>>;
+  using OneTypeObjects = std::map<std::string, OneTextureObjects>;
+
+public:
+  // Constructor that initializes the iterator with a SceneManager instance
+  BaseIterator() = default;
+
+  // Virtual destructor
+  virtual ~BaseIterator() = default;
+
+  // Dereference operator to access the current OneTypeObjects
+  virtual OneTypeObjects get() = 0;
+  virtual OneTypeObjects &operator*() = 0;
+
+  // Method to switch to the next shader set and return its name
+  virtual std::string_view switchToNextShaderSet() = 0;
+
+  // Method to switch to the next dump and return its name
+  virtual std::string_view switchToNextDump() = 0;
+
+  // Method to switch to the next type and return whether the switch was
+  // successful
+  virtual bool switchToNextType() = 0;
+
+  virtual std::string getCurrentShaderSetName() = 0;
+  virtual std::string getCurrentDumpName() = 0;
+
+  virtual bool hasNoMoreObjects() = 0;
+};
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Concept to get errors earlier if the Impl is not valid
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,10 +97,7 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
     void addObject(std::shared_ptr<BaseObject> Object);                        \
     void removeObject(const std::string &ObjectName);                          \
                                                                                \
-    bool goToNextDump();                                                       \
-    SceneManagerFacadeStructs::OneTypeObjects getNextObjects();                \
-    SceneManagerFacadeStructs::OneTypeObjects getCurrentObjects() const;       \
-    void resetObjectGetter();                                                  \
+    std::unique_ptr<BaseIterator> begin();                                     \
                                                                                \
     SceneManagerFacadeStructs::CameraData getCamera(glm::vec2 WindowSize);     \
     void setCamera(glm::vec3 From, glm::vec3 To);                              \

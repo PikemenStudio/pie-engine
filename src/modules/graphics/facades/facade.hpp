@@ -130,6 +130,10 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
         const std::map<std::string, GraphicFacadeStructs::ObjectData> &Dump,   \
         const std::string &DumpName);                                          \
                                                                                \
+    void addShaderSet(const std::string &VertexPath,                           \
+                      const std::string &FragmentPath,                         \
+                      const std::string &Name);                                \
+                                                                               \
     void addTexture(const std::string &TexturePath,                            \
                     const std::string &TextureName);                           \
                                                                                \

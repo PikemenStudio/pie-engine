@@ -1,4 +1,4 @@
-  //
+//
 // Created by FullHat on 03/04/2024.
 //
 
@@ -25,7 +25,7 @@ template <
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::setupPhysicalDevice(
     typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                              SceneImpl>::VkPhysicalDeviceProps Props) {
+                                  SceneImpl>::VkPhysicalDeviceProps Props) {
   LOG_F(INFO, "Setting up physical device");
   NativeComponents.PhysicalDevice = std::make_shared<
       vk_core::VulkanPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>>(Props);
@@ -69,7 +69,7 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 std::vector<typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                                      SceneImpl>::PhysicalDeviceLocalProps>
+                                          SceneImpl>::PhysicalDeviceLocalProps>
 GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::getLocalPhysicalDevices()
     const {
   if (NativeComponents.PhysicalDevice == nullptr) {
@@ -86,7 +86,7 @@ template <
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::
     chooseLocalPhysicalDevice(
         const typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                                        SceneImpl>::PhysicalDeviceLocalProps
+                                            SceneImpl>::PhysicalDeviceLocalProps
             &Device) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
@@ -150,7 +150,7 @@ template <
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addObject(
     const std::map<std::string,
                    typename VulkanPipeline<WindowImpl, ShaderImpl,
-                                       SceneImpl>::PublicObjectData> &Dump,
+                                           SceneImpl>::PublicObjectData> &Dump,
     const std::string &DumpName) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
@@ -174,10 +174,23 @@ void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addTexture(
 template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addShaderSet(
+    const std::string &VertexPath, const std::string &FragmentPath,
+    const std::string &Name) {
+  if (NativeComponents.PhysicalDevice == nullptr) {
+    LOG_F(INFO, "Physical device is null");
+    throw std::runtime_error("Physical device is null");
+  }
+  NativeComponents.PhysicalDevice->addShaderSet(VertexPath, FragmentPath, Name);
+}
+
+template <
+    WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
+    SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::render() {
-//  LOG_F(INFO, "Rendering");
+  //  LOG_F(INFO, "Rendering");
   NativeComponents.PhysicalDevice->render();
-//  LOG_F(INFO, "Rendered");
+  //  LOG_F(INFO, "Rendered");
 }
 
 template class vk_core::GraphicEngine<

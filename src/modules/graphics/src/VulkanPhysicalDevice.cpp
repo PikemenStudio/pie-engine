@@ -317,6 +317,17 @@ void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::setupPipeline(
 }
 
 VULKAN_PHYSICAL_DEVICE_TEMPLATES
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addShaderSet(
+    const std::string &VertexPath, const std::string &FragmentPath,
+    const std::string &Name) {
+  if (this->Pipeline == nullptr) {
+    LOG_F(ERROR, "Pipeline is not initialized");
+    throw std::runtime_error("Pipeline is not initialized");
+  }
+  this->Pipeline->addShaderSet(VertexPath, FragmentPath, Name);
+}
+
+VULKAN_PHYSICAL_DEVICE_TEMPLATES
 void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::render() {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");

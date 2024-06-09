@@ -91,6 +91,9 @@ public:
   void addTexture(const std::string &TexturePath,
                   const std::string &TextureName);
 
+  void addShaderSet(const std::string &VertexPath,
+                    const std::string &FragmentPath, const std::string &Name);
+
   void render();
 
 protected:
@@ -160,7 +163,8 @@ protected:
     vk::PipelineLayout Layout;
     vk::RenderPass RenderPass;
   };
-  std::optional<GraphicsPipelineOutBundle> PipelineBundle;
+  // map to use several shader sets
+  std::map<std::string, GraphicsPipelineOutBundle> PipelineBundles;
 
   vk::CommandPool CommandPool = nullptr;
   vk::CommandBuffer MainCommandBuffer = nullptr;
@@ -258,7 +262,8 @@ protected:
   vk::DescriptorPool
   createDescriptorPool(uint32_t Size, DescriptorSetLayoutInputStruct &Input);
   void writeDescriptorSet(SwapChainFrameStruct &Frame);
-  void createPipeline(GraphicsPipelineInBundle InBundle);
+  GraphicsPipelineOutBundle
+  createPipeline(GraphicsPipelineInBundle InBundle) const;
 
   void createFrameBuffers();
   void createCommandPool();
@@ -268,12 +273,14 @@ protected:
   void createSemaphores();
   void createFences();
 
-  vk::VertexInputBindingDescription getBindingDescription();
-  std::array<vk::VertexInputAttributeDescription, 4> getAttributeDescriptions();
+  vk::VertexInputBindingDescription getBindingDescription() const;
+  std::array<vk::VertexInputAttributeDescription, 4>
+  getAttributeDescriptions() const;
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
   void drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
-                   vk::CommandBuffer CommandBuffer, uint32_t Offset);
+                   vk::CommandBuffer CommandBuffer, uint32_t Offset,
+                   std::string ShaderSetName);
 
   void createBuffer(BufferInput Input, MeshDump &Buffer);
   void copyBuffer(vk::Buffer SrcBuffer, vk::Buffer DstBuffer,

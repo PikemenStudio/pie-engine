@@ -55,17 +55,23 @@ std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
 auto addObjects() {
   std::vector<std::shared_ptr<BaseObject>> Objects;
 
-  std::vector<std::vector<bool>> TetrisScene {};
-  for (size_t Width = 0; Width < 10; ++Width) {
-    for (size_t Height = 0; Height < 20; ++Height) {
-      for (size_t Depth = 0; Depth < 40; ++Depth) {
-      std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
-          new Actor("/Users/fullhat/Documents/tetrice_cube_no_mods.obj"));
-      Object->setName(std::string("Actor") + std::to_string(Width) + std::to_string(Height));
-      Object->setTextureName("Texture");
-      Object->setDumpName("TS");
-      Object->moveBy({4 * Width, 4 * Depth, 4 * Height});
-      Objects.push_back(Object);
+  std::vector<std::vector<bool>> TetrisScene{};
+  for (size_t Width = 0; Width < 1; ++Width) {
+    for (size_t Height = 0; Height < 2; ++Height) {
+      for (size_t Depth = 0; Depth < 2; ++Depth) {
+        std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
+            new Actor("/Users/fullhat/Documents/tetrice_cube_no_mods.obj"));
+        Object->setName(std::string("Actor") + std::to_string(Width) +
+                        std::to_string(Height) + std::to_string(Depth));
+        Object->setTextureName("Texture");
+        Object->setDumpName("TS");
+        if (Height == 0) {
+          Object->setShaderSetName("default");
+        } else {
+          Object->setShaderSetName("a");
+        }
+        Object->moveBy({4 * Width, 4 * Depth, 4 * Height});
+        Objects.push_back(Object);
       }
     }
   }
@@ -75,7 +81,7 @@ auto addObjects() {
 void moveObject() {
   while (true) {
     static uint64_t I = 0.0f;
-    //Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
+    // Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
     I += 1;
   }
 }
@@ -129,16 +135,6 @@ public:
             SceneManagerFacadeStructs::SceneManagerProps<
                 SceneManagerDependencies>{.Dependencies = {}});
     SceneManagerInstance1 = SceneManagerInstance;
-    std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
-        new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
-    Object->setName("Triangle");
-    Object->setTextureName("Texture");
-    Object->setDumpName("TS");
-    std::shared_ptr<BaseObject> Object1 = std::shared_ptr<BaseObject>(
-        new Triangle({glm::vec3(), glm::vec3(), glm::vec3()}));
-    Object1->setName("Triangle");
-    Object1->setTextureName("Texture");
-    Object1->setDumpName("TS");
 
     for (auto Object : addObjects()) {
       SceneManagerInstance->ImplInstance.addObject(Object);
@@ -183,7 +179,16 @@ public:
     };
 
     GraphicFacadeStructs::ObjectsData ObjectsData1;
+    Actor *A1 = (Actor *)Obj.get();
+    ObjectsData1["Actor"] = GraphicFacadeStructs::ObjectData{
+        .Vertices = A1->getVertices(),
+        .Colors = A1->getColors(),
+        .TexCoords = A->getTextureCoords(),
+        .Indexes = A->getIndexes(),
+        .Normals = A->getNormals(),
+    };
     GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
+    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData1, "TS1");
 
     GraphicAdapterInstance->ImplInstance.addTexture(
         "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
@@ -193,6 +198,13 @@ public:
         "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
         "sources/OIG3.JiRSM54Q19NgBbSeHmTz.jpeg",
         "Texture1");
+
+    GraphicAdapterInstance->ImplInstance.addShaderSet(
+        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+        "resources/test1.vert",
+        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+        "resources/test1.frag",
+        "a");
 
     InputManager::NativeType =
         (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType();

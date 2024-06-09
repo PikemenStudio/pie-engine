@@ -42,6 +42,7 @@ public:
   virtual std::string getDumpName() { return DumpName; }
   virtual std::string getName() { return Name; }
   virtual std::string getTextureName() { return TextureName; }
+  virtual std::string getShaderSetName() { return ShaderSetName; }
 
   virtual void setName(std::string NewName) { this->Name = NewName; }
   virtual void setTextureName(std::string NewTextureName) {
@@ -49,6 +50,9 @@ public:
   }
   virtual void setDumpName(std::string NewDumpName) {
     this->DumpName = NewDumpName;
+  }
+  virtual void setShaderSetName(std::string NewShaderSetName) {
+    this->ShaderSetName = NewShaderSetName;
   }
 
   // Modifications
@@ -68,6 +72,7 @@ protected:
   std::string Name;
   std::string TextureName;
   std::string DumpName;
+  std::string ShaderSetName = "default";
 
   glm::vec3 Position = {0.0f, 0.0f, 0.0f};
   glm::mat4 Rotation = glm::mat4(1.0f);

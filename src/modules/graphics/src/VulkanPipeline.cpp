@@ -40,11 +40,12 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::VulkanPipeline(
                               .Counts = {1, 1},
                               .Stages = {vk::ShaderStageFlagBits::eVertex,
                                          vk::ShaderStageFlagBits::eVertex}});
-  createPipeline(
+  this->PipelineBundles["default"] = createPipeline(
       {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
                            "resources/test.vert",
        .FragmentShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
                              "resources/test.frag"});
+
   createFrameBuffers();
   createCommandPool();
   createFrameCommandBuffers();
@@ -63,13 +64,13 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::~VulkanPipeline() {
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .destroyCommandPool(this->CommandPool);
 
-  if (PipelineBundle.has_value()) {
+  for (auto &PipelineBundle : PipelineBundles) {
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyPipeline(PipelineBundle.value().Pipeline);
+        .destroyPipeline(PipelineBundle.second.Pipeline);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyPipelineLayout(PipelineBundle.value().Layout);
+        .destroyPipelineLayout(PipelineBundle.second.Layout);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
-        .destroyRenderPass(PipelineBundle.value().RenderPass);
+        .destroyRenderPass(PipelineBundle.second.RenderPass);
   }
 
   destroySwapChain();
@@ -838,8 +839,9 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::writeDescriptorSet(
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
-void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipeline(
-    VulkanPipeline::GraphicsPipelineInBundle InBundle) {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::GraphicsPipelineOutBundle
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipeline(
+    VulkanPipeline::GraphicsPipelineInBundle InBundle) const {
   vk::GraphicsPipelineCreateInfo CreateInfo;
   CreateInfo.flags = vk::PipelineCreateFlags();
 
@@ -1007,7 +1009,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipeline(
   }
 
   // Init Result
-  this->PipelineBundle = GraphicsPipelineOutBundle{
+  GraphicsPipelineOutBundle OutBundle{
       .Pipeline = Pipeline,
       .Layout = CreateInfo.layout,
       .RenderPass = CreateInfo.renderPass,
@@ -1020,6 +1022,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createPipeline(
       .destroyShaderModule(FragmentShaderModule);
 
   LOG_F(INFO, "Pipeline created successfully");
+  return OutBundle;
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
@@ -1032,7 +1035,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFrameBuffers() {
 
     vk::FramebufferCreateInfo FramebufferCreateInfo{
         .flags = vk::FramebufferCreateFlags(),
-        .renderPass = this->PipelineBundle->RenderPass,
+        .renderPass = this->PipelineBundles["default"].RenderPass,
         .attachmentCount = static_cast<uint32_t>(Attachments.size()),
         .pAttachments = Attachments.data(),
         .width = this->SwapChainBundle->Extent.width,
@@ -1177,8 +1180,15 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
       Clear,
       DepthClear,
   }};
+
+  auto *SceneManager =
+      &this->NativeComponents.Facades->SceneManager->ImplInstance;
+  std::unique_ptr<BaseIterator> Iterator = SceneManager->begin();
+
+  std::string ShaderSetName = "default";
+
   vk::RenderPassBeginInfo RenderPassInfo{
-      .renderPass = this->PipelineBundle->RenderPass,
+      .renderPass = this->PipelineBundles[ShaderSetName].RenderPass,
       .framebuffer = this->SwapChainBundle->Frames[ImageIndex].FrameBuffer,
       .renderArea =
           {
@@ -1191,37 +1201,40 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
 
   CommandBuffer.beginRenderPass(&RenderPassInfo, vk::SubpassContents::eInline);
   CommandBuffer.bindDescriptorSets(
-      vk::PipelineBindPoint::eGraphics, this->PipelineBundle->Layout, 0,
+      vk::PipelineBindPoint::eGraphics,
+      this->PipelineBundles[ShaderSetName].Layout, 0,
       this->SwapChainBundle->Frames[ImageIndex].DescriptorSet, nullptr);
-  CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                             this->PipelineBundle->Pipeline);
+  CommandBuffer.bindPipeline(
+      vk::PipelineBindPoint::eGraphics,
+      this->PipelineBundles[Iterator->getCurrentShaderSetName()].Pipeline);
 
-  auto *SceneManager =
-      &this->NativeComponents.Facades->SceneManager->ImplInstance;
-
-  SceneManager->resetObjectGetter();
   uint32_t Offset = 0;
   while (true) {
-    SceneManagerFacadeStructs::OneTypeObjects Objects =
-        SceneManager->getCurrentObjects();
-
-    // Current type vector is empty (or not even created)
-    if (Objects.empty()) {
-      if (SceneManager->goToNextDump()) {
-        // Step to next dump
-        Offset = 0;
-        Objects = SceneManager->getCurrentObjects();
-        drawObjects(Objects, CommandBuffer, Offset);
-        Offset += Objects.size();
-        continue;
+    if (Iterator->hasNoMoreObjects()) {
+      // Try to switch to next ShaderSet
+      ShaderSetName = Iterator->switchToNextShaderSet();
+      if (Iterator->hasNoMoreObjects()) {
+        // Try to switch to next dump
+        Iterator->switchToNextDump();
+        if (Iterator->hasNoMoreObjects()) {
+          // Try to switch to next type
+          break;
+        } else {
+          // Step to next dump
+          Offset = 0;
+        }
       }
-      break;
     }
 
     // if all ok
-    drawObjects(Objects, CommandBuffer, Offset);
-    Offset += Objects.size();
-    const auto &Discard = SceneManager->getNextObjects();
+    SceneManagerFacadeStructs::OneTypeObjects Objects = Iterator->get();
+    ShaderSetName = Iterator->getCurrentShaderSetName();
+    CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
+                               this->PipelineBundles[ShaderSetName].Pipeline);
+    drawObjects(Objects, CommandBuffer, Offset, ShaderSetName);
+    Offset += Objects.size() * 2;
+
+    Iterator->switchToNextType();
   }
 
   auto [width, height] =
@@ -1385,7 +1398,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
 PIPELINE_TEMPLATES_NO_SPEC
 void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     SceneManagerFacadeStructs::OneTypeObjects Objects,
-    vk::CommandBuffer CommandBuffer, uint32_t Offset) {
+    vk::CommandBuffer CommandBuffer, uint32_t Offset,
+    std::string ShaderSetName) {
   // Iterate through textures
   for (auto &[TextureName, ObjectsSet] : Objects) {
     std::string DumpName = ObjectsSet[0]->getDumpName();
@@ -1394,8 +1408,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     BaseObject::ObjectTypes Type = ObjectsSet[0]->getType();
     std::string TypeName = BaseObject::toString(Type);
 
-    this->Textures[TextureName]->use(CommandBuffer,
-                                     this->PipelineBundle->Layout);
+    this->Textures[TextureName]->use(
+        CommandBuffer, this->PipelineBundles[ShaderSetName].Layout);
     CommandBuffer.drawIndexed(
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].IndexCount,
         Objects[TextureName].size(),
@@ -1607,7 +1621,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::allocateDescriptorSet(
 
 PIPELINE_TEMPLATES_NO_SPEC
 vk::VertexInputBindingDescription
-vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getBindingDescription() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getBindingDescription() const {
   vk::VertexInputBindingDescription BindingDescription{
       .binding = 0,
       .stride = 11 * sizeof(float),
@@ -1619,7 +1633,7 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getBindingDescription() {
 
 PIPELINE_TEMPLATES_NO_SPEC
 std::array<vk::VertexInputAttributeDescription, 4>
-vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getAttributeDescriptions() {
+vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::getAttributeDescriptions() const {
   std::array<vk::VertexInputAttributeDescription, 4> Attributes{
       vk::VertexInputAttributeDescription{
           .location = 0,
@@ -1809,6 +1823,17 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addTexture(
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addShaderSet(
+    const std::string &VertexPath, const std::string &FragmentPath,
+    const std::string &Name) {
+  VulkanPipeline::GraphicsPipelineInBundle InBundle{
+      .VertexShaderPath = VertexPath,
+      .FragmentShaderPath = FragmentPath,
+  };
+  this->PipelineBundles[Name] = createPipeline(InBundle);
+}
+
+PIPELINE_TEMPLATES_NO_SPEC
 void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareFrame(
     uint32_t ImageIndex) {
   SwapChainFrameStruct &Frame = SwapChainBundle->Frames[ImageIndex];
@@ -1920,7 +1945,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::initUi() {
       .Allocator = nullptr,
       .CheckVkResultFn = nullptr,
   };
-  ImGui_ImplVulkan_Init(&Info, this->PipelineBundle->RenderPass);
+  ImGui_ImplVulkan_Init(&Info, this->PipelineBundles["default"].RenderPass);
 
   VkCommandBufferAllocateInfo AllocInfo{};
   AllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;

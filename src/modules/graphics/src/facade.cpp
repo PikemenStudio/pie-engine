@@ -176,6 +176,16 @@ void GraphicApiFacadeVulkanImpl<Dep>::addObjectData(
 }
 
 template <VulkanDependenciesConcept Dep>
+void GraphicApiFacadeVulkanImpl<Dep>::addShaderSet(
+    const std::string &VertexPath, const std::string &FragmentPath,
+    const std::string &Name) {
+  static_cast<
+      DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
+                  typename Dep::SceneManagerType>>(Data)
+      ->addShaderSet(VertexPath, FragmentPath, Name);
+}
+
+template <VulkanDependenciesConcept Dep>
 void GraphicApiFacadeVulkanImpl<Dep>::addTexture(
     const std::string &TexturePath, const std::string &TextureName) {
   static_cast<
