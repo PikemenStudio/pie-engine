@@ -14,27 +14,26 @@ struct Vertex {
   glm::vec2 Uv{};
 
   bool operator==(const Vertex &Other) const {
-    return Position == Other.Position && Color == Other.Color && Normal == Other.Normal &&
-           Uv == Other.Uv;
+    return Position == Other.Position && Color == Other.Color &&
+           Normal == Other.Normal && Uv == Other.Uv;
   }
 };
 
 template <typename T, typename... Rest>
-void hashCombine(std::size_t& Seed, const T& v, const Rest&... rest) {
+void hashCombine(std::size_t &Seed, const T &v, const Rest &...rest) {
   Seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (Seed << 6) + (Seed >> 2);
   (hashCombine(Seed, rest), ...);
 };
 
 namespace std {
-template <>
-struct hash<Vertex> {
+template <> struct hash<Vertex> {
   size_t operator()(Vertex const &Vertex) const {
     size_t Seed = 0;
     hashCombine(Seed, Vertex.Position, Vertex.Color, Vertex.Normal, Vertex.Uv);
     return Seed;
   }
 };
-}  // namespace std
+} // namespace std
 
 Actor::Actor(const std::string &FileName) {
   tinyobj::attrib_t Attrib;
@@ -42,7 +41,8 @@ Actor::Actor(const std::string &FileName) {
   std::vector<tinyobj::material_t> Materials;
   std::string Warn, err;
 
-  if (!tinyobj::LoadObj(&Attrib, &Shapes, &Materials, &Warn, &err, FileName.c_str())) {
+  if (!tinyobj::LoadObj(&Attrib, &Shapes, &Materials, &Warn, &err,
+                        FileName.c_str())) {
     throw std::runtime_error(Warn + err);
   }
 
@@ -53,7 +53,6 @@ Actor::Actor(const std::string &FileName) {
   for (const auto &shape : Shapes) {
     for (int I = shape.mesh.indices.size() - 1; I >= 0; --I) {
       const auto &Index = shape.mesh.indices[I];
-    //for (const auto &Index : shape.mesh.indices) {
       Vertex Vertex{};
 
       if (Index.vertex_index >= 0) {
@@ -76,8 +75,7 @@ Actor::Actor(const std::string &FileName) {
             Attrib.normals[3 * Index.normal_index + 1],
             Attrib.normals[3 * Index.normal_index + 2],
         };
-      }
-      else {
+      } else {
         throw "";
       }
 
@@ -118,6 +116,6 @@ glm::mat4 Actor::calculateTransformation() {
   glm::mat4 Result = glm::mat4(1.0f);
   Result *= Rotation;
   Result *= glm::translate(Result, this->Position);
-  //Result = Result * glm::scale(Result, this->Scale);
+  // Result = Result * glm::scale(Result, this->Scale);
   return Result;
 }

@@ -760,7 +760,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
   LayoutStruct.Stages[0] = vk::ShaderStageFlagBits::eFragment;
 
   std::vector<vk::DescriptorSetLayoutBinding> Bindings1;
-  for (int I = 0; I < 2; ++I) {
+  for (int I = 0; I < 3; ++I) {
     vk::DescriptorSetLayoutBinding LayoutBinding1{
         .binding = static_cast<uint32_t>(I),
         .descriptorType = vk::DescriptorType::eCombinedImageSampler,
