@@ -60,10 +60,19 @@ public:
   virtual void rotateBy(glm::vec3 Axis, float Angle) {
     Rotation = glm::rotate(glm::mat4(1.0f), glm::radians(Angle), Axis);
   }
+  virtual void rotateByX(float Angle) {
+    RotationAngles.x = Angle;
+  }
+  virtual void rotateByY(float Angle) {
+    RotationAngles.y = Angle;
+  }
+  virtual void rotateByZ(float Angle) {
+    RotationAngles.z = Angle;
+  }
   virtual void scaleBy(glm::vec3 Vector) { this->Scale = Vector; }
 
   virtual glm::vec3 getPosition() { return Position; }
-  virtual glm::mat4 getRotation() { return Rotation; }
+  virtual glm::vec3 getRotation() { return RotationAngles; }
   virtual glm::vec3 getScale() { return Scale; }
 
   virtual glm::mat4 calculateTransformation() = 0;
@@ -78,6 +87,7 @@ protected:
 
   glm::vec3 Position = {0.0f, 0.0f, 0.0f};
   glm::mat4 Rotation = glm::mat4(1.0f);
+  glm::vec3 RotationAngles = {0.0f, 0.0f, 0.0f};
   glm::vec3 Scale = {1.0f, 1.0f, 1.0f};
 };
 

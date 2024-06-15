@@ -114,7 +114,9 @@ std::vector<uint32_t> Actor::getIndexes() { return Indexes; }
 std::vector<float> Actor::getNormals() { return Normals; }
 glm::mat4 Actor::calculateTransformation() {
   glm::mat4 Result = glm::mat4(1.0f);
-  Result *= Rotation;
+  Result *= glm::rotate(Result, RotationAngles.x, glm::vec3(1.0f, 0.0f, 0.0f));
+  Result *= glm::rotate(Result, RotationAngles.y, glm::vec3(0.0f, 1.0f, 0.0f));
+  Result *= glm::rotate(Result, RotationAngles.z, glm::vec3(0.0f, 0.0f, 1.0f));
   Result *= glm::translate(Result, this->Position);
   Result = Result * glm::scale(Result, this->Scale);
   return Result;

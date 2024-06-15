@@ -54,6 +54,17 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::VulkanPipeline(
   createSemaphores();
   createFences();
   LOG_F(INFO, "Init pipeline, GOOD");
+
+  UI::CurrentObjectUpdated = [&]() {
+    auto Object =
+        NativeComponents.Facades->SceneManager->ImplInstance.getObjectByName(
+            UI::CurrentObjectName);
+    UI::setCurrentObjectModification({
+        .Position = Object->getPosition(),
+        .Rotation = Object->getRotation(),
+        .Scale = Object->getScale(),
+    });
+  };
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
@@ -1211,6 +1222,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
       vk::PipelineBindPoint::eGraphics,
       this->PipelineBundles[Iterator->getCurrentShaderSetName()].Pipeline);
 
+  UI::Objects.clear();
+
   uint32_t Offset = 0;
   while (true) {
     if (Iterator->hasNoMoreObjects()) {
@@ -1255,6 +1268,19 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
     throw std::runtime_error(
         std::string("Failed to end recording main command buffer ") + E.what());
   }
+
+  // Process objects
+  auto UIData = UI::getCurrentObjectModification();
+  if (UIData.has_value()) {
+    std::shared_ptr<BaseObject> Object =
+        SceneManager->getObjectByName(UI::CurrentObjectName);
+    Object->moveBy({0.0f, 0.0f, 0.0f});
+    Object->rotateByX(glm::radians(UIData->Rotation.x));
+    Object->rotateByY(glm::radians(UIData->Rotation.y));
+    Object->rotateByZ(glm::radians(UIData->Rotation.z));
+    Object->moveBy(UIData->Position);
+    Object->scaleBy(UIData->Scale);
+  }
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
@@ -1264,6 +1290,10 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     std::string ShaderSetName) {
   // Iterate through textures
   for (auto &[TextureName, ObjectsSet] : Objects) {
+    for (const auto Object : ObjectsSet) {
+      UI::Objects.push_back(Object->getName());
+    }
+
     std::string DumpName = ObjectsSet[0]->getDumpName();
     prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
 
