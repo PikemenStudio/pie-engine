@@ -760,7 +760,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
   LayoutStruct.Stages[0] = vk::ShaderStageFlagBits::eFragment;
 
   std::vector<vk::DescriptorSetLayoutBinding> Bindings1;
-  for (int I = 0; I < 3; ++I) {
+  for (int I = 0; I < 2; ++I) {
     vk::DescriptorSetLayoutBinding LayoutBinding1{
         .binding = static_cast<uint32_t>(I),
         .descriptorType = vk::DescriptorType::eCombinedImageSampler,
@@ -1553,9 +1553,9 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addObjectData(
       MeshArray.push_back(ObjectData.Colors[IColor + 2]);
       MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 0]);
       MeshArray.push_back(ObjectData.TexCoords[ITexCoord + 1]);
-      MeshArray.push_back(ObjectData.Normals[ITexCoord + 0]);
-      MeshArray.push_back(ObjectData.Normals[ITexCoord + 1]);
-      MeshArray.push_back(ObjectData.Normals[ITexCoord + 2]);
+      MeshArray.push_back(ObjectData.Normals[INormal + 0]);
+      MeshArray.push_back(ObjectData.Normals[INormal + 1]);
+      MeshArray.push_back(ObjectData.Normals[INormal + 2]);
     }
 
     size_t ArraySize = MeshArray.size();

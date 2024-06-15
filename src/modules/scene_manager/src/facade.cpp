@@ -50,6 +50,12 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::getCamera(
 }
 
 template <SceneManagerDependenciesConcept Dep>
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::setCamera(
+    glm::vec3 From, glm::vec3 To) {
+  static_cast<SceneManager *>(Data)->setCamera(From, To);
+}
+
+template <SceneManagerDependenciesConcept Dep>
 std::vector<glm::mat4>
 scene_manager_facades::SceneManagerBaseImpl<Dep>::getTransformations() {
   return static_cast<SceneManager *>(Data)->getTransformations();

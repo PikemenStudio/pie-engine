@@ -16,12 +16,10 @@ vk_core::VulkanTexture::VulkanTexture(
   DescriptorPool = InputChunk.DescriptorPool;
 
   for (const auto &FileName : InputChunk.FileNames) {
-    Textures.push_back({});
-
-    auto &NewTexture = Textures.back();
+    auto NewTexture = TextureData{};
     NewTexture.FileName = FileName;
 
-    Textures.back().Pixels =
+    NewTexture.Pixels =
         load(NewTexture.FileName, NewTexture.Size, NewTexture.Channels);
 
     ImageInputChunk ImageInputChunkInstance{
@@ -45,6 +43,8 @@ vk_core::VulkanTexture::VulkanTexture(
 
     NewTexture.ImageView = makeView(NewTexture.Image);
     NewTexture.Sampler = createSampler();
+
+    Textures.push_back(NewTexture);
   }
 
   createDescriptorSet();
@@ -62,7 +62,7 @@ vk_core::VulkanTexture::~VulkanTexture() {
 void vk_core::VulkanTexture::use(vk::CommandBuffer CommandBuffer,
                                  vk::PipelineLayout PipelineLayout) {
   CommandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                   PipelineLayout, 1, DescriptorSet, nullptr);
+                                   PipelineLayout, 1, DescriptorSet,nullptr);
 }
 
 stbi_uc *vk_core::VulkanTexture::load(const std::string &FileName,
@@ -201,7 +201,7 @@ vk::Sampler vk_core::VulkanTexture::createSampler() {
       .addressModeW = vk::SamplerAddressMode::eRepeat,
       .mipLodBias = 0.0f,
       .anisotropyEnable = VK_FALSE,
-      .maxAnisotropy = 1.0f,
+      .maxAnisotropy = 16.0f,
       .compareEnable = VK_FALSE,
       .compareOp = vk::CompareOp::eAlways,
       .minLod = 0.0f,
@@ -226,20 +226,23 @@ void vk_core::VulkanTexture::createDescriptorSet() {
   };
 
   try {
-    DescriptorSet = LogicalDevice.allocateDescriptorSets(AllocateInfo)[0];
+    DescriptorSet =
+        LogicalDevice.allocateDescriptorSets(AllocateInfo)[0];
   } catch (vk::SystemError &E) {
-    throw std::runtime_error(std::string("Failed to allocate descriptor set ") +
-                             E.what());
+    throw std::runtime_error(
+        std::string("Failed to allocate descriptor set ") + E.what());
   }
 
   std::vector<vk::WriteDescriptorSet> WriteDescriptorSets;
+  std::vector<vk::DescriptorImageInfo*> ImageInfos;
   uint32_t Index = 0;
-  for (const auto &Texture : Textures) {
-    vk::DescriptorImageInfo ImageInfo{
+  for (auto &Texture : Textures) {
+    vk::DescriptorImageInfo *ImageInfo = new vk::DescriptorImageInfo{
         .sampler = Texture.Sampler,
         .imageView = Texture.ImageView,
         .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
     };
+    ImageInfos.push_back(ImageInfo);
 
     vk::WriteDescriptorSet WriteDescriptorSet{
         .dstSet = DescriptorSet,
@@ -247,13 +250,17 @@ void vk_core::VulkanTexture::createDescriptorSet() {
         .dstArrayElement = 0,
         .descriptorCount = 1,
         .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-        .pImageInfo = &ImageInfo,
+        .pImageInfo = ImageInfos.back(),
     };
     WriteDescriptorSets.push_back(std::move(WriteDescriptorSet));
   }
 
   LogicalDevice.updateDescriptorSets(WriteDescriptorSets.size(),
                                      WriteDescriptorSets.data(), 0, nullptr);
+
+  for (auto *ImageInfo : ImageInfos) {
+    delete ImageInfo;
+  }
 }
 
 vk::Image vk_core::VulkanTexture::createImage(

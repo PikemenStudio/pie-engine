@@ -177,8 +177,8 @@ protected:
   std::map<std::string, MultiDumpObjects> MultiShaderSetObjects;
 
   std::map<std::string, MultiTypeObjects>::iterator ObjectGetterIt;
-  glm::vec3 From = {10.0f, -60.0f, -20.0f};
-  glm::vec3 To = {20.0f, 0.0f, 10.0f};
+  glm::vec3 From = {0.0f, 10.0f, -10.0f};
+  glm::vec3 To = {0.0f, 0.0f, 0.0f};
 };
 
 #endif // ENGINE_SRC_MODULES_SCENE_MANAGER_SRC_SCENEMANAGER_HPP

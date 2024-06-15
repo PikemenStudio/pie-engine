@@ -99,11 +99,12 @@ protected:
   vk::PhysicalDevice PhysicalDevice;
 
   vk::DescriptorSetLayout DescriptorSetLayout;
-  vk::DescriptorSet DescriptorSet;
   vk::DescriptorPool DescriptorPool;
 
   vk::CommandBuffer CommandBuffer;
   vk::Queue Queue;
+
+  vk::DescriptorSet DescriptorSet;
 };
 
 } // namespace vk_core

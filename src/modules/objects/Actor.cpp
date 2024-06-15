@@ -51,7 +51,9 @@ Actor::Actor(const std::string &FileName) {
 
   std::unordered_map<Vertex, uint32_t> UniqueVertices{};
   for (const auto &shape : Shapes) {
-    for (const auto &Index : shape.mesh.indices) {
+    for (int I = shape.mesh.indices.size() - 1; I >= 0; --I) {
+      const auto &Index = shape.mesh.indices[I];
+    //for (const auto &Index : shape.mesh.indices) {
       Vertex Vertex{};
 
       if (Index.vertex_index >= 0) {
@@ -74,6 +76,9 @@ Actor::Actor(const std::string &FileName) {
             Attrib.normals[3 * Index.normal_index + 1],
             Attrib.normals[3 * Index.normal_index + 2],
         };
+      }
+      else {
+        throw "";
       }
 
       if (Index.texcoord_index >= 0) {

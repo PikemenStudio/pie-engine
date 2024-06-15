@@ -41,7 +41,8 @@ SceneManager::CameraData SceneManager::getCamera(glm::vec2 WindowSize) {
   glm::mat4 View = glm::lookAt(Eye, Center, Up);
 
   glm::mat4 Projection =
-      glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+      glm::perspective(glm::radians(45.0f), 3456.0f / 2234.0f, 0.1f, 100.0f);
+  Projection[1][1] *= -1;
 
   return CameraData{
       .View = View,
