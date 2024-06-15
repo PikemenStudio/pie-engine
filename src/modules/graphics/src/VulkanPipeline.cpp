@@ -759,22 +759,16 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
   LayoutStruct.Counts[0] = 1;
   LayoutStruct.Stages[0] = vk::ShaderStageFlagBits::eFragment;
 
-  vk::DescriptorSetLayoutBinding LayoutBinding1{
-      .binding = 0,
-      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-      .descriptorCount = 1,
-      .stageFlags = vk::ShaderStageFlagBits::eFragment,
-  };
-
-  vk::DescriptorSetLayoutBinding LayoutBinding2{
-      .binding = 1,
-      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-      .descriptorCount = 1,
-      .stageFlags = vk::ShaderStageFlagBits::eFragment,
-  };
-
-  std::vector<vk::DescriptorSetLayoutBinding> Bindings1 = {LayoutBinding1,
-                                                           LayoutBinding2};
+  std::vector<vk::DescriptorSetLayoutBinding> Bindings1;
+  for (int I = 0; I < 3; ++I) {
+    vk::DescriptorSetLayoutBinding LayoutBinding1{
+        .binding = static_cast<uint32_t>(I),
+        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+        .descriptorCount = 1,
+        .stageFlags = vk::ShaderStageFlagBits::eFragment,
+    };
+    Bindings1.push_back(LayoutBinding1);
+  }
 
   vk::DescriptorSetLayoutCreateInfo CreateInfo1{
       .flags = vk::DescriptorSetLayoutCreateFlags(),
