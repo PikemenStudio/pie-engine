@@ -29,6 +29,7 @@ add_subdirectory(src/modules/renderable_scene/src)
 add_subdirectory(src/modules/scene_manager/src)
 add_subdirectory(src/modules/objects)
 add_subdirectory(src/modules/input_manager)
+add_subdirectory(src/modules/ui)
 #add_subdirectory(src/modules/imgui_docking)
 set(ADAPTERS ${ADAPTERS}
         src/modules/windows/facades/facade.hpp
@@ -69,6 +70,9 @@ include_directories(src/modules/objects)
 
 target_link_libraries(main PRIVATE input_manager)
 include_directories(src/modules/input_manager/facades)
+
+target_link_libraries(main PRIVATE UI)
+include_directories(src/modules/ui)
 
 find_package(loguru CONFIG REQUIRED)
 target_link_libraries(main PRIVATE loguru)

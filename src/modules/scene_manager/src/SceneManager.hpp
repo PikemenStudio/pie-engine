@@ -55,6 +55,23 @@ public:
     return Result;
   }
 
+  std::shared_ptr<BaseObject> getObjectByName(const std::string &Name) {
+    for (auto &[ShaderSetName, Objects] : MultiShaderSetObjects) {
+      for (auto &[DumpName, MultiTypeObjects] : Objects) {
+        for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+          for (auto &Object : OneTypeObjects) {
+            for (auto &ObjectWithTexture : Object.second) {
+              if (ObjectWithTexture->getName() == Name) {
+                return ObjectWithTexture;
+              }
+            }
+          }
+        }
+      }
+    }
+    return nullptr;
+  }
+
   class Iterator : BaseIterator {
   public:
     Iterator(SceneManager *Manager) : Manager(Manager) {

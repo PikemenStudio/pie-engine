@@ -12,7 +12,6 @@
 #include "VulkanPhysicalDevice.hpp"
 #include "VulkanTexture.hpp"
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-#include "imgui.h"
 #include "vulkan/vulkan.hpp"
 #include </Users/fullhat/Documents/GitHub/pie-engine/vcpkg/buildtrees/imgui/src/76b6bb5605-ca10468178.clean/backends/imgui_impl_glfw.h>
 #include </Users/fullhat/Documents/GitHub/pie-engine/vcpkg/buildtrees/imgui/src/76b6bb5605-ca10468178.clean/backends/imgui_impl_vulkan.h>

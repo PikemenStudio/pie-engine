@@ -104,6 +104,8 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     std::vector<glm::mat4> getTransformations();                               \
                                                                                \
+    std::shared_ptr<BaseObject> getObjectByName(const std::string &Name);      \
+                                                                               \
   protected:                                                                   \
     void *Data;                                                                \
   };

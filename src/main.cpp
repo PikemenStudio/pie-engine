@@ -213,6 +213,9 @@ public:
           (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType(),
           GLFW_TRUE);
     });
+    InputManager::bindMouseXY([&](double X, double Y) {
+      LOG_F(INFO, "Mouse X: %f, Y: %f", X, Y);
+    });
 
     std::thread Thread(moveObject);
     Thread.detach();

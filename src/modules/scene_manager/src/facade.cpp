@@ -55,5 +55,12 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::getTransformations() {
   return static_cast<SceneManager *>(Data)->getTransformations();
 }
 
+template <SceneManagerDependenciesConcept Dep>
+std::shared_ptr<BaseObject>
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getObjectByName(
+    const std::string &Name) {
+  return static_cast<SceneManager *>(Data)->getObjectByName(Name);
+}
+
 template class scene_manager_facades::SceneManagerBaseImpl<
     scene_manager_facades::SceneManagerDependencies>;

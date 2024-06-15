@@ -21,7 +21,7 @@ public:
     vk::Queue Queue;
     vk::DescriptorSetLayout DescriptorSetLayout;
     vk::DescriptorPool DescriptorPool;
-    std::string FileName;
+    std::vector<std::string> FileNames;
   };
 
   struct ImageInputChunk {
@@ -54,10 +54,12 @@ public:
 
   void use(vk::CommandBuffer CommandBuffer, vk::PipelineLayout PipelineLayout);
 
-  void load();
-  void populate();
-  void makeView();
-  void createSampler();
+  static stbi_uc *load(const std::string &FileName, glm::vec<2, int> &Size,
+                       int &Channels);
+  void populate(const glm::vec<2, int> &Size, int Channels, stbi_uc *Pixels,
+                vk::Image Image);
+  vk::ImageView makeView(vk::Image Image);
+  vk::Sampler createSampler();
   void createDescriptorSet();
 
 public:
@@ -77,14 +79,24 @@ protected:
     vk::MemoryPropertyFlags Properties;
   };
 
-  glm::vec<2, int> Size;
-  int Channels;
+  struct TextureData {
+    glm::vec<2, int> Size;
+    int Channels;
+
+    std::string FileName;
+
+    stbi_uc *Pixels;
+
+    vk::Image Image;
+    vk::DeviceMemory ImageMemory;
+    vk::ImageView ImageView;
+    vk::Sampler Sampler;
+  };
+
+  std::vector<TextureData> Textures;
+
   vk::Device LogicalDevice;
   vk::PhysicalDevice PhysicalDevice;
-  vk::Image Image;
-  vk::ImageView ImageView;
-  vk::DeviceMemory ImageMemory;
-  vk::Sampler Sampler;
 
   vk::DescriptorSetLayout DescriptorSetLayout;
   vk::DescriptorSet DescriptorSet;
@@ -92,10 +104,6 @@ protected:
 
   vk::CommandBuffer CommandBuffer;
   vk::Queue Queue;
-
-  std::string FileName;
-
-  stbi_uc *Pixels;
 };
 
 } // namespace vk_core

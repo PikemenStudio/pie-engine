@@ -14,55 +14,72 @@ vk_core::VulkanTexture::VulkanTexture(
   Queue = InputChunk.Queue;
   DescriptorSetLayout = InputChunk.DescriptorSetLayout;
   DescriptorPool = InputChunk.DescriptorPool;
-  FileName = InputChunk.FileName;
 
-  load();
+  for (const auto &FileName : InputChunk.FileNames) {
+    Textures.push_back({});
 
-  ImageInputChunk ImageInputChunkInstance{
-      .LogicalDevice = LogicalDevice,
-      .PhysicalDevice = PhysicalDevice,
-      .Size = Size,
-      .Tiling = vk::ImageTiling::eOptimal,
-      .Usage = vk::ImageUsageFlagBits::eTransferDst |
-               vk::ImageUsageFlagBits::eSampled,
-      .MemoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal,
-      .Format = vk::Format::eR8G8B8A8Unorm,
-  };
+    auto &NewTexture = Textures.back();
+    NewTexture.FileName = FileName;
 
-  Image = createImage(ImageInputChunkInstance);
+    Textures.back().Pixels =
+        load(NewTexture.FileName, NewTexture.Size, NewTexture.Channels);
 
-  ImageMemory = createImageMemory(ImageInputChunkInstance, Image);
+    ImageInputChunk ImageInputChunkInstance{
+        .LogicalDevice = LogicalDevice,
+        .PhysicalDevice = PhysicalDevice,
+        .Size = NewTexture.Size,
+        .Tiling = vk::ImageTiling::eOptimal,
+        .Usage = vk::ImageUsageFlagBits::eTransferDst |
+                 vk::ImageUsageFlagBits::eSampled,
+        .MemoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal,
+        .Format = vk::Format::eR8G8B8A8Unorm,
+    };
 
-  populate();
-  free(Pixels);
-  makeView();
-  createSampler();
+    NewTexture.Image = VulkanTexture::createImage(ImageInputChunkInstance);
+
+    NewTexture.ImageMemory =
+        createImageMemory(ImageInputChunkInstance, NewTexture.Image);
+    populate(NewTexture.Size, NewTexture.Channels, NewTexture.Pixels,
+             NewTexture.Image);
+    free(NewTexture.Pixels);
+
+    NewTexture.ImageView = makeView(NewTexture.Image);
+    NewTexture.Sampler = createSampler();
+  }
+
   createDescriptorSet();
 }
 
 vk_core::VulkanTexture::~VulkanTexture() {
-  LogicalDevice.freeMemory(ImageMemory);
-  LogicalDevice.destroyImage(Image);
-  LogicalDevice.destroyImageView(ImageView);
-  LogicalDevice.destroySampler(Sampler);
+  for (auto Texture : Textures) {
+    LogicalDevice.freeMemory(Texture.ImageMemory);
+    LogicalDevice.destroyImage(Texture.Image);
+    LogicalDevice.destroyImageView(Texture.ImageView);
+    LogicalDevice.destroySampler(Texture.Sampler);
+  }
 }
 
 void vk_core::VulkanTexture::use(vk::CommandBuffer CommandBuffer,
-                             vk::PipelineLayout PipelineLayout) {
+                                 vk::PipelineLayout PipelineLayout) {
   CommandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                    PipelineLayout, 1, DescriptorSet, nullptr);
 }
 
-void vk_core::VulkanTexture::load() {
-  Pixels =
+stbi_uc *vk_core::VulkanTexture::load(const std::string &FileName,
+                                      glm::vec<2, int> &Size, int &Channels) {
+  stbi_uc *Pixels =
       stbi_load(FileName.c_str(), &Size.x, &Size.y, &Channels, STBI_rgb_alpha);
 
   if (Pixels == nullptr) {
     throw std::runtime_error("Failed to load texture image!");
   }
+
+  return Pixels;
 }
 
-void vk_core::VulkanTexture::populate() {
+void vk_core::VulkanTexture::populate(const glm::vec<2, int> &Size,
+                                      int Channels, stbi_uc *Pixels,
+                                      vk::Image Image) {
   BufferInput Input{
       .Size = static_cast<uint32_t>(Size.x * Size.y * 4),
       .Usage = vk::BufferUsageFlagBits::eTransferSrc,
@@ -144,7 +161,7 @@ void vk_core::VulkanTexture::populate() {
   LogicalDevice.destroyBuffer(StagingBuffer);
 }
 
-void vk_core::VulkanTexture::makeView() {
+vk::ImageView vk_core::VulkanTexture::makeView(vk::Image Image) {
   vk::ImageViewCreateInfo ViewCreateInfo{
       .image = Image,
       .viewType = vk::ImageViewType::e2D,
@@ -167,14 +184,14 @@ void vk_core::VulkanTexture::makeView() {
   };
 
   try {
-    ImageView = LogicalDevice.createImageView(ViewCreateInfo);
+    return LogicalDevice.createImageView(ViewCreateInfo);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to create image view ") +
                              E.what());
   }
 }
 
-void vk_core::VulkanTexture::createSampler() {
+vk::Sampler vk_core::VulkanTexture::createSampler() {
   vk::SamplerCreateInfo SamplerCreateInfo{
       .magFilter = vk::Filter::eNearest,
       .minFilter = vk::Filter::eLinear,
@@ -194,7 +211,7 @@ void vk_core::VulkanTexture::createSampler() {
   };
 
   try {
-    Sampler = LogicalDevice.createSampler(SamplerCreateInfo);
+    return LogicalDevice.createSampler(SamplerCreateInfo);
   } catch (vk::SystemError &E) {
     throw std::runtime_error(std::string("Failed to create sampler ") +
                              E.what());
@@ -215,22 +232,28 @@ void vk_core::VulkanTexture::createDescriptorSet() {
                              E.what());
   }
 
-  vk::DescriptorImageInfo ImageInfo{
-      .sampler = Sampler,
-      .imageView = ImageView,
-      .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-  };
+  std::vector<vk::WriteDescriptorSet> WriteDescriptorSets;
+  uint32_t Index = 0;
+  for (const auto &Texture : Textures) {
+    vk::DescriptorImageInfo ImageInfo{
+        .sampler = Texture.Sampler,
+        .imageView = Texture.ImageView,
+        .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+    };
 
-  vk::WriteDescriptorSet WriteDescriptorSet{
-      .dstSet = DescriptorSet,
-      .dstBinding = 0,
-      .dstArrayElement = 0,
-      .descriptorCount = 1,
-      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-      .pImageInfo = &ImageInfo,
-  };
+    vk::WriteDescriptorSet WriteDescriptorSet{
+        .dstSet = DescriptorSet,
+        .dstBinding = Index++,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+        .pImageInfo = &ImageInfo,
+    };
+    WriteDescriptorSets.push_back(std::move(WriteDescriptorSet));
+  }
 
-  LogicalDevice.updateDescriptorSets(WriteDescriptorSet, nullptr);
+  LogicalDevice.updateDescriptorSets(WriteDescriptorSets.size(),
+                                     WriteDescriptorSets.data(), 0, nullptr);
 }
 
 vk::Image vk_core::VulkanTexture::createImage(
@@ -391,9 +414,9 @@ void vk_core::VulkanTexture::copyBufferToImage(
 }
 
 vk::ImageView
-vk_core::VulkanTexture::createImageView(vk::Device LogicalDevice, vk::Image Image,
-                                    vk::Format Format,
-                                    vk::ImageAspectFlags AspectFlags) {
+vk_core::VulkanTexture::createImageView(vk::Device LogicalDevice,
+                                        vk::Image Image, vk::Format Format,
+                                        vk::ImageAspectFlags AspectFlags) {
   vk::ImageViewCreateInfo ImageViewCreateInfo{
       .image = Image,
       .viewType = vk::ImageViewType::e2D,
