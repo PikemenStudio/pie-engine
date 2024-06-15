@@ -162,13 +162,13 @@ void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addObject(
 template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
-void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addTexture(
-    const std::string &TexturePath, const std::string &TextureName) {
+void GraphicEngine<WindowImpl, ShaderImpl, SceneImpl>::addTextureSet(
+    PhysicalDeviceType::PipelineType::TextureSet &&TextureSet) {
   if (NativeComponents.PhysicalDevice == nullptr) {
     LOG_F(INFO, "Physical device is null");
     throw std::runtime_error("Physical device is null");
   }
-  NativeComponents.PhysicalDevice->addTexture(TexturePath, TextureName);
+  NativeComponents.PhysicalDevice->addTextureSet(std::move(TextureSet));
 }
 
 template <

@@ -72,6 +72,9 @@ struct GraphicFacadeStructs {
   };
 
   using ObjectsData = std::map<std::string, ObjectData>;
+
+  // Name / Paths
+  using TextureSet = std::pair<std::string, std::vector<std::string>>;
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,8 +137,7 @@ concept VulkanDependenciesConcept = requires(DependencyStructT Dep) {
                       const std::string &FragmentPath,                         \
                       const std::string &Name);                                \
                                                                                \
-    void addTexture(const std::string &TexturePath,                            \
-                    const std::string &TextureName);                           \
+    void addTextureSet(GraphicFacadeStructs::TextureSet &&TextureSet);         \
                                                                                \
   protected:                                                                   \
     void *Data;                                                                \

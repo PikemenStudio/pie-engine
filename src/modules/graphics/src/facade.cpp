@@ -186,12 +186,12 @@ void GraphicApiFacadeVulkanImpl<Dep>::addShaderSet(
 }
 
 template <VulkanDependenciesConcept Dep>
-void GraphicApiFacadeVulkanImpl<Dep>::addTexture(
-    const std::string &TexturePath, const std::string &TextureName) {
+void GraphicApiFacadeVulkanImpl<Dep>::addTextureSet(
+    GraphicFacadeStructs::TextureSet &&TextureSet) {
   static_cast<
       DataTypePtr<typename Dep::WindowType, typename Dep::ShaderLoaderType,
                   typename Dep::SceneManagerType>>(Data)
-      ->addTexture(TexturePath, TextureName);
+      ->addTextureSet(std::move(TextureSet));
 }
 
 // Explicitly instantiate class

@@ -28,6 +28,9 @@ class VulkanPipeline;
 VULKAN_PHYSICAL_DEVICE_TEMPLATES
 class VulkanPhysicalDevice {
 public:
+  using PipelineType = VulkanPipeline<WindowImpl, ShaderLoaderImplT, SceneManagerImplT>;
+
+public:
   struct VkPhysicalDeviceProps;
 
   VulkanPhysicalDevice(VkPhysicalDeviceProps Props);
@@ -131,8 +134,7 @@ public:
           typename VulkanPipeline<WindowImpl, ShaderLoaderImplT,
                                   SceneManagerImplT>::PublicObjectData> &Dump,
       const std::string &DumpName);
-  void addTexture(const std::string &TexturePath,
-                  const std::string &TextureName);
+  void addTextureSet(PipelineType::TextureSet &&TextureSet);
 
 protected:
   static void swap(VulkanPhysicalDevice &Pd1, VulkanPhysicalDevice &Pd2);

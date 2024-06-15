@@ -19,6 +19,9 @@ template <
     WindowApiImpl WindowImpl, ShaderLoaderImpl ShaderImpl,
     SceneManagerImpl<scene_manager_facades::SceneManagerDependencies> SceneImpl>
 class GraphicEngine {
+  using PhysicalDeviceType =
+      VulkanPhysicalDevice<WindowImpl, ShaderImpl, SceneImpl>;
+
 public:
   struct GraphicEngineProps;
 
@@ -34,23 +37,22 @@ public:
 
     vk_core::VulkanInstance::VkInstanceProps VkInstanceProps;
     vk_core::VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                              SceneImpl>::VkPhysicalDeviceProps
+                                  SceneImpl>::VkPhysicalDeviceProps
         VkPhysicalDeviceProps;
   };
 
   void setupInstance(VulkanInstance::VkInstanceProps Props);
-  void
-  setupPhysicalDevice(
+  void setupPhysicalDevice(
       VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                                       SceneImpl>::VkPhysicalDeviceProps Props);
+                           SceneImpl>::VkPhysicalDeviceProps Props);
 
-  std::vector<typename VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                                        SceneImpl>::PhysicalDeviceLocalProps>
+  std::vector<typename VulkanPhysicalDevice<
+      WindowImpl, ShaderImpl, SceneImpl>::PhysicalDeviceLocalProps>
   getLocalPhysicalDevices() const;
 
   void chooseLocalPhysicalDevice(
       const VulkanPhysicalDevice<WindowImpl, ShaderImpl,
-                             SceneImpl>::PhysicalDeviceLocalProps &Device);
+                                 SceneImpl>::PhysicalDeviceLocalProps &Device);
 
   enum class DeviceChoosePolicy : uint_fast8_t {
     FIRST,
@@ -61,13 +63,13 @@ public:
   // in the BEST policy ONLY
   void chooseLocalPhysicalDevice(const DeviceChoosePolicy Policy);
 
-  void addObject(
-      const std::map<std::string,
-                     typename VulkanPipeline<WindowImpl, ShaderImpl,
-                                         SceneImpl>::PublicObjectData> &Dump,
-      const std::string &DumpName);
-  void addTexture(const std::string &TexturePath,
-                  const std::string &TextureName);
+  void
+  addObject(const std::map<std::string,
+                           typename VulkanPipeline<WindowImpl, ShaderImpl,
+                                                   SceneImpl>::PublicObjectData>
+                &Dump,
+            const std::string &DumpName);
+  void addTextureSet(PhysicalDeviceType::PipelineType::TextureSet &&TextureSet);
 
   void addShaderSet(const std::string &VertexPath,
                     const std::string &FragmentPath, const std::string &Name);

@@ -87,8 +87,9 @@ public:
   void addObjectData(
       const std::map<std::string, VulkanPipeline::PublicObjectData> &Dump,
       const std::string &DumpName);
-  void addTexture(const std::string &TexturePath,
-                  const std::string &TextureName);
+
+  using TextureSet = std::pair<std::string, std::vector<std::string>>;
+  void addTextureSet(TextureSet &&TextureSet);
 
   void addShaderSet(const std::string &VertexPath,
                     const std::string &FragmentPath, const std::string &Name);

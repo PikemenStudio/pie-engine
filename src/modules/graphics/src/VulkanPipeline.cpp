@@ -766,11 +766,19 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
       .stageFlags = vk::ShaderStageFlagBits::eFragment,
   };
 
-  std::vector<vk::DescriptorSetLayoutBinding> Bindings1 = {LayoutBinding1};
+  vk::DescriptorSetLayoutBinding LayoutBinding2{
+      .binding = 1,
+      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+      .descriptorCount = 1,
+      .stageFlags = vk::ShaderStageFlagBits::eFragment,
+  };
+
+  std::vector<vk::DescriptorSetLayoutBinding> Bindings1 = {LayoutBinding1,
+                                                           LayoutBinding2};
 
   vk::DescriptorSetLayoutCreateInfo CreateInfo1{
       .flags = vk::DescriptorSetLayoutCreateFlags(),
-      .bindingCount = 1,
+      .bindingCount = 2,
       .pBindings = Bindings1.data(),
   };
 
@@ -1661,13 +1669,15 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareScene(
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
-void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addTexture(
-    const std::string &TexturePath, const std::string &TextureName) {
+void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addTextureSet(
+    TextureSet &&Set) {
   DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
-      .Count = 1,
-      .Types = {vk::DescriptorType::eCombinedImageSampler},
+      .Count = static_cast<int>(Set.second.size()),
+      .Types = {vk::DescriptorType::eCombinedImageSampler,
+                vk::DescriptorType::eCombinedImageSampler},
   };
-  MeshPool = createDescriptorPool(1, DescriptorSetLayoutInput);
+  MeshPool = createDescriptorPool(2, DescriptorSetLayoutInput);
+
   VulkanTexture::TextureInputChunk TextureInput{
       .LogicalDevice =
           static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice),
@@ -1677,9 +1687,9 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::addTexture(
       .Queue = *this->NativeComponents.GraphicsQueue,
       .DescriptorSetLayout = this->MeshSetLayout,
       .DescriptorPool = this->MeshPool,
-      .FileNames = { TexturePath },
+      .FileNames = std::move(Set.second),
   };
-  this->Textures[TextureName] = new VulkanTexture(TextureInput);
+  this->Textures[Set.first] = new VulkanTexture(TextureInput);
 }
 
 PIPELINE_TEMPLATES_NO_SPEC

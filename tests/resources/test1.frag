@@ -7,6 +7,7 @@ layout(location = 2) in vec3 fragNormal;
 layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform sampler2D material;
+layout(set = 1, binding = 1) uniform sampler2D material1;
 
 const vec4 sunColor = vec4(3.0);
 const vec3 sunDirection = normalize(vec3(1.0, 1.0, -1.0));

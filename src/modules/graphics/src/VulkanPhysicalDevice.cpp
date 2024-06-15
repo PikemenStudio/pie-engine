@@ -350,13 +350,13 @@ void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addObjectData(
 }
 
 VULKAN_PHYSICAL_DEVICE_TEMPLATES
-void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addTexture(
-    const std::string &TexturePath, const std::string &TextureName) {
+void VulkanPhysicalDevice<PHYSICAL_DEVICE_ALL_DEPS>::addTextureSet(
+    PipelineType::TextureSet &&TextureSet) {
   if (this->Pipeline == nullptr) {
     LOG_F(ERROR, "Pipeline is not initialized");
     throw std::runtime_error("Pipeline is not initialized");
   }
-  this->Pipeline->addTexture(TexturePath, TextureName);
+  this->Pipeline->addTextureSet(std::move(TextureSet));
 }
 
 template class vk_core::VulkanPhysicalDevice<
