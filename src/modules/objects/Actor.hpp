@@ -22,6 +22,8 @@ public:
 
   glm::mat4 calculateTransformation() override;
 
+  void update() override;
+
 protected:
   std::vector<float> Vertexes, Normals, Colors;
   std::vector<float> TextureCoords;

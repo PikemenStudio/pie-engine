@@ -68,6 +68,8 @@ public:
 
   virtual glm::mat4 calculateTransformation() = 0;
 
+  virtual void update() = 0;
+
 protected:
   std::string Name;
   std::string TextureName;

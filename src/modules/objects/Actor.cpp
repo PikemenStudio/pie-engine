@@ -116,6 +116,10 @@ glm::mat4 Actor::calculateTransformation() {
   glm::mat4 Result = glm::mat4(1.0f);
   Result *= Rotation;
   Result *= glm::translate(Result, this->Position);
-  // Result = Result * glm::scale(Result, this->Scale);
+  Result = Result * glm::scale(Result, this->Scale);
   return Result;
+}
+
+void Actor::update() {
+  // Do nothing
 }
