@@ -125,6 +125,10 @@ protected:
     vk::Buffer ModelBuffer;
     vk::DeviceMemory ModelMemory;
     void *ModelDataWriteLocation;
+    vk::Buffer LightBuffer;
+    vk::DeviceMemory LightMemory;
+    void *LightDataWriteLocation;
+    vk::DescriptorBufferInfo LightBufferDescriptor;
   };
 
   struct SwapChainBundleStruct {
@@ -237,6 +241,9 @@ protected:
     std::vector<vk::ShaderStageFlags> Stages;
   };
 
+  constexpr static size_t MaxModelsPerRender = 1000;
+  constexpr static size_t MaxUniformPointLights = 10;
+
 protected:
 protected:
   // SwapChain
@@ -294,7 +301,7 @@ protected:
   void prepareScene(vk::CommandBuffer CommandBuffer, MeshDump &DumpIndex);
   void prepareFrame(uint32_t ImageIndex);
 
-  void createDescriptorBuffer(SwapChainFrameStruct &Frame, size_t ModelsNumber);
+  void createDescriptorBuffer(SwapChainFrameStruct &Frame);
   void initUi();
 
   vk::Format findSupportedFormat(const std::vector<vk::Format> &Candidates,

@@ -173,10 +173,25 @@ public:
     return std::unique_ptr<BaseIterator>((BaseIterator *)new Iterator(this));
   }
 
+  void addPointLight(std::shared_ptr<PointLight> Light) {
+    PointLights[Light->getProps().Name] = Light;
+  }
+  std::shared_ptr<PointLight> getPointLight(std::string Name) {
+    return PointLights[Name];
+  }
+  std::vector<std::shared_ptr<PointLight>> getPointLights() {
+    std::vector<std::shared_ptr<PointLight>> Result;
+    for (auto &[Name, Light] : PointLights) {
+      Result.push_back(Light);
+    }
+    return Result;
+  }
+
 protected:
   std::map<std::string, MultiDumpObjects> MultiShaderSetObjects;
 
   std::map<std::string, MultiTypeObjects>::iterator ObjectGetterIt;
+  std::map<std::string, std::shared_ptr<PointLight>> PointLights;
   glm::vec3 From = {0.0f, 10.0f, -10.0f};
   glm::vec3 To = {0.0f, 0.0f, 0.0f};
 };

@@ -9,6 +9,7 @@
 #include "Square.hpp"
 #include "Triangle.hpp"
 #include "Actor.hpp"
+#include "PointLight.hpp"
 #include <map>
 
 struct ObjectData {

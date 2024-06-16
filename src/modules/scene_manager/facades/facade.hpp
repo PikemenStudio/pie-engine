@@ -106,6 +106,10 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     std::shared_ptr<BaseObject> getObjectByName(const std::string &Name);      \
                                                                                \
+    void addPointLight(std::shared_ptr<PointLight> Light);                     \
+    std::shared_ptr<PointLight> getPointLight(std::string Name);               \
+    std::vector<std::shared_ptr<PointLight>> getPointLights();                 \
+                                                                               \
   protected:                                                                   \
     void *Data;                                                                \
   };

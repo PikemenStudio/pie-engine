@@ -34,12 +34,14 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::VulkanPipeline(
 
   initWindowSurface();
   createSwapChain();
-  createDescriptorSetLayouts({.Count = 2,
-                              .Indexes = {0, 1},
+  createDescriptorSetLayouts({.Count = 3,
+                              .Indexes = {0, 1, 2},
                               .Types = {vk::DescriptorType::eUniformBuffer,
-                                        vk::DescriptorType::eStorageBuffer},
-                              .Counts = {1, 1},
+                                        vk::DescriptorType::eStorageBuffer,
+                                        vk::DescriptorType::eUniformBuffer},
+                              .Counts = {1, 1, 1},
                               .Stages = {vk::ShaderStageFlagBits::eVertex,
+                                         vk::ShaderStageFlagBits::eVertex,
                                          vk::ShaderStageFlagBits::eVertex}});
   this->PipelineBundles["default"] = createPipeline(
       {.VertexShaderPath = "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
@@ -564,6 +566,13 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::destroySwapChain() {
         .destroyBuffer(Frame.ModelBuffer);
 
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .unmapMemory(Frame.LightMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .freeMemory(Frame.LightMemory);
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+        .destroyBuffer(Frame.LightBuffer);
+
+    static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .destroyImage(Frame.DepthBuffer);
     static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
         .freeMemory(Frame.DepthBufferMemory);
@@ -764,14 +773,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorSetLayouts(
         std::string("Failed to create descriptor set layout ") + E.what());
   }
 
-  LayoutStruct.Count = 1;
-  LayoutStruct.Indexes[0] = 0;
-  LayoutStruct.Types[0] = vk::DescriptorType::eCombinedImageSampler;
-  LayoutStruct.Counts[0] = 1;
-  LayoutStruct.Stages[0] = vk::ShaderStageFlagBits::eFragment;
-
   std::vector<vk::DescriptorSetLayoutBinding> Bindings1;
-  for (int I = 0; I < 3; ++I) {
+  for (int I = 0; I < 2; ++I) {
     vk::DescriptorSetLayoutBinding LayoutBinding1{
         .binding = static_cast<uint32_t>(I),
         .descriptorType = vk::DescriptorType::eCombinedImageSampler,
@@ -850,6 +853,17 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::writeDescriptorSet(
   };
   static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
       .updateDescriptorSets(WriteDescriptorSet1, nullptr);
+
+  vk::WriteDescriptorSet WriteDescriptorSet2{
+      .dstSet = Frame.DescriptorSet,
+      .dstBinding = 2,
+      .dstArrayElement = 0,
+      .descriptorCount = 1,
+      .descriptorType = vk::DescriptorType::eUniformBuffer,
+      .pBufferInfo = &Frame.LightBufferDescriptor,
+  };
+  static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+      .updateDescriptorSets(WriteDescriptorSet2, nullptr);
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
@@ -1153,9 +1167,10 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFences() {
                                           vk::FenceCreateFlagBits::eSignaled};
 
   DescriptorSetLayoutInputStruct DescriptorSetLayoutInput{
-      .Count = 2,
+      .Count = 3,
       .Types = {vk::DescriptorType::eUniformBuffer,
-                vk::DescriptorType::eStorageBuffer},
+                vk::DescriptorType::eStorageBuffer,
+                vk::DescriptorType::eUniformBuffer},
   };
   FramePool = createDescriptorPool(this->SwapChainBundle->Frames.size(),
                                    DescriptorSetLayoutInput);
@@ -1170,7 +1185,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createFences() {
                                E.what());
     }
 
-    createDescriptorBuffer(Frame, 8192);
+    createDescriptorBuffer(Frame);
   }
 }
 
@@ -1741,6 +1756,18 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareFrame(
   std::memcpy(Frame.CameraDataWriteLocation, &CameraData,
               sizeof(SceneManagerFacadeStructs::CameraData));
 
+  auto LightData = this->NativeComponents.Facades->SceneManager->ImplInstance
+                       .getPointLights();
+  std::vector<PointLight::PointLightProps> Lights;
+  for (std::shared_ptr<PointLight> Light : LightData) {
+    Lights.push_back(Light->getProps());
+  }
+  for (int I = Lights.size(); I < MaxUniformPointLights; ++I) {
+    Lights.push_back(PointLight::PointLightProps());
+  }
+  std::memcpy(Frame.LightDataWriteLocation, Lights.data(),
+              sizeof(PointLight::PointLightProps));
+
   std::vector<glm::mat4> Transformations =
       this->NativeComponents.Facades->SceneManager->ImplInstance
           .getTransformations();
@@ -1756,7 +1783,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::prepareFrame(
 
 PIPELINE_TEMPLATES_NO_SPEC
 void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorBuffer(
-    SwapChainFrameStruct &Frame, size_t ModelsNumber) {
+    SwapChainFrameStruct &Frame) {
   BufferInput BufferInputInstance{
       .Size = sizeof(SceneManagerFacadeStructs::CameraData),
       .Usage = vk::BufferUsageFlagBits::eUniformBuffer,
@@ -1777,7 +1804,25 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorBuffer(
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .mapMemory(Frame.CameraMemory, 0, BufferInputInstance.Size);
 
-  BufferInputInstance.Size = ModelsNumber * sizeof(glm::mat4);
+  BufferInputInstance.Size =
+      MaxUniformPointLights * sizeof(PointLight::PointLightProps);
+  BufferInputInstance.Usage = vk::BufferUsageFlagBits::eUniformBuffer;
+
+  MeshDump LightData{
+      .Buffer = nullptr,
+      .Memory = nullptr,
+      .Meshes = {},
+      .DataCache = {},
+  };
+  createBuffer(BufferInputInstance, LightData);
+
+  Frame.LightBuffer = LightData.Buffer;
+  Frame.LightMemory = LightData.Memory;
+  Frame.LightDataWriteLocation =
+      static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
+          .mapMemory(Frame.LightMemory, 0, BufferInputInstance.Size);
+
+  BufferInputInstance.Size = MaxModelsPerRender * sizeof(glm::mat4);
   BufferInputInstance.Usage = vk::BufferUsageFlagBits::eStorageBuffer;
 
   MeshDump UniformBuffer{
@@ -1794,9 +1839,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorBuffer(
       static_cast<vk::Device &>(*this->NativeComponents.PhysicalDevice)
           .mapMemory(Frame.ModelMemory, 0, BufferInputInstance.Size);
 
-  Frame.ModelTransforms.reserve(ModelsNumber);
-  for (int I = 0; I < ModelsNumber; ++I) {
-    Frame.ModelTransforms.push_back(glm::mat4(1.0f));
+  Frame.ModelTransforms.reserve(MaxModelsPerRender);
+  for (int I = 0; I < MaxModelsPerRender; ++I) {
     Frame.ModelTransforms.push_back(glm::mat4(1.0f));
   }
 
@@ -1805,9 +1849,14 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::createDescriptorBuffer(
   Frame.UniformBufferDescriptor.range =
       sizeof(SceneManagerFacadeStructs::CameraData);
 
+  Frame.LightBufferDescriptor.buffer = Frame.LightBuffer;
+  Frame.LightBufferDescriptor.offset = 0;
+  Frame.LightBufferDescriptor.range =
+      MaxUniformPointLights * sizeof(PointLight::PointLightProps);
+
   Frame.ModelBufferDescriptor.buffer = Frame.ModelBuffer;
   Frame.ModelBufferDescriptor.offset = 0;
-  Frame.ModelBufferDescriptor.range = ModelsNumber * sizeof(glm::mat4);
+  Frame.ModelBufferDescriptor.range = MaxModelsPerRender * sizeof(glm::mat4);
 
   allocateDescriptorSet(Frame);
 }

@@ -3,8 +3,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 # source files
-set(SOURCE_ALL Triangle.cpp Square.cpp Actor.cpp)
-set(HEADER_ALL AllObjects.hpp BaseObject.hpp Triangle.hpp Square.hpp Actor.hpp)
+set(SOURCE_ALL Triangle.cpp Square.cpp Actor.cpp PointLight.cpp)
+set(HEADER_ALL AllObjects.hpp BaseObject.hpp Triangle.hpp Square.hpp Actor.hpp PointLight.hpp)
 
 find_package(loguru CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)

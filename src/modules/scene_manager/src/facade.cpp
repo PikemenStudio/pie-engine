@@ -50,8 +50,8 @@ scene_manager_facades::SceneManagerBaseImpl<Dep>::getCamera(
 }
 
 template <SceneManagerDependenciesConcept Dep>
-void scene_manager_facades::SceneManagerBaseImpl<Dep>::setCamera(
-    glm::vec3 From, glm::vec3 To) {
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::setCamera(glm::vec3 From,
+                                                                 glm::vec3 To) {
   static_cast<SceneManager *>(Data)->setCamera(From, To);
 }
 
@@ -66,6 +66,25 @@ std::shared_ptr<BaseObject>
 scene_manager_facades::SceneManagerBaseImpl<Dep>::getObjectByName(
     const std::string &Name) {
   return static_cast<SceneManager *>(Data)->getObjectByName(Name);
+}
+
+template <SceneManagerDependenciesConcept Dep>
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::addPointLight(
+    std::shared_ptr<PointLight> Light) {
+  static_cast<SceneManager *>(Data)->addPointLight(Light);
+}
+
+template <SceneManagerDependenciesConcept Dep>
+std::shared_ptr<PointLight>
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getPointLight(
+    std::string Name) {
+  return static_cast<SceneManager *>(Data)->getPointLight(Name);
+}
+
+template <SceneManagerDependenciesConcept Dep>
+std::vector<std::shared_ptr<PointLight>>
+scene_manager_facades::SceneManagerBaseImpl<Dep>::getPointLights() {
+  return static_cast<SceneManager *>(Data)->getPointLights();
 }
 
 template class scene_manager_facades::SceneManagerBaseImpl<
