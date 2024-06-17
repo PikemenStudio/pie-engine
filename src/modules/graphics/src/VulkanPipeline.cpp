@@ -1312,7 +1312,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
     ShaderSetName = Iterator->getCurrentShaderSetName();
     CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                                this->PipelineBundles[ShaderSetName].Pipeline);
-    Offset += drawObjects(Objects, CommandBuffer, Offset, ShaderSetName);
+    Offset = drawObjects(Objects, CommandBuffer, Offset, ShaderSetName);
 
     Iterator->switchToNextType();
   }
@@ -1376,11 +1376,12 @@ size_t vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
         CommandBuffer, this->PipelineBundles[ShaderSetName].Layout);
     CommandBuffer.drawIndexed(
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].IndexCount,
-        Objects[TextureName].size(),
+        ObjectsSet.size(),
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].FirstIndex, 0, Offset);
+    Offset += ObjectsSet.size();
   }
 
-  return Objects.size();
+  return Offset;
 }
 
 PIPELINE_TEMPLATES_NO_SPEC

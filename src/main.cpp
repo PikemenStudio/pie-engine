@@ -69,7 +69,7 @@ auto addObjects() {
         }
         else {
           Object->setTextureName("Texture");
-          Object->setDumpName("TS1");
+          Object->setDumpName("TS");
         }
         Object->setShaderSetName("default");
         Object->moveBy({2 * Width, 2 * Depth, 2 * Height});
