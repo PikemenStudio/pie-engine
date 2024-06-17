@@ -76,7 +76,13 @@ public:
   public:
     Iterator(SceneManager *Manager) : Manager(Manager) {
       MultipleDumpObjectsIt = Manager->MultiShaderSetObjects.begin();
+      if (MultipleDumpObjectsIt == Manager->MultiShaderSetObjects.end()) {
+        return;
+      }
       MultipleTypeObjectsIt = MultipleDumpObjectsIt->second.begin();
+      if (MultipleTypeObjectsIt == MultipleDumpObjectsIt->second.end()) {
+        return;
+      }
       TypeObjectsIt = MultipleTypeObjectsIt->second.begin();
     }
 
@@ -138,6 +144,10 @@ public:
     }
 
     virtual std::string getCurrentShaderSetName() override {
+      // Check if MultipleDumpObjectsIt is end of map
+      if (MultipleDumpObjectsIt == Manager->MultiShaderSetObjects.end()) {
+        return "default";
+      }
       return MultipleDumpObjectsIt->first;
     }
 
@@ -185,6 +195,51 @@ public:
       Result.push_back(Light);
     }
     return Result;
+  }
+
+  void checkObjects() {
+    while (!checkObjectsOneIteration()) {
+    }
+  }
+  bool checkObjectsOneIteration() {
+    for (auto &[ShaderSetName, Objects] : MultiShaderSetObjects) {
+      if (Objects.empty()) {
+        MultiShaderSetObjects.erase(ShaderSetName);
+        return false;
+      }
+      for (auto &[DumpName, MultiTypeObjects] : Objects) {
+        if (MultiTypeObjects.empty()) {
+          Objects.erase(DumpName);
+          return false;
+        }
+        for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+          if (OneTypeObjects.empty()) {
+            MultiTypeObjects.erase(Type);
+            return false;
+          }
+          for (auto &[TextureName, OneTextureObjects] : OneTypeObjects) {
+            if (OneTextureObjects.empty()) {
+              OneTypeObjects.erase(TextureName);
+              return false;
+            }
+            for (auto Object : OneTextureObjects) {
+              if (TextureName != Object->getTextureName()) {
+                // Move object to other texture set
+                std::string NewTextureName = Object->getTextureName();
+                Object->setTextureName(TextureName);
+                removeObject(Object->getName());
+
+                Object->setTextureName(NewTextureName);
+                addObject(Object);
+                return false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return true;
   }
 
 protected:

@@ -58,19 +58,21 @@ auto addObjects() {
   std::vector<std::vector<bool>> TetrisScene{};
   for (size_t Width = 0; Width < 1; ++Width) {
     for (size_t Height = 0; Height < 1; ++Height) {
-      for (size_t Depth = 0; Depth < 1; ++Depth) {
+      for (size_t Depth = 0; Depth < 2; ++Depth) {
         std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
             new Actor("/Users/fullhat/Documents/chess.obj"));
         Object->setName(std::string("Actor") + std::to_string(Width) +
                         std::to_string(Height) + std::to_string(Depth));
-        Object->setTextureName("Texture");
-        Object->setDumpName("TS");
-        if (Height == 0) {
-          Object->setShaderSetName("default");
-        } else {
-          Object->setShaderSetName("default");
+        if (Depth == 0) {
+          Object->setTextureName("Texture");
+          Object->setDumpName("TS");
         }
-        Object->moveBy({4 * Width, 4 * Depth, 4 * Height});
+        else {
+          Object->setTextureName("Texture");
+          Object->setDumpName("TS1");
+        }
+        Object->setShaderSetName("default");
+        Object->moveBy({2 * Width, 2 * Depth, 2 * Height});
         Objects.push_back(Object);
       }
     }
@@ -81,14 +83,17 @@ auto addObjects() {
 void moveObject() {
   while (true) {
     static uint64_t I = 0.0f;
-//    Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
+    //    Obj->rotateBy({0.0f, 1.0f, 0.0f}, (float)I / 10000);
     I += 1;
 
     auto Camera = SceneManagerInstance1->ImplInstance.getCamera({0.0f, 0.0f});
 
     // Move camera in circle
-    auto NewCameraPosition = glm::vec3(10.0f * std::cos(I / 1000000.0f), 10.0f * std::sin(I / 1000000.0f), std::abs(10.0f * std::sin(I / 10000000.0f)));
-    SceneManagerInstance1->ImplInstance.setCamera(NewCameraPosition, {0.0f, 0.0f, 0.0f});
+    auto NewCameraPosition = glm::vec3(
+        10.0f * std::cos(I / 1000000.0f), 10.0f * std::sin(I / 1000000.0f),
+        std::abs(10.0f * std::sin(I / 10000000.0f)));
+    SceneManagerInstance1->ImplInstance.setCamera(NewCameraPosition,
+                                                  {0.0f, 0.0f, 0.0f});
   }
 }
 
@@ -194,21 +199,27 @@ public:
         .Normals = A->getNormals(),
     };
     GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
-    //GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData1, "TS1");
+    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData1, "TS1");
 
     GraphicAdapterInstance->ImplInstance.addTextureSet(
         {"Texture",
          {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
           "sources/wood.jpg",
           "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/wood.jpg"}});
+    GraphicAdapterInstance->ImplInstance.addTextureSet(
+        {"Texture1",
+         {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/texture.jpg",
+          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
           "sources/texture.jpg"}});
 
-//    GraphicAdapterInstance->ImplInstance.addShaderSet(
-//        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
-//        "resources/test1.vert",
-//        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
-//        "resources/test1.frag",
-//        "a");
+    //    GraphicAdapterInstance->ImplInstance.addShaderSet(
+    //        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+    //        "resources/test1.vert",
+    //        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
+    //        "resources/test1.frag",
+    //        "a");
 
     InputManager::NativeType =
         (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType();

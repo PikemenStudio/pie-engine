@@ -66,6 +66,43 @@ vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::VulkanPipeline(
         .Rotation = Object->getRotation(),
         .Scale = Object->getScale(),
     });
+
+    // Set current Texture
+    for (int I = 0; I < UI::Textures.size(); ++I) {
+      if (Object->getTextureName() == UI::Textures[I]) {
+        UI::CurrentTextureIndex = I;
+        break;
+      };
+    }
+  };
+  UI::TextureUpdated = [&]() {
+    auto Object =
+        NativeComponents.Facades->SceneManager->ImplInstance.getObjectByName(
+            UI::CurrentObjectName);
+    Object->setTextureName(UI::Textures[UI::CurrentTextureIndex]);
+
+    // Update scene
+    NativeComponents.Facades->SceneManager->ImplInstance.checkObjects();
+  };
+  UI::ObjectNameUpdated = [&](std::string PrName, std::string NewName) {
+    auto Object =
+        NativeComponents.Facades->SceneManager->ImplInstance.getObjectByName(
+            PrName);
+    Object->setName(NewName);
+
+    // Update scene
+    NativeComponents.Facades->SceneManager->ImplInstance.checkObjects();
+  };
+
+  UI::DeleteObject = [&]() {
+    NativeComponents.Facades->SceneManager->ImplInstance.removeObject(
+        UI::CurrentObjectName);
+    NativeComponents.Facades->SceneManager->ImplInstance.checkObjects();
+    UI::CurrentObjectName = "";
+  };
+
+  UI::CreationObject = [&](std::shared_ptr<BaseObject> Object) {
+    NativeComponents.Facades->SceneManager->ImplInstance.addObject(Object);
   };
 }
 
@@ -1239,14 +1276,27 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
 
   UI::Objects.clear();
 
+  // Get object creation
+  UI::ObjectTypes.clear();
+
+  UI::AllTextures.clear();
+  for (auto &Texture : Textures) {
+    UI::AllTextures.push_back(Texture.first);
+  }
+
+  UI::ShaderSetsNames.clear();
+  for (auto &ShaderSet : PipelineBundles) {
+    UI::ShaderSetsNames.push_back(ShaderSet.first);
+  }
+
   uint32_t Offset = 0;
   while (true) {
     if (Iterator->hasNoMoreObjects()) {
-      // Try to switch to next ShaderSet
-      ShaderSetName = Iterator->switchToNextShaderSet();
+      // Try to switch to next dump
+      Iterator->switchToNextDump();
       if (Iterator->hasNoMoreObjects()) {
-        // Try to switch to next dump
-        Iterator->switchToNextDump();
+        // Try to switch to next ShaderSet
+        ShaderSetName = Iterator->switchToNextShaderSet();
         if (Iterator->hasNoMoreObjects()) {
           // Try to switch to next type
           break;
@@ -1262,8 +1312,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
     ShaderSetName = Iterator->getCurrentShaderSetName();
     CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                                this->PipelineBundles[ShaderSetName].Pipeline);
-    drawObjects(Objects, CommandBuffer, Offset, ShaderSetName);
-    Offset += Objects.size() * 2;
+    Offset += drawObjects(Objects, CommandBuffer, Offset, ShaderSetName);
 
     Iterator->switchToNextType();
   }
@@ -1296,10 +1345,16 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
     Object->moveBy(UIData->Position);
     Object->scaleBy(UIData->Scale);
   }
+
+  // Get textures
+  UI::Textures.clear();
+  for (auto &[TextureName, Texture] : this->Textures) {
+    UI::Textures.push_back(TextureName);
+  }
 }
 
 PIPELINE_TEMPLATES_NO_SPEC
-void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
+size_t vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     SceneManagerFacadeStructs::OneTypeObjects Objects,
     vk::CommandBuffer CommandBuffer, uint32_t Offset,
     std::string ShaderSetName) {
@@ -1315,6 +1370,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     BaseObject::ObjectTypes Type = ObjectsSet[0]->getType();
     std::string TypeName = BaseObject::toString(Type);
 
+    UI::ObjectTypes.push_back(TypeName);
+
     this->Textures[TextureName]->use(
         CommandBuffer, this->PipelineBundles[ShaderSetName].Layout);
     CommandBuffer.drawIndexed(
@@ -1322,6 +1379,8 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
         Objects[TextureName].size(),
         this->MeshTypes.Dumps[DumpName].Meshes[TypeName].FirstIndex, 0, Offset);
   }
+
+  return Objects.size();
 }
 
 PIPELINE_TEMPLATES_NO_SPEC

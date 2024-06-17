@@ -20,6 +20,7 @@ void UI::draw(uint32_t width, uint32_t height) {
   if (CurrentObjectName != "") {
     drawObjectModification();
   }
+  drawObjectCreationWindow();
 
   //  bool ShowDialog = true;
   //
@@ -119,7 +120,8 @@ void UI::drawObjectModification() {
       ImVec2(0, height - 300)); // Set the position of the new window
   ImGui::Begin("Object Modification", nullptr, ImGuiWindowFlags_NoResize);
 
-  char objectName[128] = "Object Name";
+  char objectName[128];
+  std::strcpy(objectName, CurrentObjectName.c_str());
   float rotation[3] = {
       ObjectModification.Rotation.x,
       ObjectModification.Rotation.y,
@@ -137,11 +139,14 @@ void UI::drawObjectModification() {
       ObjectModification.Scale.y,
       ObjectModification.Scale.z,
   };
-  std::vector<std::string> textures = {"BlueMiddleSoft", "Red", "Texture3"};
-  int currentTexture = 0;
+  std::vector<std::string> textures = Textures;
 
   // Input field for object name
   ImGui::InputText("Object Name", objectName, IM_ARRAYSIZE(objectName));
+  if (objectName != CurrentObjectName && std::strcmp(objectName, "") != 0) {
+    ObjectNameUpdated(CurrentObjectName, objectName);
+    CurrentObjectName = objectName;
+  }
 
   // Input field for rotation
   ImGui::InputFloat3("Rotation", rotation);
@@ -158,11 +163,13 @@ void UI::drawObjectModification() {
   ObjectModification.Scale = glm::vec3(scale[0], scale[1], scale[2]);
 
   // Dropdown list for selecting texture
-  if (ImGui::BeginCombo("Texture", textures[currentTexture].c_str())) {
+  if (ImGui::BeginCombo("Texture", textures[CurrentTextureIndex].c_str())) {
     for (int n = 0; n < textures.size(); n++) {
-      bool is_selected = (currentTexture == n);
-      if (ImGui::Selectable(textures[n].c_str(), is_selected))
-        currentTexture = n;
+      bool is_selected = (CurrentTextureIndex == n);
+      if (ImGui::Selectable(textures[n].c_str(), is_selected)) {
+        CurrentTextureIndex = n;
+        TextureUpdated();
+      }
       if (is_selected)
         ImGui::SetItemDefaultFocus();
     }
@@ -172,6 +179,7 @@ void UI::drawObjectModification() {
   // Button for deleting object
   if (ImGui::Button("Delete Object")) {
     // Handle delete object action
+    DeleteObject();
   }
 
   ImGui::End();
@@ -186,4 +194,73 @@ UI::OptionalObjectModificationType UI::getCurrentObjectModification() {
 void UI::setCurrentObjectModification(
     UI::ObjectModificationType NewObjectModification) {
   ObjectModification = NewObjectModification;
+}
+void UI::drawObjectCreationWindow() {
+  ImGui::SetNextWindowSize(ImVec2(350, 300));
+  ImGui::SetNextWindowPos(
+      ImVec2(width - 350, height - 300)); // Set the position of the new window
+  ImGui::Begin("Object Creation", nullptr, ImGuiWindowFlags_NoResize);
+
+  if (ImGui::BeginCombo("Type", ObjectTypes[CreationObjectTypeIndex].c_str())) {
+    for (int n = 0; n < ObjectTypes.size(); n++) {
+      bool is_selected = (CreationObjectTypeIndex == n);
+      if (ImGui::Selectable(ObjectTypes[n].c_str(), is_selected)) {
+        CreationObjectTypeIndex = n;
+      }
+      if (is_selected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  if (ImGui::BeginCombo("Texture",
+                        AllTextures[CreationObjectTextureIndex].c_str())) {
+    for (int n = 0; n < AllTextures.size(); n++) {
+      bool is_selected = (CreationObjectTextureIndex == n);
+      if (ImGui::Selectable(AllTextures[n].c_str(), is_selected)) {
+        CreationObjectTextureIndex = n;
+      }
+      if (is_selected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  char objectName[128];
+  std::strcpy(objectName, CreationObjectName.c_str());
+  ImGui::InputText("Object Name", objectName, IM_ARRAYSIZE(objectName));
+  if (std::strcmp(CreationObjectName.c_str(), objectName) != 0) {
+    CreationObjectName = objectName;
+  }
+
+  std::strcpy(objectName, FilePath.c_str());
+  ImGui::InputText("Object Path", objectName, IM_ARRAYSIZE(objectName));
+  if (std::strcmp(FilePath.c_str(), objectName) != 0) {
+    FilePath = objectName;
+  }
+
+  if (ImGui::BeginCombo("Shader Set",
+                        ShaderSetsNames[CreationObjectShaderSetIndex].c_str())) {
+    for (int n = 0; n < ShaderSetsNames.size(); n++) {
+      bool is_selected = (CreationObjectShaderSetIndex == n);
+      if (ImGui::Selectable(ShaderSetsNames[n].c_str(), is_selected)) {
+        CreationObjectShaderSetIndex = n;
+      }
+      if (is_selected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  if (ImGui::Button("Create Object")) {
+    std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
+        new Actor("/Users/fullhat/Documents/chess.obj"));
+    Object->setName(CreationObjectName);
+    Object->setTextureName(AllTextures[CreationObjectTextureIndex]);
+    Object->setDumpName("TS");
+    Object->setShaderSetName(ShaderSetsNames[CreationObjectShaderSetIndex]);
+    CreationObject(Object);
+  }
+
+  ImGui::End();
 }

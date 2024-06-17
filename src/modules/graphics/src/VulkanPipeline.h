@@ -285,7 +285,7 @@ protected:
   getAttributeDescriptions() const;
 
   void recordDrawCommands(vk::CommandBuffer CommandBuffer, uint32_t ImageIndex);
-  void drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
+  size_t drawObjects(SceneManagerFacadeStructs::OneTypeObjects Objects,
                    vk::CommandBuffer CommandBuffer, uint32_t Offset,
                    std::string ShaderSetName);
 
