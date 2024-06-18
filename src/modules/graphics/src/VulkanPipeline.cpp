@@ -1249,6 +1249,7 @@ void vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::recordDrawCommands(
 
   auto *SceneManager =
       &this->NativeComponents.Facades->SceneManager->ImplInstance;
+  SceneManager->updateObjects();
   std::unique_ptr<BaseIterator> Iterator = SceneManager->begin();
 
   std::string ShaderSetName = "default";
@@ -1367,8 +1368,7 @@ size_t vk_core::VulkanPipeline<PIPELINE_ALL_DEPS>::drawObjects(
     std::string DumpName = ObjectsSet[0]->getDumpName();
     prepareScene(CommandBuffer, MeshTypes.Dumps[DumpName]);
 
-    BaseObject::ObjectTypes Type = ObjectsSet[0]->getType();
-    std::string TypeName = BaseObject::toString(Type);
+    std::string TypeName = ObjectsSet[0]->getType();
 
     UI::ObjectTypes.push_back(TypeName);
 

@@ -20,7 +20,7 @@ struct LightSource {
 };
 
 layout(set = 0, binding = 2) uniform LightSourceUBO {
-    LightSource lights[1];
+    LightSource lights[2];
 } light;
 
 layout(location = 0) in vec3 inPosition;
@@ -40,7 +40,7 @@ void calculate_position(vec4 model) {
 vec3 calculate_point_light(vec4 model) {
     vec3 result_light_color = vec3(0.0);
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 2; i++) {
         vec3 direction_to_light = light.lights[0].position.xyz - model.xyz;
 
         vec3 light_color = light.lights[i].color.xyz * (1.0 / dot(direction_to_light, direction_to_light));

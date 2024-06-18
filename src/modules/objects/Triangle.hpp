@@ -14,7 +14,7 @@ public:
   ~Triangle() = default;
 
   std::vector<float> getVertices() override;
-  ObjectTypes getType() override;
+  std::string getType() override;
 
   glm::mat4 calculateTransformation() override;
 

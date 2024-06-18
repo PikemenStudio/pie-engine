@@ -24,6 +24,7 @@ public:
     TRIANGLE,
     SQUARE,
     ACTOR,
+    Light,
   };
 
   static std::string toString(ObjectTypes Type) {
@@ -34,16 +35,19 @@ public:
       return "Square";
     case ObjectTypes::ACTOR:
       return "Actor";
+    case ObjectTypes::Light:
+      return "Light";
     }
   }
 
   // Object data
-  virtual ObjectTypes getType() = 0;
+  virtual std::string getType() { return Type; }
   virtual std::string getDumpName() { return DumpName; }
   virtual std::string getName() { return Name; }
   virtual std::string getTextureName() { return TextureName; }
   virtual std::string getShaderSetName() { return ShaderSetName; }
 
+  virtual void setType(std::string NewType) { this->Type = NewType; }
   virtual void setName(std::string NewName) { this->Name = NewName; }
   virtual void setTextureName(std::string NewTextureName) {
     this->TextureName = NewTextureName;
@@ -80,6 +84,7 @@ public:
   virtual void update() = 0;
 
 protected:
+  std::string Type;
   std::string Name;
   std::string TextureName;
   std::string DumpName;

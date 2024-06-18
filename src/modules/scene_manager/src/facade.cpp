@@ -92,5 +92,10 @@ void scene_manager_facades::SceneManagerBaseImpl<Dep>::checkObjects() {
   static_cast<SceneManager *>(Data)->checkObjects();
 }
 
+template <SceneManagerDependenciesConcept Dep>
+void scene_manager_facades::SceneManagerBaseImpl<Dep>::updateObjects() {
+  static_cast<SceneManager *>(Data)->updateObjects();
+}
+
 template class scene_manager_facades::SceneManagerBaseImpl<
     scene_manager_facades::SceneManagerDependencies>;

@@ -18,8 +18,8 @@ std::vector<float> Triangle::getVertices() {
   return VertexesVector;
 }
 
-BaseObject::ObjectTypes Triangle::getType() {
-  return BaseObject::ObjectTypes::TRIANGLE;
+std::string Triangle::getType() {
+  return "Triangle";
 }
 
 glm::mat4 Triangle::calculateTransformation() {

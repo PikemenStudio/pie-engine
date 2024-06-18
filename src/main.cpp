@@ -50,7 +50,27 @@ using GraphicApiFacadeType = GraphicApiFacade<
     graphic_api_impls::GraphicApiFacadeVulkanImpl<GraphicDependenciesType>>;
 
 std::shared_ptr<BaseObject> Obj;
+std::shared_ptr<BaseObject> Obj1;
+std::vector<std::shared_ptr<BaseObject>> Objs;
 std::shared_ptr<SceneManagerFacadeType> SceneManagerInstance1;
+
+struct LocalObjectData {
+  std::string Name;
+  std::string TextureName;
+  std::string ShaderSetName;
+  std::string DumpName;
+  std::string Type;
+  std::string Path;
+};
+std::shared_ptr<BaseObject> createObject(LocalObjectData Data) {
+  std::shared_ptr<BaseObject> Object =
+      std::shared_ptr<BaseObject>(new Actor(Data.Path));
+  Object->setName(Data.Name);
+  Object->setTextureName(Data.TextureName);
+  Object->setShaderSetName(Data.ShaderSetName);
+  Object->setDumpName(Data.DumpName);
+  Object->setType(Data.Type);
+}
 
 auto addObjects() {
   std::vector<std::shared_ptr<BaseObject>> Objects;
@@ -58,7 +78,7 @@ auto addObjects() {
   std::vector<std::vector<bool>> TetrisScene{};
   for (size_t Width = 0; Width < 1; ++Width) {
     for (size_t Height = 0; Height < 1; ++Height) {
-      for (size_t Depth = 0; Depth < 2; ++Depth) {
+      for (size_t Depth = 0; Depth < 3; ++Depth) {
         std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
             new Actor("/Users/fullhat/Documents/chess.obj"));
         Object->setName(std::string("Actor") + std::to_string(Width) +
@@ -66,18 +86,29 @@ auto addObjects() {
         if (Depth == 0) {
           Object->setTextureName("Texture");
           Object->setDumpName("TS");
-        }
-        else {
+        } else {
           Object->setTextureName("Texture");
           Object->setDumpName("TS");
         }
         Object->setShaderSetName("default");
+        Object->setType("Actor");
         Object->moveBy({2 * Width, 2 * Depth, 2 * Height});
         Objects.push_back(Object);
+        Objs.push_back(Object);
       }
     }
   }
   Obj = Objects[0];
+
+//  std::shared_ptr<BaseObject> Object = std::shared_ptr<BaseObject>(
+//      new Actor("/Users/fullhat/Documents/chessboard.obj"));
+//  Object->setName("Light");
+//  Object->setTextureName("Texture");
+//  Object->setDumpName("TS1");
+//  Object->setShaderSetName("default");
+//  Object->setType("Light");
+//  Objects.push_back(Object);
+//  Obj1 = Object;
   return Objects;
 }
 void moveObject() {
@@ -90,10 +121,22 @@ void moveObject() {
 
     // Move camera in circle
     auto NewCameraPosition = glm::vec3(
-        10.0f * std::cos(I / 1000000.0f), 10.0f * std::sin(I / 1000000.0f),
-        std::abs(10.0f * std::sin(I / 10000000.0f)));
+        20.0f * std::cos(I / 10000000.0f), 20.0f * std::sin(I / 10000000.0f),
+        std::abs(10.0f * std::sin(I / 10000000.0f)) + 10);
     SceneManagerInstance1->ImplInstance.setCamera(NewCameraPosition,
                                                   {0.0f, 0.0f, 0.0f});
+//    SceneManagerInstance1->ImplInstance.setCamera({30.f, 30.f, 30.0f},
+//                                                  {0.0f, 0.0f, 0.0f});
+
+    //    Objs[0]->moveBy({0.0f, 0.0f, 0.0f});
+    //    glm::vec3 EarthPos = glm::vec3(10.0f * std::cos(I / 1000000.0f),
+    //                                   10.0f * std::sin(I / 1000000.0f),
+    //                                   0.0f);
+    //    Objs[1]->moveBy(EarthPos);
+    //    Objs[2]->moveBy(glm::vec3(1.0f * std::cos(I / 100000.0f),
+    //                              1.0f * std::sin(I / 100000.0f),
+    //                              0.5f * std::sin(I / 100000.0f)) +
+    //                    EarthPos);
   }
 }
 
@@ -179,6 +222,7 @@ public:
 
     GraphicAdapterInstance->ImplInstance.chooseGpu({});
 
+    // Objects
     GraphicFacadeStructs::ObjectsData ObjectsData;
     Actor *A = (Actor *)Obj.get();
     ObjectsData["Actor"] = GraphicFacadeStructs::ObjectData{
@@ -189,18 +233,26 @@ public:
         .Normals = A->getNormals(),
     };
 
-    GraphicFacadeStructs::ObjectsData ObjectsData1;
-    Actor *A1 = (Actor *)Obj.get();
-    ObjectsData1["Actor"] = GraphicFacadeStructs::ObjectData{
-        .Vertices = A1->getVertices(),
-        .Colors = A1->getColors(),
-        .TexCoords = A->getTextureCoords(),
-        .Indexes = A->getIndexes(),
-        .Normals = A->getNormals(),
-    };
     GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS");
-    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData1, "TS1");
 
+//    ObjectsData.clear();
+//    Actor *B = (Actor *)Obj1.get();
+//    ObjectsData["Light"] = GraphicFacadeStructs::ObjectData{
+//        .Vertices = B->getVertices(),
+//        .Colors = B->getColors(),
+//        .TexCoords = B->getTextureCoords(),
+//        .Indexes = B->getIndexes(),
+//        .Normals = B->getNormals(),
+//    };
+//    GraphicAdapterInstance->ImplInstance.addObjectData(ObjectsData, "TS1");
+
+    // Shader Sets
+    GraphicAdapterInstance->ImplInstance.addShaderSet(
+        "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test1.vert",
+        "/Users/fullhat/Documents/GitHub/pie-engine/tests/resources/test1.frag",
+        "light");
+
+    // Textures
     GraphicAdapterInstance->ImplInstance.addTextureSet(
         {"Texture",
          {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
@@ -208,19 +260,42 @@ public:
           "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
           "sources/wood.jpg"}});
     GraphicAdapterInstance->ImplInstance.addTextureSet(
-        {"Texture1",
+        {"Sun",
          {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
-          "sources/texture.jpg",
+          "sources/preview_sun.jpg",
+          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/texture.jpg"}});
+    GraphicAdapterInstance->ImplInstance.addTextureSet(
+        {"Earth",
+         {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/2k_earth_daymap.jpg",
+          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/texture.jpg"}});
+    GraphicAdapterInstance->ImplInstance.addTextureSet(
+        {"Moon",
+         {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/preview_moon.jpg",
+          "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/texture.jpg"}});
+    GraphicAdapterInstance->ImplInstance.addTextureSet(
+        {"ChessBoard",
+         {"/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
+          "sources/Unknown.jpeg",
           "/Users/fullhat/Documents/GitHub/pie-engine/src/modules/graphics/"
           "sources/texture.jpg"}});
 
-    //    GraphicAdapterInstance->ImplInstance.addShaderSet(
-    //        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
-    //        "resources/test1.vert",
-    //        "/Users/fullhat/Documents/GitHub/pie-engine/tests/"
-    //        "resources/test1.frag",
-    //        "a");
+    // Add light
+    SceneManagerInstance->ImplInstance.addPointLight(
+        std::shared_ptr<PointLight>(new PointLight(PointLight::PointLightProps{
+            glm::vec4(-5.0f, -5.0f, 0.0f, 0.0f),
+            glm::vec4(1.0f, 0.9f, 0.9f, 0.0f), 10.0f, "qwd1"})));
 
+    SceneManagerInstance->ImplInstance.addPointLight(
+        std::shared_ptr<PointLight>(new PointLight(PointLight::PointLightProps{
+            glm::vec4(5.0f, 5.0f, 5.0f, 0.0f),
+            glm::vec4(1.0f, 0.9f, 0.9f, 0.0f), 10.0f, "qwd"})));
+
+    // Input
     InputManager::NativeType =
         (GLFWwindow *)WindowAdapterInstance->ImplInstance.getNativeType();
     InputManager::bindAction(GLFW_KEY_ESCAPE, [&]() {

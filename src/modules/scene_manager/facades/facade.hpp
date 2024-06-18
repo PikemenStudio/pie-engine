@@ -112,6 +112,8 @@ concept SceneManagerDependenciesConcept = requires(DependencyStructT Dep) {
                                                                                \
     void checkObjects();                                                       \
                                                                                \
+    void updateObjects();                                                      \
+                                                                               \
   protected:                                                                   \
     void *Data;                                                                \
   };

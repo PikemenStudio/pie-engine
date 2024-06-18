@@ -19,7 +19,7 @@ public:
   using OneTypeObjects = std::map<std::string, OneTextureObjects>;
 
 protected:
-  using MultiTypeObjects = std::map<BaseObject::ObjectTypes, OneTypeObjects>;
+  using MultiTypeObjects = std::map<std::string, OneTypeObjects>;
   using MultiDumpObjects = std::map<std::string, MultiTypeObjects>;
 
 public:
@@ -240,6 +240,20 @@ public:
     }
 
     return true;
+  }
+
+  void updateObjects() {
+    for (auto &[ShaderSetName, Objects] : MultiShaderSetObjects) {
+      for (auto &[DumpName, MultiTypeObjects] : Objects) {
+        for (auto &[Type, OneTypeObjects] : MultiTypeObjects) {
+          for (auto &[TextureName, OneTextureObjects] : OneTypeObjects) {
+            for (auto Object : OneTextureObjects) {
+              Object->update();
+            }
+          }
+        }
+      }
+    }
   }
 
 protected:

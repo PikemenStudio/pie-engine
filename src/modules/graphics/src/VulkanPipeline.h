@@ -242,7 +242,7 @@ protected:
   };
 
   constexpr static size_t MaxModelsPerRender = 1000;
-  constexpr static size_t MaxUniformPointLights = 10;
+  constexpr static size_t MaxUniformPointLights = 2;
 
 protected:
 protected:

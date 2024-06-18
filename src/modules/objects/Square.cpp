@@ -20,8 +20,8 @@ std::vector<float> Square::getVertices() {
   return VertexesVector;
 }
 
-BaseObject::ObjectTypes Square::getType() {
-  return BaseObject::ObjectTypes::SQUARE;
+std::string Square::getType() {
+  return "Square";
 }
 
 glm::mat4 Square::calculateTransformation() {
